@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>S1 · Enquête techno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#110f26;--panel:#1c1940;--deep:#16132f;--line:#3a3468;--fg:#ece8ff;--muted:#9d96cc;--amber:#ffb547;--cyan:#5ce1e6;--pink:#ff6aa8;--good:#6ee7a0;--bad:#ff5a5a;--ink:#1a1300;
+--f-display:'Silkscreen',monospace;--f-mono:'JetBrains Mono',monospace;--f-body:'Atkinson Hyperlegible',system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font:16px/1.45 var(--f-body)}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+[hidden]{display:none!important}
+#wrap{max-width:900px;margin:0 auto;padding:12px 16px 32px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+header h1{flex:1;margin:0;font:700 clamp(15px,4vw,20px) var(--f-display);color:var(--amber);letter-spacing:.02em}
+header .pts{font:700 18px var(--f-mono);color:var(--cyan)}
+.iconbtn{min-width:44px;height:44px;background:var(--panel);border:1px solid var(--line);border-radius:10px;font-size:18px}
+h2{margin:0 0 6px;font:700 clamp(18px,4.6vw,26px) var(--f-display);color:var(--cyan);letter-spacing:.02em;text-wrap:balance}
+p{margin:0 0 10px}
+.lead{color:var(--muted);max-width:68ch}
+b,.hl{color:var(--amber)}
+.btn{min-height:46px;padding:0 16px;background:var(--panel);border:1px solid var(--line);border-bottom-width:3px;border-radius:9px;font:700 15px var(--f-body)}
+.btn:active{transform:translateY(2px)}
+.btn.ok{background:var(--amber);color:var(--ink);border-color:#c98a24}
+.btn:disabled{opacity:.35;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row.c{justify-content:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.missions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;margin:14px 0}
+.mcard{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;text-align:left;background:var(--panel);border:1px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:14px}
+.mcard:hover{border-color:var(--amber)}
+.mcard .e{grid-row:span 3;font-size:34px;line-height:1}
+.mcard .t{font:700 15px var(--f-display);letter-spacing:.02em}
+.mcard .d{color:var(--muted);font-size:14px}
+.mcard .s{font:700 13px var(--f-mono);color:var(--good)}
+.mcard.done{border-color:var(--good)}
+.fb{min-height:1.5em;font-weight:700;margin:8px 0}
+.fb.good{color:var(--good)} .fb.bad{color:var(--bad)}
+.prog{font:700 13px var(--f-mono);color:var(--muted)}
+/* duel frise */
+.duel{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch;margin:12px 0}
+.inv{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:150px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:12px;text-align:center;font-weight:700}
+.inv .em{font-size:46px;line-height:1}
+.inv small{font:500 13px var(--f-mono);color:var(--muted)}
+.inv.right{border-color:var(--good);box-shadow:0 0 16px rgba(110,231,160,.4)}
+.inv.wrong{border-color:var(--bad)}
+.vs{align-self:center;font:700 18px var(--f-display);color:var(--muted)}
+.tl{position:relative;height:150px;margin:14px 0 6px;border-bottom:3px solid var(--line)}
+.tl .dot{position:absolute;bottom:-9px;width:15px;height:15px;margin-left:-7px;border-radius:50%;background:var(--amber);border:2px solid var(--bg);transition:left .8s cubic-bezier(.5,0,.2,1),opacity .4s}
+.tl .lab{position:absolute;bottom:14px;transform:translateX(-50%) rotate(-55deg);transform-origin:left bottom;white-space:nowrap;font:500 12px var(--f-mono);color:var(--muted);transition:left .8s cubic-bezier(.5,0,.2,1),opacity .4s}
+.tl .tick{position:absolute;bottom:-26px;transform:translateX(-50%);font:500 11px var(--f-mono);color:var(--muted);white-space:nowrap}
+.tl-wrap{padding:0 30px 30px}
+/* choix */
+.opts{display:grid;gap:8px;margin:10px 0}
+.opt{text-align:left;min-height:48px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;font-weight:700}
+.opt.right{border-color:var(--good);background:#18382d}
+.opt.wrong{border-color:var(--bad);background:#3a1a24}
+.need{font:700 20px var(--f-body);margin:6px 0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.pair .card{font-size:14px}
+.pair .card h4{margin:0 0 4px;font:700 12px var(--f-display);color:var(--muted)}
+/* iceberg */
+.ice{position:relative;height:340px;border-radius:12px;overflow:hidden;background:linear-gradient(#1f2b55 0 26%,#0b2747 26% 100%)}
+.ice .sea{position:absolute;left:0;right:0;top:26%;height:2px;background:#5ce1e6aa}
+.ice .tip{position:absolute;left:50%;top:6%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-weight:700;font-size:13px;text-align:center}
+.ice .tip span{font-size:32px}
+.ice .layers{position:absolute;left:50%;top:28%;transform:translateX(-50%);width:min(94%,560px);display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.ice .layer{padding:5px 9px;border-radius:8px;background:#cfe9ff;color:#0b2747;font:700 12px var(--f-body);animation:pop .4s both}
+@keyframes pop{from{transform:scale(.3);opacity:0}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chip{min-height:42px;padding:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:22px;font-weight:700;font-size:14px}
+.chip.right{border-color:var(--good);color:var(--good)}
+.chip.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+/* panne */
+.day{display:grid;gap:8px;margin:10px 0}
+.slot{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.slot .h{font:700 14px var(--f-mono);color:var(--cyan)}
+.slot .ch{display:flex;gap:6px}
+.slot .ch button{min-width:44px;height:40px;border-radius:8px;background:var(--deep);border:1px solid var(--line);font-size:18px}
+.slot .ch button.on{border-color:var(--amber);background:#3a2c10}
+.slot.res-ok{border-color:var(--good)} .slot.res-ko{border-color:var(--bad)}
+.slot small{display:block;color:var(--muted);font-size:13px}
+/* love hate */
+.swipe{position:relative;height:220px;margin:12px 0}
+.sc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:var(--panel);border:2px solid var(--line);border-radius:16px;font:700 clamp(17px,4.4vw,22px) var(--f-body);transition:transform .35s,opacity .35s}
+.sc .em{font-size:48px}
+.sc.gol{transform:translateX(-120%) rotate(-12deg);opacity:0}
+.sc.gor{transform:translateX(120%) rotate(12deg);opacity:0}
+.big{font-size:30px;min-width:96px;min-height:64px}
+.bar{display:flex;height:26px;border-radius:13px;overflow:hidden;margin:10px 0;font:700 13px var(--f-mono)}
+.bar div{display:grid;place-items:center;transition:width .6s}
+/* copie */
+canvas.wave{width:100%;height:110px;background:var(--deep);border:1px solid var(--line);border-radius:10px;display:block}
+.copies{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.copies h3{margin:0 0 6px;font:700 13px var(--f-display);color:var(--muted)}
+.digits{font:500 13px var(--f-mono);background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:8px;height:110px;overflow:hidden;word-break:break-all;line-height:1.35}
+.digits i{font-style:normal;color:var(--bad);font-weight:700}
+.gen{font:700 14px var(--f-mono);color:var(--amber);margin:6px 0}
+/* découverte */
+.disc{margin-top:16px;border-color:var(--cyan)}
+.disc h3{margin:0 0 6px;font:700 15px var(--f-display);color:var(--cyan)}
+textarea{width:100%;min-height:70px;padding:10px;background:var(--deep);color:var(--fg);border:1px solid var(--line);border-radius:10px;font:15px var(--f-body);resize:vertical}
+.notes li{margin-bottom:10px}
+.notes .q{color:var(--muted);font-size:14px}
+@media (max-width:520px){ .duel{grid-template-columns:1fr} .vs{text-align:center} .pair,.copies{grid-template-columns:1fr} .inv{min-height:110px} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+</style>
+
+<div id="wrap">
+  <header><button class="iconbtn" id="home" aria-label="Retour aux missions">☰</button><h1>Enquête techno</h1><span class="pts" id="pts" aria-label="Points">0 pt</span></header>
+  <main id="main"></main>
+</div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s), main=$('#main');
+const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- sauvegarde (sur cet appareil) ---------- */
+const KEY='snt-s1-enquete';
+let D={ pts:0, done:{}, disc:{} };
+try{ const v=JSON.parse(localStorage.getItem(KEY)); if(v && typeof v==='object') D=Object.assign(D,v); }catch(e){}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(D)); }catch(e){} $('#pts').textContent=D.pts+' pt'; }
+function addPts(n){ D.pts+=n; save(); }
+
+/* ---------- découverte de fin de mission ---------- */
+// chaque mission finit par une question : le choix + la phrase de l'élève alimentent « Mes découvertes »
+function discovery(id, q, opts, goodIdx, explain){
+  const box=document.createElement('div'); box.className='card disc';
+  const prev=D.disc[id]||{};
+  box.innerHTML=`<h3>Ta découverte</h3><p>${q}</p><div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div>
+    <div class="fb"></div><p class="lead">Et toi, avec tes mots, en une phrase :</p><textarea id="d-txt" placeholder="J'ai découvert que…">${esc(prev.txt||'')}</textarea>
+    <div class="row" style="margin-top:10px"><button class="btn ok" id="d-ok">Enregistrer et revenir aux missions</button></div>`;
+  let pick=prev.pick;
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    pick=+b.dataset.i;
+    box.querySelectorAll('.opt').forEach((x,i)=>{ x.classList.toggle('right',i===goodIdx); x.classList.toggle('wrong',i===pick && i!==goodIdx); x.disabled=true; });
+    const fb=box.querySelector('.fb'); fb.className='fb '+(pick===goodIdx?'good':'bad'); fb.innerHTML=(pick===goodIdx?'Oui ! ':'Pas tout à fait. ')+`<span style="color:var(--fg);font-weight:400">${explain}</span>`;
+    if(pick===goodIdx && !prev.got){ addPts(20); prev.got=1; }
+  });
+  box.querySelector('#d-ok').onclick=()=>{ D.disc[id]={ q, pick:pick!=null?opts[pick]:'', got:prev.got, txt:box.querySelector('#d-txt').value.trim() }; D.done[id]=1; save(); menu(); };
+  main.appendChild(box); box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function head(e,t,lead){ main.innerHTML=`<h2>${e} ${t}</h2><p class="lead">${lead}</p>`; scrollTo(0,0); }
+function el(html){ const d=document.createElement('div'); d.innerHTML=html; main.appendChild(d); return d; }
+
+/* =========================================================
+   1 · La frise : quelle invention est la plus ancienne ?
+   ========================================================= */
+const INV=[
+  ['🪨','Outils en pierre taillée',-2600000],['🔥','Maîtrise du feu',-400000],['🎶','Flûte en os',-40000],['🌾','Agriculture',-12000],
+  ['🛞','Roue',-5500],['✍️','Écriture',-5300],['📜','Imprimerie',1450],['0️⃣','Binaire (Leibniz)',1703],['🧵','Métier Jacquard à cartes perforées',1801],
+  ['📟','Télégraphe',1844],['☎️','Téléphone',1876],['📻','Radio',1895],['🖥️','Ordinateur',1945],['🌐','Internet',1969],['🕸️','Web',1989],['📱','Smartphone',2007],['🤖','ChatGPT',2022]
+];
+const yr=y=>y<0?`il y a ${(-y+2026).toLocaleString('fr-FR')} ans`:`en ${y}`;
+function m1(){
+  head('⏳','La frise','Duel : touche l\'invention <b>la plus ancienne</b>. 8 duels, puis on range tout sur une frise.');
+  const box=el(`<p class="prog" id="m1p"></p><div class="duel" id="m1d"></div><p class="fb" id="m1f"></p><div class="row c"><button class="btn ok" id="m1n" hidden>Duel suivant</button></div>`);
+  let round=0, ok=0;
+  const next=()=>{
+    if(round>=8) return frise(ok);
+    $('#m1p').textContent=`Duel ${round+1} / 8 · ${ok} bonne${ok>1?'s':''} réponse${ok>1?'s':''}`; $('#m1f').textContent=''; $('#m1n').hidden=true;
+    let a,b; do{ [a,b]=shuffle(INV.slice()).slice(0,2); }while(Math.abs(a[2]-b[2])<20);
+    const d=$('#m1d'); d.innerHTML=[a,b].map((v,i)=>`${i?'<span class="vs">ou</span>':''}<button class="inv" data-y="${v[2]}"><span class="em">${v[0]}</span>${v[1]}<small hidden>${yr(v[2])}</small></button>`).join('');
+    d.querySelectorAll('.inv').forEach(btn=>btn.onclick=()=>{
+      if(!$('#m1n').hidden) return;
+      const old=Math.min(a[2],b[2]), good=+btn.dataset.y===old;
+      d.querySelectorAll('.inv').forEach(x=>{ x.querySelector('small').hidden=false; x.classList.add(+x.dataset.y===old?'right':'wrong'); });
+      if(good){ ok++; addPts(5); }
+      $('#m1f').className='fb '+(good?'good':'bad'); $('#m1f').textContent=good?'Bien vu !':'Raté : regarde les dates.';
+      round++; $('#m1n').hidden=false; $('#m1n').textContent=round>=8?'Voir la frise':'Duel suivant'; $('#m1n').focus();
+    });
+  };
+  $('#m1n').onclick=next; next();
+}
+function frise(ok){
+  head('⏳','La frise','Voici toutes les inventions, placées à leur vraie date. Utilise le zoom pour regarder de plus près la fin de la frise.');
+  const ZO=[[-2700000,'depuis 2,7 millions d\'années'],[-450000,'depuis 450 000 ans'],[-45000,'depuis 45 000 ans'],[-6000,'depuis 6 000 ans (avant notre ère)'],[1400,'depuis 1400']];
+  let z=0;
+  const box=el(`<p class="prog">Duels réussis : ${ok} / 8</p><div class="card"><p class="gen" id="fz"></p><div class="tl-wrap"><div class="tl" id="tl"></div></div>
+    <div class="row c"><button class="btn" id="zm">− Dézoomer</button><button class="btn ok" id="zp">Zoomer sur la fin ＋</button></div></div><p class="lead" id="fcount" style="margin-top:10px"></p>`);
+  const tl=$('#tl');
+  const nodes=INV.map(v=>{ const d=document.createElement('div'); d.className='dot'; d.title=v[1]+' · '+yr(v[2]); const l=document.createElement('div'); l.className='lab'; l.textContent=v[0]+' '+v[1]; tl.append(d,l); return {v,d,l}; });
+  const draw=()=>{
+    const from=ZO[z][0], to=2030; $('#fz').textContent='Frise '+ZO[z][1];
+    tl.querySelectorAll('.tick').forEach(t=>t.remove());
+    [from,to].forEach((y,i)=>{ const t=document.createElement('div'); t.className='tick'; t.style.left=(i?100:0)+'%'; t.textContent=y<0?(y).toLocaleString('fr-FR'):y; tl.appendChild(t); });
+    let shown=0, crowd=0; const rightZone=from+(to-from)*.9;
+    nodes.forEach(({v,d,l})=>{ const vis=v[2]>=from, x=vis?(v[2]-from)/(to-from)*100:0; d.style.left=l.style.left=x+'%'; d.style.opacity=vis?1:0; l.style.opacity=vis?1:0; if(vis){ shown++; if(v[2]>=rightZone) crowd++; } });
+    $('#fcount').innerHTML=`Sur cette frise : <b>${shown}</b> inventions, dont <b>${crowd}</b> entassées dans le dernier dixième, tout à droite.`;
+    $('#zm').disabled=z===0; $('#zp').disabled=z===ZO.length-1;
+  };
+  $('#zp').onclick=()=>{ z++; draw(); if(z===ZO.length-1 && !D.done.frise_zoom){ D.done.frise_zoom=1; addPts(10); } };
+  $('#zm').onclick=()=>{ z--; draw(); };
+  draw();
+  discovery('frise','Que montre la frise, même quand on zoome ?',[
+    'Les inventions sont réparties régulièrement dans le temps',
+    'Les inventions s\'accélèrent : il y en a de plus en plus, de plus en plus vite',
+    'On n\'a plus rien inventé depuis l\'an 2000'],1,
+    'À chaque zoom, les inventions s\'entassent encore à droite : c\'est une <b>accélération</b>. Deux pistes pour l\'expliquer : les petites inventions anciennes sont oubliées, et l\'information circule de plus en plus vite.');
+}
+
+/* =========================================================
+   2 · Comment faisait-on avant -5000 ?
+   ========================================================= */
+const BEFORE=[
+  ['🎵','Écouter de la musique','Chanter et jouer de la flûte ou du tambour autour du feu',['Allumer la radio','Acheter un disque'],'Une appli de streaming'],
+  ['📣','Transmettre un message au loin','Le tambour, les signaux de fumée ou un messager qui court',['Envoyer une lettre par la poste','Le télégraphe'],'Un SMS ou un message instantané'],
+  ['🏹','Apprendre un savoir-faire','Regarder et imiter les anciens, écouter les récits',['Lire un manuel','Aller à l\'école en car'],'Un tutoriel vidéo'],
+  ['🍖','Obtenir sa nourriture','Chasser, pêcher, cueillir, partager avec le groupe',['Aller au marché avec des pièces','Cultiver un champ de blé'],'Le supermarché et la carte bancaire'],
+  ['🌿','Se soigner','Les plantes, le repos, les rituels du groupe',['Aller à la pharmacie','Prendre des antibiotiques'],'Un rendez-vous pris en ligne'],
+  ['🧭','Trouver son chemin','Le soleil, les étoiles, les rivières, la mémoire des lieux',['Une carte routière en papier','Une boussole'],'Le GPS du téléphone']
+];
+function m2(){
+  head('🔥','Avant -5000','Il y a plus de 7 000 ans, sans écriture ni métal. Pour chaque besoin, trouve <b>comment on faisait</b>. Attention aux pièges : certaines réponses sont trop récentes !');
+  let i=0, ok=0;
+  const box=el(`<p class="prog" id="m2p"></p><div class="card"><p class="need" id="m2n"></p><div class="opts" id="m2o"></div><p class="fb" id="m2f"></p><div class="pair" id="m2pair" hidden></div><div class="row c" style="margin-top:10px"><button class="btn ok" id="m2x" hidden>Suivant</button></div></div>`);
+  const show=()=>{
+    if(i>=BEFORE.length){ box.remove(); el(`<p class="card">Tu as trouvé <b>${ok} / ${BEFORE.length}</b> façons de faire d'avant.</p>`);
+      return discovery('avant','Qu\'est-ce qui a changé entre -5000 et aujourd\'hui ?',[
+        'Nos besoins : avant on n\'écoutait pas de musique',
+        'Les besoins sont les mêmes, ce sont les moyens (les techniques) qui ont changé',
+        'Rien n\'a changé'],1,
+        'Écouter de la musique, transmettre, apprendre, se nourrir, se soigner : les besoins humains n\'ont pas changé. Ce sont les <b>techniques</b> qui les ont transformés, et elles prolongent notre corps puis notre mémoire.'); }
+    const [e,need,good,traps,now]=BEFORE[i];
+    $('#m2p').textContent=`Besoin ${i+1} / ${BEFORE.length}`; $('#m2n').textContent=e+' '+need; $('#m2f').textContent=''; $('#m2x').hidden=true; $('#m2pair').hidden=true;
+    const opts=shuffle([good,...traps]);
+    $('#m2o').innerHTML=opts.map(o=>`<button class="opt">${o}</button>`).join('');
+    $('#m2o').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(!$('#m2x').hidden) return;
+      const g=b.textContent===good; if(g){ ok++; addPts(5); }
+      $('#m2o').querySelectorAll('.opt').forEach(x=>{ x.classList.toggle('right',x.textContent===good); x.classList.toggle('wrong',x===b && !g); });
+      $('#m2f').className='fb '+(g?'good':'bad'); $('#m2f').textContent=g?'Exact !':'Trop récent pour -5000 !';
+      $('#m2pair').innerHTML=`<div class="card"><h4>Avant -5000</h4>${good}</div><div class="card"><h4>Aujourd'hui</h4>${now}</div>`; $('#m2pair').hidden=false;
+      $('#m2x').hidden=false; $('#m2x').focus();
+    });
+  };
+  $('#m2x').onclick=()=>{ i++; show(); }; show();
+}
+
+/* =========================================================
+   3 · L'iceberg : commander un billet de train
+   ========================================================= */
+const ICE_OK=[['⚡','L\'énergie (électricité, batterie chargée)'],['📶','Le réseau (antennes, box, fibre)'],['🗄️','Des serveurs dans des data centers'],['🏦','La banque qui valide le paiement'],['✉️','Un service qui envoie le billet et les alertes SMS'],['🌊','Des câbles sous-marins et terrestres'],['🔒','Un service de sécurité (mot de passe, code reçu)'],['🍽️','La logistique (repas du wagon-bar commandés)'],['📊','Le marketing (fichier clients mis à jour)'],['🧑‍💻','Des informaticiens qui maintiennent tout ça']];
+const ICE_KO=[['🕊️','Un pigeon voyageur'],['🖨️','Une imprimerie de billets en papier'],['📠','Un fax au guichet'],['🧾','Un carnet à souches']];
+function m3(){
+  head('🧊','L\'iceberg','Tu commandes un billet de train sur ton téléphone : trois touches et c\'est fait. Mais <b>qu\'est-ce qui travaille en coulisse</b> ? Touche tout ce qui est nécessaire, en évitant les pièges.');
+  const all=shuffle([...ICE_OK.map(x=>[...x,1]),...ICE_KO.map(x=>[...x,0])]);
+  let found=0, errs=0;
+  el(`<div class="ice"><div class="tip"><span>📱</span>Ce que tu vois :<br>l'appli, 3 touches</div><div class="sea"></div><div class="layers" id="lay"></div></div>
+    <p class="prog" id="m3p" style="margin-top:10px"></p><div class="chips" id="m3c">${all.map((c,i)=>`<button class="chip" data-i="${i}">${c[0]} ${c[1]}</button>`).join('')}</div><p class="fb" id="m3f"></p>`);
+  const prog=()=>$('#m3p').textContent=`Partie cachée trouvée : ${found} / ${ICE_OK.length}`;
+  prog();
+  $('#m3c').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
+    const c=all[+b.dataset.i]; b.disabled=true;
+    if(c[2]){ found++; addPts(3); b.classList.add('right'); const l=document.createElement('span'); l.className='layer'; l.textContent=c[0]+' '+c[1]; $('#lay').appendChild(l); }
+    else { errs++; b.classList.add('wrong'); $('#m3f').className='fb bad'; $('#m3f').textContent='Ça, c\'est le monde d\'avant : pas besoin pour un billet en ligne.'; }
+    prog();
+    if(found===ICE_OK.length){ $('#m3f').className='fb good'; $('#m3f').textContent=`Tout trouvé, avec ${errs} piège${errs>1?'s':''}. Regarde la taille de la partie immergée !`;
+      $('#m3c').querySelectorAll('.chip').forEach(x=>x.disabled=true);
+      discovery('iceberg','Que montre l\'iceberg ?',[
+        'Une technologie, c\'est seulement l\'appareil qu\'on tient dans la main',
+        'La partie cachée (infrastructure, énergie, services) est bien plus grande que la partie visible',
+        'Le train fonctionne sans électricité'],1,
+        'Une action simple en apparence mobilise des dizaines de systèmes cachés. Il y a un <b>endroit</b> (l\'utilisateur) et un <b>envers</b> (l\'infrastructure) : c\'est difficile d\'être conscient de tout ce qu\'on met en route.'); }
+  });
+}
+
+/* =========================================================
+   4 · La panne : une journée sans courant
+   ========================================================= */
+const DAY=[
+  ['7h00','Le réveil du téléphone sonne','✅',"Le téléphone a sa batterie : il sonne. Mais il ne rechargera pas."],
+  ['7h30','Prendre une douche chaude','❌',"Le chauffe-eau et souvent la pompe sont électriques."],
+  ['8h00','Prendre le RER ou le tram','❌',"Trains, métros, signalisation : tout est à l'arrêt."],
+  ['8h30','Envoyer un message à un ami','❌',"Les antennes ont peu de batteries de secours : le réseau tombe vite."],
+  ['10h00','Lire un livre papier','✅',"Aucune énergie nécessaire (à part la lumière du jour)."],
+  ['12h30','Payer la cantine par carte','❌',"Terminaux et serveurs bancaires coupés : il faut des espèces."],
+  ['13h00','Retirer de l\'argent au distributeur','❌',"Les distributeurs sont hors service : en Espagne, les gens faisaient la queue avec des pièces."],
+  ['15h00','Jouer au foot dans la cour','✅',"Un ballon suffit !"],
+  ['17h00','Faire un plein d\'essence','❌',"Les pompes sont électriques."],
+  ['19h00','Écouter les infos','✅',"Avec une radio à piles : c'était le conseil des autorités en Espagne."]
+];
+function m4(){
+  head('🔌','La panne','28 avril 2025 : une panne d\'électricité géante coupe l\'Espagne et le Portugal pendant des heures. Pour chaque moment de ta journée, prédis : <b>ça marche ✅ ou ça bloque ❌</b> ?');
+  const ans={};
+  el(`<div class="day" id="day">${DAY.map((d,i)=>`<div class="slot" data-i="${i}"><span class="h">${d[0]}</span><span>${d[1]}<small hidden></small></span><span class="ch"><button data-v="✅" aria-label="ça marche">✅</button><button data-v="❌" aria-label="ça bloque">❌</button></span></div>`).join('')}</div>
+    <div class="row c"><button class="btn ok" id="m4v" disabled>Vérifier mes prédictions</button></div><p class="fb" id="m4f"></p>`);
+  $('#day').querySelectorAll('.slot').forEach(s=>s.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    if(s.classList.contains('res-ok')||s.classList.contains('res-ko')) return;
+    ans[s.dataset.i]=b.dataset.v; s.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    $('#m4v').disabled=Object.keys(ans).length<DAY.length;
+  }));
+  $('#m4v').onclick=()=>{
+    let ok=0, ko=0;
+    $('#day').querySelectorAll('.slot').forEach(s=>{ const d=DAY[+s.dataset.i], g=ans[s.dataset.i]===d[2]; if(g) ok++; if(d[2]==='❌') ko++;
+      s.classList.add(g?'res-ok':'res-ko'); const sm=s.querySelector('small'); sm.hidden=false; sm.textContent=(d[2]==='✅'?'Ça marche. ':'Ça bloque. ')+d[3]; });
+    addPts(ok*3); $('#m4v').hidden=true;
+    $('#m4f').className='fb good'; $('#m4f').innerHTML=`${ok} / ${DAY.length} bonnes prédictions. <b>${ko}</b> moments sur ${DAY.length} sont bloqués par une seule panne. En juillet 2024, une simple mise à jour ratée (CrowdStrike) a aussi cloué des avions au sol et bloqué des hôpitaux.`;
+    discovery('panne','Que montre la panne ?',[
+      'On pourrait facilement se passer de la technologie',
+      'Nous dépendons de la technologie pour beaucoup de tâches simples, et les systèmes reliés entre eux sont fragiles',
+      'Seuls les ordinateurs tombent en panne'],1,
+      'Une seule panne (électricité, logiciel) bloque des dizaines d\'activités à la fois : les systèmes sont <b>enchevêtrés</b>, donc vulnérables.');
+  };
+}
+
+/* =========================================================
+   5 · Love or Hate ?
+   ========================================================= */
+const LH=[
+  ['🎮','Jouer à des jeux vidéo qui sont de vrais chefs-d\'œuvre'],['📵','Être perdu en pleine campagne sans réseau ni carte téléchargée'],['👋','Garder le contact avec des amis partis loin'],
+  ['😠','Le cyberharcèlement'],['🎧','Découvrir des artistes du monde entier'],['💸','Payer des abonnements chaque mois… et tout perdre en arrêtant'],
+  ['🌍','Parler avec des inconnus à l\'autre bout du monde'],['🎭','Les deepfakes : fausses vidéos très réalistes'],['🧑‍🏫','Apprendre presque tout avec des tutos'],
+  ['🎣','Le phishing : faux messages pour voler tes codes'],['🗺️','Ne plus jamais se perdre grâce au GPS'],['🔋','Passer des heures sur son téléphone sans s\'en rendre compte']
+];
+function m5(){
+  head('💖','Love or Hate ?','Pour chaque situation, réponds vite : tu <b>adores</b> 💖 ou tu <b>détestes</b> 🤮 ? Il n\'y a pas de mauvaise réponse.');
+  const cards=shuffle(LH.slice()); let i=0, love=0, hate=0; const lo=[], ha=[];
+  el(`<p class="prog" id="m5p"></p><div class="swipe" id="sw"></div><div class="row c"><button class="btn big" id="h">🤮</button><button class="btn big" id="l">💖</button></div>`);
+  const show=()=>{
+    $('#m5p').textContent=`Situation ${Math.min(i+1,cards.length)} / ${cards.length}`;
+    if(i>=cards.length) return end();
+    $('#sw').innerHTML=`<div class="sc"><span class="em">${cards[i][0]}</span>${cards[i][1]}</div>`;
+  };
+  const vote=v=>{ if(i>=cards.length) return; const c=$('#sw .sc'); c.classList.add(v?'gor':'gol'); (v?lo:ha).push(cards[i][1]); v?love++:hate++; i++; addPts(1); setTimeout(show,300); };
+  $('#l').onclick=()=>vote(1); $('#h').onclick=()=>vote(0);
+  const end=()=>{
+    $('#l').parentNode.remove(); $('#sw').remove();
+    const pl=Math.round(love/cards.length*100);
+    el(`<div class="card"><p>Ton bilan :</p><div class="bar"><div style="width:${pl}%;background:var(--pink);color:#2a0716">${love?'💖 '+love:''}</div><div style="width:${100-pl}%;background:var(--line)">${hate?'🤮 '+hate:''}</div></div>
+      <p class="lead">Compare avec ton voisin : avez-vous les mêmes ?</p></div>`);
+    discovery('love','Que montre ton bilan ?',[
+      'La technologie est seulement géniale',
+      'La technologie est seulement dangereuse',
+      'Notre relation à la technologie est ambivalente : elle a des côtés qu\'on aime et d\'autres qu\'on rejette'],2,
+      'Presque tout le monde a des 💖 et des 🤮 : la relation est <b>ambivalente</b>. Et les mêmes outils servent à des usages très différents, qui dépendent aussi des intentions de ceux qui les fabriquent.');
+  };
+  show();
+}
+
+/* =========================================================
+   6 · Copier : cassette contre numérique
+   ========================================================= */
+function m6(){
+  head('📼','Copier','Dans les années 1980-90, on copiait les disques sur cassette, puis la cassette sur une autre cassette… Fais des copies de copies et compare avec une copie <b>numérique</b>.');
+  el(`<div class="copies"><div><h3>📼 Copie analogique (cassette)</h3><canvas class="wave" id="wa" width="600" height="160"></canvas><p class="gen" id="ga">Original</p></div>
+    <div><h3>💾 Copie numérique (nombres)</h3><div class="digits" id="dg"></div><p class="gen" id="gd">Original</p></div></div>
+    <div class="row c" style="margin-top:12px"><button class="btn ok" id="cp">Faire une copie de la copie</button><button class="btn" id="play">▶ Écouter la cassette</button></div><p class="fb" id="m6f"></p>`);
+  const N=600, orig=Array.from({length:N},(_,x)=>Math.sin(x/9)*.5+Math.sin(x/3.1)*.22+Math.sin(x/1.7)*.12);
+  let ana=orig.slice(), gen=0;
+  const nums=orig.slice(0,90).map(v=>Math.round((v+1)*127));
+  let dig=nums.slice();
+  const drawA=()=>{ const c=$('#wa'), g=c.getContext('2d'); g.clearRect(0,0,c.width,c.height);
+    g.strokeStyle='#3a3468'; g.beginPath(); orig.forEach((v,x)=>g[x?'lineTo':'moveTo'](x,80-v*60)); g.stroke();
+    g.strokeStyle='#5ce1e6'; g.lineWidth=2; g.beginPath(); ana.forEach((v,x)=>g[x?'lineTo':'moveTo'](x,80-v*60)); g.stroke(); g.lineWidth=1; };
+  const drawD=()=>{ $('#dg').innerHTML=dig.map((v,i)=>v===nums[i]?v:`<i>${v}</i>`).join(' '); };
+  drawA(); drawD();
+  $('#cp').onclick=()=>{
+    gen++;
+    // chaque copie analogique : on perd un peu d'aigus (lissage) et on ajoute du souffle
+    ana=ana.map((v,x)=>((ana[x-2]??v)+(ana[x-1]??v)+v+(ana[x+1]??v)+(ana[x+2]??v))/5*.9+(Math.random()-.5)*.2);
+    dig=dig.slice(); // une copie numérique recopie exactement les mêmes nombres
+    drawA(); drawD(); addPts(2);
+    $('#ga').textContent=`Copie n° ${gen} : le signal s'use, le souffle s'ajoute`; $('#gd').textContent=`Copie n° ${gen} : 0 nombre différent de l'original`;
+    if(gen===6){ $('#m6f').className='fb good'; $('#m6f').textContent='Après 6 copies : la cassette est très abîmée (souffle, aigus perdus), la copie numérique est identique.';
+      discovery('copie','Pourquoi dit-on que copier ne coûte (presque) plus rien ?',[
+        'Parce qu\'une copie numérique est identique à l\'original et ne coûte qu\'un peu d\'énergie, sans support à fabriquer',
+        'Parce que la musique est devenue gratuite pour les artistes',
+        'Parce que les cassettes étaient plus fidèles'],0,
+        'Le numérique, ce sont des <b>nombres</b> : on les recopie à l\'identique, instantanément, des millions de fois. Le coût se déplace : serveurs, réseaux et téléphones consomment de l\'énergie à chaque écoute. Et ce qui ne se copie pas, comme un concert ou un vinyle, prend de la valeur.'); }
+  };
+  // écoute : une mélodie simple + souffle proportionnel au nombre de copies
+  $('#play').onclick=()=>{
+    try{
+      const ac=new (window.AudioContext||window.webkitAudioContext)(), t0=ac.currentTime, notes=[392,440,494,523,494,440,392];
+      const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=Math.max(500,6000/(1+gen)); lp.connect(ac.destination);
+      notes.forEach((f,k)=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='triangle'; o.frequency.value=f*(1+(Math.random()-.5)*.004*gen); g.gain.setValueAtTime(.0001,t0+k*.28); g.gain.exponentialRampToValueAtTime(.25,t0+k*.28+.03); g.gain.exponentialRampToValueAtTime(.0001,t0+k*.28+.26); o.connect(g).connect(lp); o.start(t0+k*.28); o.stop(t0+k*.28+.3); });
+      if(gen){ const len=ac.sampleRate*2.1, buf=ac.createBuffer(1,len,ac.sampleRate), ch=buf.getChannelData(0); for(let k=0;k<len;k++) ch[k]=(Math.random()*2-1)*Math.min(.25,.035*gen);
+        const s=ac.createBufferSource(); s.buffer=buf; s.connect(ac.destination); s.start(t0); }
+      setTimeout(()=>ac.close(),2600);
+    }catch(e){}
+  };
+}
+
+/* ---------- menu et découvertes ---------- */
+const MISSIONS=[
+  ['frise','⏳','La frise','Quelle invention est la plus ancienne ? Puis zoome sur 2,7 millions d\'années d\'inventions.',m1],
+  ['avant','🔥','Avant -5000','Comment faisait-on pour écouter de la musique ou se soigner, sans écriture ni métal ?',m2],
+  ['iceberg','🧊','L\'iceberg','Un billet de train en 3 touches : qu\'y a-t-il sous la surface ?',m3],
+  ['panne','🔌','La panne','Une journée sans électricité : qu\'est-ce qui marche encore ?',m4],
+  ['love','💖','Love or Hate ?','Tu adores ou tu détestes ? Fais ton bilan.',m5],
+  ['copie','📼','Copier','Copie de copie de cassette contre copie numérique.',m6]
+];
+function menu(){
+  const n=MISSIONS.filter(m=>D.done[m[0]]).length;
+  main.innerHTML=`<h2>La technologie, c'est quoi ?</h2>
+    <p class="lead">Six missions pour mener l'enquête. À la fin de chacune, note ce que tu as découvert : on s'en servira en classe pour construire le cours ensemble.</p>
+    <div class="missions">${MISSIONS.map(([id,e,t,d],i)=>`<button class="mcard${D.done[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.done[id]?'✓ découverte notée':''}</span></button>`).join('')}</div>
+    <div class="row"><button class="btn${n?' ok':''}" id="notes">📒 Mes découvertes (${n} / ${MISSIONS.length})</button></div>`;
+  main.querySelectorAll('.mcard').forEach(b=>b.onclick=()=>MISSIONS[+b.dataset.i][4]());
+  $('#notes').onclick=notes; scrollTo(0,0);
+}
+function notes(){
+  const lines=MISSIONS.map(([id,e,t])=>{ const d=D.disc[id]; return {id,e,t,d}; });
+  main.innerHTML=`<h2>📒 Mes découvertes</h2><p class="lead">Ce que tu as trouvé pendant l'enquête. Recopie-le dans ton cahier, ou copie-le pour l'envoyer à ton professeur.</p>
+    <ol class="notes">${lines.map(({e,t,d})=>`<li><b>${e} ${t}</b><br>${d?`<span class="q">${esc(d.q)}</span><br>${esc(d.pick||'(pas de réponse)')}${d.txt?`<br>« ${esc(d.txt)} »`:''}`:'<span class="q">Mission pas encore faite.</span>'}</li>`).join('')}</ol>
+    <p>Total : <b>${D.pts} points</b></p>
+    <div class="row"><button class="btn ok" id="cpy">Copier le texte</button><button class="btn" id="back">Retour aux missions</button><button class="btn" id="reset">Tout effacer</button></div><p class="fb" id="nf"></p>`;
+  const txt='Mes découvertes (SNT S1)\n\n'+lines.map(({e,t,d})=>`${e} ${t}\n${d?`${d.q}\n→ ${d.pick||'-'}${d.txt?`\n« ${d.txt} »`:''}`:'(pas faite)'}`).join('\n\n');
+  $('#cpy').onclick=async()=>{ try{ await navigator.clipboard.writeText(txt); $('#nf').className='fb good'; $('#nf').textContent='Copié !'; }catch(e){ $('#nf').className='fb bad'; $('#nf').textContent='La copie automatique ne marche pas ici : sélectionne le texte à la main.'; } };
+  $('#back').onclick=menu;
+  $('#reset').onclick=()=>{ if(confirm('Effacer toutes tes découvertes et tes points ?')){ D={pts:0,done:{},disc:{}}; save(); menu(); } };
+  scrollTo(0,0);
+}
+$('#home').onclick=menu;
+save(); menu();
+</script>
+
+</body></html>
