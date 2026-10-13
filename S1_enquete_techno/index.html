@@ -1,419 +1,987 @@
 <!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
-<title>S1 · Enquête techno</title>
+<title>S1 · Techno Survivor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#110f26;--panel:#1c1940;--deep:#16132f;--line:#3a3468;--fg:#ece8ff;--muted:#9d96cc;--amber:#ffb547;--cyan:#5ce1e6;--pink:#ff6aa8;--good:#6ee7a0;--bad:#ff5a5a;--ink:#1a1300;
+:root{--bg:#110f26;--panel:#1c1940;--deep:#16132f;--line:#3a3468;--fg:#ece8ff;--muted:#9d96cc;--amber:#ffb547;--cyan:#5ce1e6;--pink:#ff6aa8;--good:#6ee7a0;--bad:#ff5a5a;--ink:#1a1300;--blood:#b3001b;
 --f-display:'Silkscreen',monospace;--f-mono:'JetBrains Mono',monospace;--f-body:'Atkinson Hyperlegible',system-ui,sans-serif}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font:16px/1.45 var(--f-body)}
 button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
 button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 [hidden]{display:none!important}
-#wrap{max-width:900px;margin:0 auto;padding:12px 16px 32px}
-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-header h1{flex:1;margin:0;font:700 clamp(15px,4vw,20px) var(--f-display);color:var(--amber);letter-spacing:.02em}
-header .pts{font:700 18px var(--f-mono);color:var(--cyan)}
-.iconbtn{min-width:44px;height:44px;background:var(--panel);border:1px solid var(--line);border-radius:10px;font-size:18px}
+#wrap{max-width:960px;margin:0 auto;padding:10px 16px 28px}
+header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+header h1{flex:1;margin:0;font:700 clamp(14px,4vw,20px) var(--f-display);color:var(--amber);letter-spacing:.02em}
+header .pts{font:700 17px var(--f-mono);color:var(--cyan)}
+.iconbtn{min-width:44px;height:44px;padding:0 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;font:700 15px var(--f-body)}
 h2{margin:0 0 6px;font:700 clamp(18px,4.6vw,26px) var(--f-display);color:var(--cyan);letter-spacing:.02em;text-wrap:balance}
 p{margin:0 0 10px}
-.lead{color:var(--muted);max-width:68ch}
-b,.hl{color:var(--amber)}
+.lead{color:var(--muted);max-width:70ch}
+b{color:var(--amber)}
 .btn{min-height:46px;padding:0 16px;background:var(--panel);border:1px solid var(--line);border-bottom-width:3px;border-radius:9px;font:700 15px var(--f-body)}
 .btn:active{transform:translateY(2px)}
 .btn.ok{background:var(--amber);color:var(--ink);border-color:#c98a24}
 .btn:disabled{opacity:.35;cursor:default}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .row.c{justify-content:center}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.missions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;margin:14px 0}
-.mcard{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;text-align:left;background:var(--panel);border:1px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:14px}
-.mcard:hover{border-color:var(--amber)}
-.mcard .e{grid-row:span 3;font-size:34px;line-height:1}
-.mcard .t{font:700 15px var(--f-display);letter-spacing:.02em}
-.mcard .d{color:var(--muted);font-size:14px}
-.mcard .s{font:700 13px var(--f-mono);color:var(--good)}
-.mcard.done{border-color:var(--good)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:10px}
 .fb{min-height:1.5em;font-weight:700;margin:8px 0}
 .fb.good{color:var(--good)} .fb.bad{color:var(--bad)}
-.prog{font:700 13px var(--f-mono);color:var(--muted)}
-/* duel frise */
-.duel{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch;margin:12px 0}
-.inv{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:150px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:12px;text-align:center;font-weight:700}
-.inv .em{font-size:46px;line-height:1}
-.inv small{font:500 13px var(--f-mono);color:var(--muted)}
-.inv.right{border-color:var(--good);box-shadow:0 0 16px rgba(110,231,160,.4)}
-.inv.wrong{border-color:var(--bad)}
-.vs{align-self:center;font:700 18px var(--f-display);color:var(--muted)}
-.tl{position:relative;height:150px;margin:14px 0 6px;border-bottom:3px solid var(--line)}
-.tl .dot{position:absolute;bottom:-9px;width:15px;height:15px;margin-left:-7px;border-radius:50%;background:var(--amber);border:2px solid var(--bg);transition:left .8s cubic-bezier(.5,0,.2,1),opacity .4s}
-.tl .lab{position:absolute;bottom:14px;transform:translateX(-50%) rotate(-55deg);transform-origin:left bottom;white-space:nowrap;font:500 12px var(--f-mono);color:var(--muted);transition:left .8s cubic-bezier(.5,0,.2,1),opacity .4s}
-.tl .tick{position:absolute;bottom:-26px;transform:translateX(-50%);font:500 11px var(--f-mono);color:var(--muted);white-space:nowrap}
-.tl-wrap{padding:0 30px 30px}
-/* choix */
+.hud{display:flex;gap:12px;align-items:center;justify-content:space-between;font:700 14px var(--f-mono);margin-bottom:6px}
+.hud .lives{color:var(--bad);font-size:18px;letter-spacing:2px}
+/* menu */
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin:14px 0}
+.gcard{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;text-align:left;background:var(--panel);border:1px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:14px}
+.gcard:hover{border-color:var(--amber)}
+.gcard .e{grid-row:span 3;font-size:44px;line-height:1}
+.gcard .t{font:700 16px var(--f-display);letter-spacing:.02em}
+.gcard .d{color:var(--muted);font-size:14px}
+.gcard .s{font:700 13px var(--f-mono);color:var(--good)}
+.gcard.done{border-color:var(--good)}
+/* scène commune */
+.stage{position:relative;height:min(62vh,540px);min-height:380px;border-radius:12px;overflow:hidden;border:1px solid var(--line);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+body.paused .stage{filter:blur(14px)}
+.float{position:absolute;transform:translate(-50%,-50%);font:700 17px var(--f-mono);pointer-events:none;z-index:60;animation:rise 1s forwards;white-space:nowrap;text-shadow:0 2px 4px #000}
+@keyframes rise{to{transform:translate(-50%,-160%);opacity:0}}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translate(-8px,4px)}40%{transform:translate(7px,-5px)}60%{transform:translate(-5px,3px)}80%{transform:translate(4px,-2px)}}
+.laser{position:absolute;height:4px;transform-origin:0 50%;border-radius:2px;pointer-events:none;z-index:40;animation:fade .25s forwards}
+@keyframes fade{to{opacity:0}}
+.overlay{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:16px;background:rgba(8,6,20,.82)}
+.overlay .card{max-width:520px;width:100%;text-align:center}
+/* zombies */
+.zst{background:linear-gradient(#1b2b22,#2a2216 70%,#3b2a1a)}
+.qbar{min-height:58px;margin-bottom:6px;padding:10px 14px;background:var(--deep);border:2px solid var(--amber);border-radius:12px;font:700 clamp(15px,4vw,19px) var(--f-body);text-align:center}
+.z{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);cursor:crosshair;z-index:10}
+.z .em{font-size:46px;line-height:1;filter:drop-shadow(0 4px 4px #000a)}
+.z .lab{max-width:min(30vw,190px);margin-top:2px;padding:4px 8px;background:#f2ead2;color:#2a1a08;border:2px solid #5a3a1a;border-radius:7px;font:700 13px/1.2 var(--f-body);text-align:center}
+.z.angry .em{filter:drop-shadow(0 0 10px red)}
+.z.angry .lab{text-decoration:line-through;opacity:.6}
+.z.dead{animation:die .5s forwards;pointer-events:none}
+@keyframes die{to{transform:translate(-50%,-50%) scale(1.8) rotate(25deg);opacity:0}}
+.z.flee{transition:opacity .4s;opacity:0;pointer-events:none}
+.turret{position:absolute;left:50%;bottom:6px;font-size:42px;transform:translateX(-50%);z-index:20;pointer-events:none}
+.barricade{position:absolute;left:0;right:0;bottom:62px;height:6px;background:repeating-linear-gradient(90deg,#8b5a2b 0 30px,#5a3a1a 30px 34px);opacity:.8}
+.splat{position:absolute;width:70px;height:70px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--blood) 0 40%,transparent 41%),radial-gradient(circle at 80% 30%,var(--blood) 0 14%,transparent 15%),radial-gradient(circle at 20% 75%,var(--blood) 0 12%,transparent 13%);opacity:.85;pointer-events:none;z-index:2}
+.blood{position:absolute;inset:0;pointer-events:none;z-index:80;animation:bfade 2.2s forwards}
+.blood i{position:absolute;border-radius:50%;background:radial-gradient(circle,#d0001f 0 55%,#7a0010 56% 62%,transparent 63%)}
+.blood i::after{content:'';position:absolute;left:45%;top:60%;width:14%;height:160%;border-radius:0 0 40px 40px;background:#b3001b;animation:drip 2s ease-in forwards}
+@keyframes drip{from{height:20%}to{height:260%}}
+@keyframes bfade{0%,60%{opacity:1}to{opacity:0}}
+/* pieuvre */
+.ost{background:radial-gradient(ellipse at 50% 0,#163455,#0a1426 70%)}
+.ost svg{position:absolute;inset:0;width:100%;height:100%}
+.link{stroke:#5ce1e6;stroke-width:4;stroke-linecap:round}
+.link.cut{stroke:#ff5a5a;stroke-dasharray:6 8}
+.node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;z-index:10;background:none;border:0;padding:0}
+.node .em{font-size:30px;line-height:1;width:52px;height:52px;display:grid;place-items:center;border-radius:50%;background:#0e1e36;border:2px solid #2f5f8f}
+.node.router .em{border-color:var(--amber)}
+.node .nm{font:700 11px var(--f-mono);color:var(--fg);background:#0b1426cc;padding:1px 5px;border-radius:5px;margin-top:2px;white-space:nowrap}
+.node .ad{font:700 12px var(--f-mono);color:var(--amber)}
+.node.flash-bad .em{box-shadow:0 0 0 4px var(--bad)}
+.wrench{position:absolute;transform:translate(-50%,-50%);z-index:15;width:42px;height:42px;border-radius:50%;background:#3a1a24;border:2px solid var(--bad);font-size:20px;display:grid;place-items:center;animation:pulse .8s infinite alternate}
+.wrench.fix{animation:spin .8s linear infinite;border-color:var(--good)}
+@keyframes pulse{to{transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.pk{position:absolute;transform:translate(-50%,-50%);z-index:20;padding:3px 7px;border-radius:7px;background:var(--amber);color:var(--ink);font:700 13px var(--f-mono);pointer-events:none;white-space:nowrap;box-shadow:0 2px 6px #000}
+.pk.wait{animation:blink .5s infinite alternate}
+.pk small{font-size:10px;margin-left:4px}
+@keyframes blink{to{background:#fff2c9}}
+.octo{position:absolute;transform:translate(-50%,-50%);font-size:76px;line-height:1;z-index:30;pointer-events:none;filter:drop-shadow(0 0 12px #ff6aa8aa)}
+.octo .eyes{position:absolute;left:50%;top:30%;transform:translateX(-50%);display:flex;gap:10px}
+.octo .eyes i{width:12px;height:12px;border-radius:50%;background:#ff2a2a;box-shadow:0 0 10px 4px #ff2a2a;opacity:.35;transition:opacity .15s}
+.octo.fire .eyes i{opacity:1}
+.hpbar{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:min(60%,260px);height:10px;border-radius:5px;background:#3a1a24;overflow:hidden;z-index:31}
+.hpbar div{height:100%;background:var(--pink);transition:width .4s}
+.alert{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:50;padding:8px 14px;border-radius:10px;background:#3a0010e6;border:2px solid var(--bad);font:700 16px var(--f-display);color:#fff;pointer-events:none;text-align:center}
+.rtable{font:500 13px/1.6 var(--f-mono)}
+.rtable b{color:var(--good)} .rtable i{color:var(--muted);font-style:normal}
+/* boîte noire */
+.bb{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:10px 0}
+.bbox{width:clamp(120px,30vw,190px);aspect-ratio:1;border-radius:16px;background:#050409;border:3px solid #2a2550;display:grid;place-items:center;font-size:44px;position:relative;box-shadow:inset 0 0 30px #000}
+.bbox.run .gear{animation:spin2 .7s linear infinite}
+@keyframes spin2{to{transform:rotate(360deg)}}
+.bbox .q{position:absolute;bottom:6px;font:700 12px var(--f-display);color:#4a4480}
+.io{display:flex;flex-direction:column;gap:6px;align-items:center}
+.io input{width:100%;max-width:150px;height:50px;text-align:center;font:700 24px var(--f-mono);background:var(--deep);color:var(--fg);border:2px solid var(--line);border-radius:10px}
+.out{min-width:110px;min-height:50px;display:grid;place-items:center;padding:0 10px;font:700 24px var(--f-mono);background:var(--deep);border:2px solid var(--line);border-radius:10px;color:var(--good)}
+.out.pop{animation:popo .4s}
+@keyframes popo{from{transform:translateX(-40px);opacity:0}}
+table.hist{border-collapse:collapse;font:500 14px var(--f-mono);margin:6px 0}
+table.hist td,table.hist th{border:1px solid var(--line);padding:3px 10px;text-align:center}
+table.hist th{color:var(--muted);font-weight:500}
 .opts{display:grid;gap:8px;margin:10px 0}
 .opt{text-align:left;min-height:48px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;font-weight:700}
 .opt.right{border-color:var(--good);background:#18382d}
 .opt.wrong{border-color:var(--bad);background:#3a1a24}
-.need{font:700 20px var(--f-body);margin:6px 0}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.pair .card{font-size:14px}
-.pair .card h4{margin:0 0 4px;font:700 12px var(--f-display);color:var(--muted)}
-/* iceberg */
-.ice{position:relative;height:340px;border-radius:12px;overflow:hidden;background:linear-gradient(#1f2b55 0 26%,#0b2747 26% 100%)}
-.ice .sea{position:absolute;left:0;right:0;top:26%;height:2px;background:#5ce1e6aa}
-.ice .tip{position:absolute;left:50%;top:6%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-weight:700;font-size:13px;text-align:center}
-.ice .tip span{font-size:32px}
-.ice .layers{position:absolute;left:50%;top:28%;transform:translateX(-50%);width:min(94%,560px);display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.ice .layer{padding:5px 9px;border-radius:8px;background:#cfe9ff;color:#0b2747;font:700 12px var(--f-body);animation:pop .4s both}
-@keyframes pop{from{transform:scale(.3);opacity:0}}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.chip{min-height:42px;padding:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:22px;font-weight:700;font-size:14px}
-.chip.right{border-color:var(--good);color:var(--good)}
-.chip.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
-/* panne */
-.day{display:grid;gap:8px;margin:10px 0}
-.slot{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-.slot .h{font:700 14px var(--f-mono);color:var(--cyan)}
-.slot .ch{display:flex;gap:6px}
-.slot .ch button{min-width:44px;height:40px;border-radius:8px;background:var(--deep);border:1px solid var(--line);font-size:18px}
-.slot .ch button.on{border-color:var(--amber);background:#3a2c10}
-.slot.res-ok{border-color:var(--good)} .slot.res-ko{border-color:var(--bad)}
-.slot small{display:block;color:var(--muted);font-size:13px}
-/* love hate */
-.swipe{position:relative;height:220px;margin:12px 0}
-.sc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:var(--panel);border:2px solid var(--line);border-radius:16px;font:700 clamp(17px,4.4vw,22px) var(--f-body);transition:transform .35s,opacity .35s}
-.sc .em{font-size:48px}
-.sc.gol{transform:translateX(-120%) rotate(-12deg);opacity:0}
-.sc.gor{transform:translateX(120%) rotate(12deg);opacity:0}
-.big{font-size:30px;min-width:96px;min-height:64px}
-.bar{display:flex;height:26px;border-radius:13px;overflow:hidden;margin:10px 0;font:700 13px var(--f-mono)}
-.bar div{display:grid;place-items:center;transition:width .6s}
-/* copie */
-canvas.wave{width:100%;height:110px;background:var(--deep);border:1px solid var(--line);border-radius:10px;display:block}
-.copies{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.copies h3{margin:0 0 6px;font:700 13px var(--f-display);color:var(--muted)}
-.digits{font:500 13px var(--f-mono);background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:8px;height:110px;overflow:hidden;word-break:break-all;line-height:1.35}
-.digits i{font-style:normal;color:var(--bad);font-weight:700}
-.gen{font:700 14px var(--f-mono);color:var(--amber);margin:6px 0}
-/* découverte */
+.pred{display:flex;gap:8px;align-items:center;justify-content:center;margin:6px 0;font:700 18px var(--f-mono)}
+.pred input{width:120px;height:44px;text-align:center;font:700 18px var(--f-mono);background:var(--deep);color:var(--fg);border:2px solid var(--line);border-radius:9px}
+.pred input.right{border-color:var(--good)} .pred input.wrong{border-color:var(--bad)}
+/* fil d'actu */
+.feedwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:12px}
+.post{background:#f6f4ff;color:#1b1838;border-radius:14px;padding:12px 14px;min-height:150px}
+.post .src{display:flex;align-items:center;gap:8px;font:700 13px var(--f-body);color:#5a5580}
+.post .src .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#ddd8ff;font-size:16px}
+.post h3{margin:8px 0;font:700 clamp(16px,4vw,19px)/1.3 var(--f-body)}
+.post .meta{font:500 12px var(--f-mono);color:#6d688f}
+.post .tag{display:inline-block;padding:2px 8px;border-radius:10px;font:700 12px var(--f-body);margin-right:6px}
+.verif{margin-top:8px;padding:6px 10px;border-radius:8px;font:700 13px var(--f-body)}
+.verif.t{background:#d8f8e6;color:#0d4a2a} .verif.f{background:#ffdbe2;color:#7a0016}
+.world{position:relative;height:300px;border-radius:12px;background:#0b0a1c;border:1px solid var(--line);overflow:hidden}
+.world svg{position:absolute;inset:0;width:100%;height:100%}
+.pp{transition:fill .35s,r .35s}
+.gauges{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 12px;margin-top:8px;font:700 12px var(--f-mono)}
+.gauge .g{height:9px;border-radius:5px;background:var(--deep);overflow:hidden;margin-top:2px}
+.gauge .g div{height:100%;transition:width .6s}
+.events{margin-top:8px;font-size:14px;max-height:130px;overflow:auto}
+.events div{padding:4px 0;border-bottom:1px solid var(--line);animation:popo .4s}
+.likes{font:700 15px var(--f-mono);color:var(--pink)}
+/* la bulle */
+.feed3{display:grid;gap:10px}
+.nw{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#f6f4ff;color:#1b1838;border-radius:12px;padding:10px 12px;animation:popo .35s}
+.nw .ic{font-size:28px}
+.nw .tt{font:700 15px/1.3 var(--f-body)}
+.nw .tp{font:500 12px var(--f-mono);color:#6d688f}
+.nw .lk{min-width:54px;height:46px;border-radius:10px;border:2px solid #ff6aa8;background:#fff;font-size:22px}
+.nw.target{outline:4px solid var(--good)}
+.prof{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:4px 12px;font:700 12px var(--f-mono)}
+.prof .g{height:8px;border-radius:4px;background:var(--deep);overflow:hidden}
+.prof .g div{height:100%;background:var(--pink);transition:width .5s}
+.bubblemap{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.bubblemap .tpc{background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+.bubblemap .tpc h4{margin:0 0 4px;font:700 13px var(--f-body)}
+.bubblemap .seen{color:var(--good)} .bubblemap .unseen{color:var(--muted)}
+.ring{width:100%;max-width:360px;display:block;margin:6px auto}
+.goal{border:2px solid var(--good);background:#18382d;border-radius:12px;padding:10px 14px;margin:8px 0;font-weight:700}
+/* les likes */
+.lkwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.lbl{margin:8px 0 4px;font:700 12px var(--f-mono);color:var(--muted)}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.chip{min-height:50px;padding:4px;background:var(--deep);border:2px solid var(--line);border-radius:10px;font:700 12px var(--f-body);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.chip .em{font-size:22px;line-height:1.1}
+.chip.on{border-color:var(--pink);background:#3a1a34}
+.chip:disabled{opacity:.3;cursor:default}
+.phone{position:relative;height:400px;border-radius:24px;background:#f6f4ff;border:7px solid #2a2550;overflow:hidden;color:#1b1838}
+.phone .scr{position:absolute;inset:0;overflow:auto;padding:6px 8px}
+.phone .empty{margin-top:40%;text-align:center;color:#8d88b0;font-size:14px}
+.notif{position:absolute;left:8px;right:8px;top:8px;z-index:5;padding:8px 10px;border-radius:12px;background:#1b1838ee;color:#fff;font:700 13px var(--f-body);animation:ndrop .3s}
+@keyframes ndrop{from{transform:translateY(-130%);opacity:0}}
+.mypost{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid #ddd8ff;animation:popo .35s}
+.mypost .ic{font-size:30px}
+.mypost .tx{font:700 13px/1.3 var(--f-body)}
+.mypost .mt{font:500 11px var(--f-mono);color:#6d688f}
+.mypost .ct{font:700 16px var(--f-mono);color:#e0306f;min-width:58px;text-align:right}
+.mypost.viral{background:#ffe3ef}
+.flame{display:flex;align-items:center;gap:8px;margin-top:10px;font:700 14px var(--f-mono)}
+.flame .g,.lvl .g{flex:1;height:10px;border-radius:5px;background:var(--deep);overflow:hidden}
+.flame .g div{height:100%;background:linear-gradient(90deg,#ff5a5a,#ffb547)}
+.flame.low .g div{background:var(--bad);animation:blink .3s infinite alternate}
+.lvl{display:flex;align-items:center;gap:10px;font:700 13px var(--f-mono);margin-bottom:8px}
+.lvl .g div{height:100%;background:var(--cyan);transition:width .5s}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:150;max-width:calc(100% - 32px);padding:10px 16px;border-radius:12px;background:var(--amber);color:var(--ink);font:700 15px var(--f-body);animation:ndrop .3s;box-shadow:0 4px 14px #000a;text-align:center}
+.heart{position:absolute;font-size:22px;pointer-events:none;z-index:6;animation:hfly 1.1s forwards}
+@keyframes hfly{to{transform:translate(var(--dx),-150px) scale(1.5);opacity:0}}
+.ab{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.ab .col{background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.ab .big{font:700 28px var(--f-mono);color:var(--pink)}
+.algo{font:500 14px/1.6 var(--f-mono);background:#050409;border:1px solid var(--line);border-radius:10px;padding:10px 12px;white-space:pre-wrap;text-align:left;color:var(--good)}
+.dots{position:relative;height:160px;border-left:2px solid var(--line);border-bottom:2px solid var(--line);margin:10px 4px 26px 34px}
+.dots span{position:absolute;transform:translate(-50%,50%);font-size:18px;line-height:1}
+.dots .ax{position:absolute;font:500 11px var(--f-mono);color:var(--muted);transform:none}
+.hlist{display:grid;gap:3px;font:500 13px var(--f-mono)}
+.hlist div{display:grid;grid-template-columns:2.2em 1fr 3.4em;gap:6px;align-items:center}
+.hlist i{display:block;height:10px;border-radius:4px;background:var(--pink)}
+textarea{width:100%;min-height:64px;padding:10px;background:var(--deep);color:var(--fg);border:1px solid var(--line);border-radius:10px;font:15px var(--f-body);resize:vertical}
 .disc{margin-top:16px;border-color:var(--cyan)}
 .disc h3{margin:0 0 6px;font:700 15px var(--f-display);color:var(--cyan)}
-textarea{width:100%;min-height:70px;padding:10px;background:var(--deep);color:var(--fg);border:1px solid var(--line);border-radius:10px;font:15px var(--f-body);resize:vertical}
 .notes li{margin-bottom:10px}
 .notes .q{color:var(--muted);font-size:14px}
-@media (max-width:520px){ .duel{grid-template-columns:1fr} .vs{text-align:center} .pair,.copies{grid-template-columns:1fr} .inv{min-height:110px} }
-@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+@media (max-width:640px){ .lkwrap{grid-template-columns:1fr} .phone{height:300px} .feedwrap{grid-template-columns:1fr} .bb{grid-template-columns:1fr;justify-items:center} }
+@media (prefers-reduced-motion:reduce){ .blood i::after,.wrench,.pk.wait{animation:none!important} }
 </style>
 
 <div id="wrap">
-  <header><button class="iconbtn" id="home" aria-label="Retour aux missions">☰</button><h1>Enquête techno</h1><span class="pts" id="pts" aria-label="Points">0 pt</span></header>
+  <header><button class="iconbtn" id="home" aria-label="Retour au menu">☰</button><h1>Techno Survivor</h1><button class="iconbtn" id="pausebtn" hidden>Pause</button><span class="pts" id="pts">0 pt</span></header>
   <main id="main"></main>
 </div>
+<div class="overlay" id="ov" hidden><div class="card" id="ovc"></div></div>
 
 <script>
 'use strict';
 const $=s=>document.querySelector(s), main=$('#main');
+const rand=(a,b)=>a+Math.random()*(b-a), randi=(a,b)=>Math.floor(rand(a,b+1)), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function mk(tag,cls,html,parent){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; parent.appendChild(e); return e; }
+function place(e,x,y){ e.style.left=x+'px'; e.style.top=y+'px'; }
 
-/* ---------- sauvegarde (sur cet appareil) ---------- */
-const KEY='snt-s1-enquete';
-let D={ pts:0, done:{}, disc:{} };
+/* ---------- sauvegarde locale ---------- */
+const KEY='snt-s1-survivor';
+let D={ pts:0, best:{}, disc:{} };
 try{ const v=JSON.parse(localStorage.getItem(KEY)); if(v && typeof v==='object') D=Object.assign(D,v); }catch(e){}
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(D)); }catch(e){} $('#pts').textContent=D.pts+' pt'; }
-function addPts(n){ D.pts+=n; save(); }
+function addPts(n,x,y,st){ D.pts+=Math.round(n); save(); if(st && x!=null) floatTxt(st,x,y,'+'+Math.round(n),'var(--good)'); }
+function floatTxt(st,x,y,t,c){ const e=mk('div','float',t,st); e.style.color=c||'#fff'; place(e,x,y); setTimeout(()=>e.remove(),1000); }
+function laser(st,x1,y1,x2,y2,col){ const e=mk('div','laser',null,st); const dx=x2-x1, dy=y2-y1; e.style.left=x1+'px'; e.style.top=y1+'px'; e.style.width=Math.hypot(dx,dy)+'px'; e.style.transform=`rotate(${Math.atan2(dy,dx)}rad)`; e.style.background=col; e.style.boxShadow=`0 0 10px ${col}`; setTimeout(()=>e.remove(),260); }
+function shake(el){ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
 
-/* ---------- découverte de fin de mission ---------- */
-// chaque mission finit par une question : le choix + la phrase de l'élève alimentent « Mes découvertes »
-function discovery(id, q, opts, goodIdx, explain){
-  const box=document.createElement('div'); box.className='card disc';
-  const prev=D.disc[id]||{};
-  box.innerHTML=`<h3>Ta découverte</h3><p>${q}</p><div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div>
-    <div class="fb"></div><p class="lead">Et toi, avec tes mots, en une phrase :</p><textarea id="d-txt" placeholder="J'ai découvert que…">${esc(prev.txt||'')}</textarea>
-    <div class="row" style="margin-top:10px"><button class="btn ok" id="d-ok">Enregistrer et revenir aux missions</button></div>`;
-  let pick=prev.pick;
+/* ---------- boucle de jeu (s'arrête en pause) ---------- */
+const G={ cur:null, pause:false };
+let last=0;
+function frame(ts){ const dt=Math.min(.05,(ts-last)/1000||0); last=ts; if(G.cur && !G.pause && G.cur.update) G.cur.update(dt); requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+function startGame(g){ stopGame(); G.cur=g; G.pause=false; $('#pausebtn').hidden=!g.update; }
+function stopGame(){ if(G.cur && G.cur.stop) G.cur.stop(); G.cur=null; G.pause=false; document.body.classList.remove('paused'); $('#pausebtn').hidden=true; $('#pausebtn').textContent='Pause'; $('#ov').hidden=true; }
+function togglePause(){ if(!G.cur || !G.cur.update || G.cur.over) return; G.pause=!G.pause; document.body.classList.toggle('paused',G.pause); $('#pausebtn').textContent=G.pause?'Reprendre':'Pause'; }
+$('#pausebtn').onclick=togglePause;
+addEventListener('keydown',e=>{ if(e.key==='Escape' && G.cur){ e.preventDefault(); togglePause(); } });
+function overlay(html){ $('#ovc').innerHTML=html; $('#ov').hidden=false; }
+
+/* ---------- découverte de fin de jeu ---------- */
+function discovery(id,q,opts,goodIdx,explain){
+  const box=mk('div','card disc',null,main); const prev=D.disc[id]||{}; let pickI=null;
+  box.innerHTML=`<h3>Ta découverte</h3><p>${q}</p><div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div><div class="fb"></div>
+    <p class="lead">Avec tes mots, en une phrase :</p><textarea placeholder="J'ai découvert que…">${esc(prev.txt||'')}</textarea>
+    <div class="row" style="margin-top:10px"><button class="btn ok" data-ok>Enregistrer et revenir au menu</button></div>`;
   box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
-    pick=+b.dataset.i;
-    box.querySelectorAll('.opt').forEach((x,i)=>{ x.classList.toggle('right',i===goodIdx); x.classList.toggle('wrong',i===pick && i!==goodIdx); x.disabled=true; });
-    const fb=box.querySelector('.fb'); fb.className='fb '+(pick===goodIdx?'good':'bad'); fb.innerHTML=(pick===goodIdx?'Oui ! ':'Pas tout à fait. ')+`<span style="color:var(--fg);font-weight:400">${explain}</span>`;
-    if(pick===goodIdx && !prev.got){ addPts(20); prev.got=1; }
+    pickI=+b.dataset.i;
+    box.querySelectorAll('.opt').forEach((x,i)=>{ x.classList.toggle('right',i===goodIdx); x.classList.toggle('wrong',i===pickI && i!==goodIdx); x.disabled=true; });
+    const fb=box.querySelector('.fb'); fb.className='fb '+(pickI===goodIdx?'good':'bad'); fb.innerHTML=(pickI===goodIdx?'Oui ! ':'Pas tout à fait. ')+`<span style="color:var(--fg);font-weight:400">${explain}</span>`;
+    if(pickI===goodIdx && !prev.got){ prev.got=1; addPts(20); }
   });
-  box.querySelector('#d-ok').onclick=()=>{ D.disc[id]={ q, pick:pick!=null?opts[pick]:'', got:prev.got, txt:box.querySelector('#d-txt').value.trim() }; D.done[id]=1; save(); menu(); };
-  main.appendChild(box); box.scrollIntoView({behavior:'smooth',block:'start'});
+  box.querySelector('[data-ok]').onclick=()=>{ D.disc[id]={ q, pick:pickI!=null?opts[pickI]:(prev.pick||''), got:prev.got, txt:box.querySelector('textarea').value.trim() }; save(); menu(); };
+  box.scrollIntoView({behavior:'smooth',block:'start'});
 }
-function head(e,t,lead){ main.innerHTML=`<h2>${e} ${t}</h2><p class="lead">${lead}</p>`; scrollTo(0,0); }
-function el(html){ const d=document.createElement('div'); d.innerHTML=html; main.appendChild(d); return d; }
+function head(e,t,lead){ main.innerHTML=`<h2>${e} ${t}</h2>${lead?`<p class="lead">${lead}</p>`:''}`; scrollTo(0,0); }
+function endCard(title,body,again,disc){
+  stopGame();
+  overlay(`<h2>${title}</h2><p>${body}</p><div class="row c"><button class="btn ok" id="o-a">Rejouer</button><button class="btn" id="o-d">${disc?'Ma découverte':'Menu'}</button></div>`);
+  $('#o-a').onclick=()=>{ $('#ov').hidden=true; again(); };
+  $('#o-d').onclick=()=>{ $('#ov').hidden=true; if(disc){ main.querySelectorAll('.stage,.hud,.qbar').forEach(e=>e.remove()); disc(); } else menu(); };
+}
 
 /* =========================================================
-   1 · La frise : quelle invention est la plus ancienne ?
+   1 · ZOMBIES QCM : abats le zombie qui porte la bonne réponse
    ========================================================= */
-const INV=[
-  ['🪨','Outils en pierre taillée',-2600000],['🔥','Maîtrise du feu',-400000],['🎶','Flûte en os',-40000],['🌾','Agriculture',-12000],
-  ['🛞','Roue',-5500],['✍️','Écriture',-5300],['📜','Imprimerie',1450],['0️⃣','Binaire (Leibniz)',1703],['🧵','Métier Jacquard à cartes perforées',1801],
-  ['📟','Télégraphe',1844],['☎️','Téléphone',1876],['📻','Radio',1895],['🖥️','Ordinateur',1945],['🌐','Internet',1969],['🕸️','Web',1989],['📱','Smartphone',2007],['🤖','ChatGPT',2022]
+const ZQ=[
+  ['Quelle invention est la plus ancienne ?','La maîtrise du feu',['L\'écriture','La roue','L\'imprimerie']],
+  ['L\'écriture est apparue il y a environ…','5 300 ans',['300 000 ans','500 ans','2 millions d\'années']],
+  ['Homo sapiens existe depuis environ…','300 000 ans',['5 000 ans','2 000 ans','30 millions d\'années']],
+  ['Le numérique, c\'est d\'abord…','Transformer l\'information en nombres',['Tout ce qui est virtuel','Internet','Les jeux vidéo']],
+  ['Que montre l\'iceberg de la technologie ?','La partie cachée est bien plus grande que la partie visible',['Les ordinateurs ont froid','Le téléphone suffit à tout faire']],
+  ['Pourquoi copier un fichier ne coûte presque rien ?','Ce sont des nombres recopiés à l\'identique',['Les fichiers sont petits','Internet est gratuit']],
+  ['Juillet 2024, la mise à jour ratée de CrowdStrike…','A bloqué des millions d\'ordinateurs',['A effacé Internet','A supprimé tous les SMS']],
+  ['Internet et le Web…','Le Web est un service qui utilise Internet',['C\'est exactement la même chose','Internet est un site du Web']],
+  ['En 1703, Leibniz décrit…','Le système binaire',['L\'imprimerie','Le téléphone','La radio']],
+  ['Le métier Jacquard (1801) était programmé avec…','Des cartes perforées',['Un clavier','Un écran tactile','Le Wi-Fi']],
+  ['Avant -5000, comment écoutait-on de la musique ?','Chants, flûtes et tambours',['On n\'en écoutait pas','Avec la radio']],
+  ['Panne de courant géante en Espagne (2025) : qu\'est-ce qui marche ?','Une radio à piles',['Le distributeur de billets','Le métro','La pompe à essence']],
+  ['Le premier smartphone grand public date de…','2007',['1985','1995','2019']],
+  ['Un disque vinyle est un support…','Analogique',['Numérique','Virtuel']],
+  ['Un CD est un support…','Numérique',['Analogique','Biologique']],
+  ['ChatGPT a été rendu public en…','2022',['2007','1999','2012']],
+  ['Le premier ordinateur électronique (ENIAC) date de…','1945',['1890','1981','2000']],
+  ['Internet (ARPANET) est né en…','1969',['1989','2001','1945']],
+  ['Le Web a été inventé en…','1989',['1969','2007','1950']],
+  ['Notre relation à la technologie est…','Ambivalente : on aime et on rejette',['Toujours positive','Toujours négative']],
+  ['Pourquoi les inventions s\'accélèrent ?','L\'information circule de plus en plus vite',['On est plus intelligents qu\'avant','Il n\'y a plus de règles']]
 ];
-const yr=y=>y<0?`il y a ${(-y+2026).toLocaleString('fr-FR')} ans`:`en ${y}`;
-function m1(){
-  head('⏳','La frise','Duel : touche l\'invention <b>la plus ancienne</b>. 8 duels, puis on range tout sur une frise.');
-  const box=el(`<p class="prog" id="m1p"></p><div class="duel" id="m1d"></div><p class="fb" id="m1f"></p><div class="row c"><button class="btn ok" id="m1n" hidden>Duel suivant</button></div>`);
-  let round=0, ok=0;
-  const next=()=>{
-    if(round>=8) return frise(ok);
-    $('#m1p').textContent=`Duel ${round+1} / 8 · ${ok} bonne${ok>1?'s':''} réponse${ok>1?'s':''}`; $('#m1f').textContent=''; $('#m1n').hidden=true;
-    let a,b; do{ [a,b]=shuffle(INV.slice()).slice(0,2); }while(Math.abs(a[2]-b[2])<20);
-    const d=$('#m1d'); d.innerHTML=[a,b].map((v,i)=>`${i?'<span class="vs">ou</span>':''}<button class="inv" data-y="${v[2]}"><span class="em">${v[0]}</span>${v[1]}<small hidden>${yr(v[2])}</small></button>`).join('');
-    d.querySelectorAll('.inv').forEach(btn=>btn.onclick=()=>{
-      if(!$('#m1n').hidden) return;
-      const old=Math.min(a[2],b[2]), good=+btn.dataset.y===old;
-      d.querySelectorAll('.inv').forEach(x=>{ x.querySelector('small').hidden=false; x.classList.add(+x.dataset.y===old?'right':'wrong'); });
-      if(good){ ok++; addPts(5); }
-      $('#m1f').className='fb '+(good?'good':'bad'); $('#m1f').textContent=good?'Bien vu !':'Raté : regarde les dates.';
-      round++; $('#m1n').hidden=false; $('#m1n').textContent=round>=8?'Voir la frise':'Duel suivant'; $('#m1n').focus();
+function gZombie(){
+  head('🧟','Zombies QCM','Les zombies portent des réponses. <b>Touche</b> celui qui a la bonne réponse avant qu\'ils franchissent la barricade. Une mauvaise cible les rend plus rapides !');
+  mk('div','hud','<span class="lives" id="zl"></span><span id="zn"></span>',main);
+  const qb=mk('div','qbar',null,main);
+  const st=mk('div','stage zst','<div class="barricade"></div><div class="turret">🔫</div>',main);
+  const QS=shuffle(ZQ.slice()).slice(0,12);
+  const S={ n:-1, lives:3, ok:0, zs:[], mult:1, base:30, wait:0, over:false, W:0, H:0, done:false };
+  const g={ over:false };
+  const measure=()=>{ S.W=st.clientWidth; S.H=st.clientHeight; };
+  const hudUp=()=>{ $('#zl').textContent='♥'.repeat(S.lives)+'♡'.repeat(3-S.lives); $('#zn').textContent=`Question ${Math.min(S.n+1,QS.length)} / ${QS.length} · ${S.ok} abattus`; };
+  function wave(){
+    S.zs.forEach(z=>z.el.remove()); S.zs=[]; S.n++; S.mult=1; S.done=false;
+    if(S.n>=QS.length) return finish();
+    const [q,good,bad]=QS[S.n]; qb.textContent=q; hudUp();
+    const answers=shuffle([good,...bad.slice(0,3)]), n=answers.length;
+    answers.forEach((a,i)=>{
+      const el=mk('div','z',`<span class="em">🧟</span><span class="lab">${a}</span>`,st);
+      const z={ el, a, good:a===good, x:(i+.5)/n*S.W, y:-30-rand(0,30)-(i%2)*55, vy:(S.base+S.n*1.8)*rand(.85,1.2), ph:rand(0,6) };
+      el.addEventListener('pointerdown',ev=>{ ev.preventDefault(); shoot(z); });
+      S.zs.push(z);
+    });
+  }
+  function shoot(z){
+    if(S.over || G.pause || S.done || !S.zs.includes(z)) return;
+    const zx=parseFloat(z.el.style.left), zy=parseFloat(z.el.style.top);
+    laser(st,S.W/2,S.H-30,zx,zy,z.good?'#6ee7a0':'#ff5a5a');
+    if(z.good){
+      S.done=true; S.ok++;
+      addPts(10+Math.max(0,Math.round((1-zy/S.H)*10)),zx,zy-30,st);
+      const sp=mk('div','splat',null,st); place(sp,zx,zy+10);
+      z.el.classList.add('dead');
+      S.zs.forEach(o=>{ if(o!==z) o.el.classList.add('flee'); });
+      S.wait=.9;
+    } else {
+      if(z.el.classList.contains('angry')) return;
+      z.el.classList.add('angry'); S.mult*=1.35; floatTxt(st,zx,zy-40,'GRRR ! Plus vite !','#ff5a5a'); shake(st);
+    }
+  }
+  function bite(){
+    S.done=true; S.lives--; hudUp(); shake(document.body);
+    // gerbe de sang sur l'écran
+    const b=mk('div','blood',null,st);
+    for(let k=0;k<9;k++){ const i=mk('i',null,null,b); const s=rand(60,160); Object.assign(i.style,{width:s+'px',height:s+'px',left:rand(-5,85)+'%',top:rand(-5,70)+'%'}); }
+    setTimeout(()=>b.remove(),2300);
+    const good=S.zs.find(o=>o.good);
+    floatTxt(st,S.W/2,S.H/2,'Mordu ! Réponse : '+(good?good.a:''),'#ffd0d0');
+    S.zs.forEach(o=>o.el.classList.add('flee'));
+    S.wait=1.8;
+  }
+  function finish(){
+    S.over=g.over=true;
+    D.best.zombie=Math.max(D.best.zombie||0,S.ok); save();
+    const win=S.lives>0;
+    endCard(win?'Tu as survécu !':'Dévoré…', win?`${S.ok} zombies abattus sur ${QS.length}. Il te reste ${S.lives} ♥.`:`Les zombies ont franchi la barricade. ${S.ok} abattus avant la fin.`, gZombie, null);
+  }
+  g.update=dt=>{
+    if(S.over) return;
+    if(!S.W) measure();
+    if(S.wait>0){ if((S.wait-=dt)<=0){ if(S.lives<=0) return finish(); wave(); } return; }
+    for(const z of S.zs){
+      z.y+=z.vy*S.mult*dt; z.ph+=dt*3;
+      place(z.el,clamp(z.x+Math.sin(z.ph)*8,50,S.W-50),z.y);
+      if(!S.done && z.y>S.H-80){ bite(); break; }
+    }
+  };
+  addEventListener('resize',measure);
+  g.stop=()=>removeEventListener('resize',measure);
+  startGame(g); measure(); hudUp(); wave();
+}
+
+/* =========================================================
+   2 · LA PIEUVRE : réparer Internet et router les paquets
+   ========================================================= */
+function gOcto(){
+  head('🐙','La pieuvre laser','Une pieuvre géante aux yeux laser coupe les câbles d\'Internet ! <b>Répare</b> les câbles coupés (🔧) et <b>guide les paquets</b> : quand un paquet clignote sur un routeur, touche la machine où il doit aller. Personne ne t\'a donné les règles : devine-les en lisant les adresses.');
+  mk('div','hud','<span id="oh"></span><span>🐙 vie de la pieuvre</span>',main);
+  const st=mk('div','stage ost','<svg aria-hidden="true"></svg><div class="hpbar"><div style="width:100%"></div></div>',main);
+  const tbl=mk('div','card rtable',null,main);
+  const svg=st.querySelector('svg');
+  // règles cachées, tirées au hasard à chaque partie
+  const hostsDef=shuffle([['🏫','Lycée'],['🏥','Hôpital'],['🎮','Jeux'],['🏦','Banque'],['📺','Vidéo'],['📰','Journal']]);
+  const up=Math.random()<.5;
+  const N={
+    S:{x:.07,y:.58,em:'💻',nm:'Toi'},
+    A:{x:.3,y:.58,em:'🗼',nm:'Routeur A',router:1,parent:'S'},
+    B:{x:.56,y:.36,em:'🗼',nm:'Routeur B',router:1,pre:up?'1':'2',parent:'A'},
+    C:{x:.56,y:.82,em:'🗼',nm:'Routeur C',router:1,pre:up?'2':'1',parent:'A'}
+  };
+  const sub=[shuffle(['1','2','3']),shuffle(['1','2','3'])];
+  ['B','C'].forEach((r,ri)=>[.24,.38,.52].forEach((y,k)=>{ const h=hostsDef[ri*3+k]; N[r+k]={x:.88,y:ri?y+.42:y,em:h[0],nm:h[1],addr:N[r].pre+'.'+sub[ri][k],parent:r}; }));
+  const kids=id=>Object.keys(N).filter(k=>N[k].parent===id);
+  const links=Object.keys(N).filter(k=>N[k].parent).map(k=>({a:N[k].parent,b:k,cut:false,fix:0,line:null,w:null}));
+  const linkTo=b=>links.find(l=>l.b===b);
+  const K={};   // ce que le joueur a découvert
+  const S={ W:0,H:0, pk:[], hp:10, lost:0, ok:0, spawn:1.2, cutT:5, octo:{x:.5,ph:0}, over:false, firing:0 };
+  const g={ over:false };
+  links.forEach(l=>{ l.line=document.createElementNS('http://www.w3.org/2000/svg','line'); l.line.setAttribute('class','link'); svg.appendChild(l.line); });
+  Object.entries(N).forEach(([id,n])=>{
+    n.el=mk('button','node'+(n.router?' router':''),`<span class="em">${n.em}</span><span class="nm">${n.nm}</span><span class="ad"></span>`,st);
+    n.el.addEventListener('pointerdown',ev=>{ ev.preventDefault(); tapNode(id); });
+  });
+  const octo=mk('div','octo','🐙<span class="eyes"><i></i><i></i></span>',st);
+  const P=id=>({x:N[id].x*S.W,y:N[id].y*S.H});
+  function layout(){
+    S.W=st.clientWidth; S.H=st.clientHeight;
+    Object.values(N).forEach(n=>place(n.el,n.x*S.W,n.y*S.H));
+    links.forEach(l=>{ const a=P(l.a), b=P(l.b); l.line.setAttribute('x1',a.x); l.line.setAttribute('y1',a.y); l.line.setAttribute('x2',b.x); l.line.setAttribute('y2',b.y); if(l.w) place(l.w,(a.x+b.x)/2,(a.y+b.y)/2); });
+  }
+  function labels(){
+    ['B','C'].forEach(r=>{ N[r].el.querySelector('.ad').textContent=K[r]?N[r].pre+'.*':''; });
+    Object.entries(N).forEach(([id,n])=>{ if(n.addr) n.el.querySelector('.ad').textContent=K[id]?n.addr:'?.?'; });
+    tbl.innerHTML=`<b style="color:var(--cyan)">Ta table de routage</b> (elle se remplit avec tes découvertes)<br>`+
+      `Routeur A : ${K.B?`<b>${N.B.pre}.*</b> → B`:'<i>?.* → B</i>'} · ${K.C?`<b>${N.C.pre}.*</b> → C`:'<i>?.* → C</i>'}<br>`+
+      ['B','C'].map(r=>`Routeur ${r} : `+kids(r).map(h=>K[h]?`<b>${N[h].addr}</b> → ${N[h].em}`:`<i>?.? → ${N[h].em}</i>`).join(' · ')).join('<br>');
+  }
+  const hudUp=()=>{ $('#oh').textContent=`📦 livrés : ${S.ok} · perdus : ${S.lost} / 6`; st.querySelector('.hpbar div').style.width=(S.hp*10)+'%'; };
+  function cut(l){
+    l.cut=true; l.line.classList.add('cut');
+    const a=P(l.a), b=P(l.b);
+    l.w=mk('button','wrench','🔧',st); place(l.w,(a.x+b.x)/2,(a.y+b.y)/2);
+    l.w.addEventListener('pointerdown',ev=>{ ev.preventDefault(); if(!l.fix && !G.pause){ l.fix=.8; l.w.classList.add('fix'); } });
+    if(links.filter(x=>x.cut).length>=3) alertMsg('INTERNET EN PANNE !');
+  }
+  function alertMsg(t){ const a=mk('div','alert',t,st); setTimeout(()=>a.remove(),1400); }
+  function spawn(){
+    const h=pick(Object.keys(N).filter(k=>N[k].addr));
+    const el=mk('div','pk',`📦 ${N[h].addr}`,st);
+    const p={ el, dest:N[h].addr, at:'S', to:null, t:0, x:P('S').x, y:P('S').y, wait:0 };
+    S.pk.push(p); send(p,'A');
+  }
+  function send(p,to){ p.from=p.at; p.to=to; p.t=0; p.wait=0; p.el.classList.remove('wait'); }
+  function arrive(p){
+    p.at=p.to; p.to=null; const n=N[p.at];
+    if(n.addr){
+      if(n.addr===p.dest) return delivered(p);
+      K[p.at]=1; labels(); n.el.classList.add('flash-bad'); setTimeout(()=>n.el.classList.remove('flash-bad'),700);
+      return lose(p,`Raté : ${n.em} a l'adresse ${n.addr}`);
+    }
+    if(n.pre){ K[p.at]=1; labels(); if(p.dest[0]!==n.pre) return lose(p,`${n.nm} ne gère que ${n.pre}.*`); }
+    p.wait=Math.max(5,9-S.ok*.25); p.el.classList.add('wait');
+  }
+  function delivered(p){
+    S.ok++; K[p.at]=1; labels(); kill(p);
+    const pos=P(p.at); addPts(10,pos.x,pos.y-30,st);
+    // les routeurs reliés tirent sur la pieuvre
+    const ox=S.octo.x*S.W, oy=S.H*.11;
+    ['A','B','C'].forEach(r=>{ if(!linkTo(r).cut){ const q=P(r); laser(st,q.x,q.y,ox,oy,'#5ce1e6'); } });
+    S.hp=Math.max(0,S.hp-1); hudUp(); floatTxt(st,ox,oy+40,'-1 ❤','#ff6aa8');
+    if(S.hp<=0) finish(true);
+  }
+  function lose(p,msg){ S.lost++; floatTxt(st,clamp(p.x,110,S.W-110),p.y-36,msg,'#ffb3b3'); kill(p); hudUp(); shake(st); if(S.lost>=6) finish(false); }
+  function kill(p){ p.el.remove(); const i=S.pk.indexOf(p); if(i>=0) S.pk.splice(i,1); }
+  function tapNode(id){
+    if(G.pause || S.over) return;
+    const n=N[id]; if(!n.parent) return;
+    const ws=S.pk.filter(p=>p.at===n.parent && !p.to && p.wait>0).sort((a,b)=>a.wait-b.wait);
+    if(!ws.length) return;
+    if(linkTo(id).cut){ const pos=P(id); floatTxt(st,pos.x,pos.y-40,'Câble coupé : répare-le 🔧','#ff5a5a'); return; }
+    send(ws[0],id);
+  }
+  function finish(win){
+    if(S.over) return; S.over=g.over=true;
+    D.best.octo=Math.max(D.best.octo||0,S.ok); save();
+    endCard(win?'La pieuvre est vaincue !':'Internet est tombé…', win?`${S.ok} paquets livrés, ${S.lost} perdus. Tes routeurs ont repoussé la pieuvre.`:`Trop de paquets perdus. Tu en as livré ${S.ok}. Regarde ta table de routage et retente !`, gOcto, ()=>{
+      mk('div','card',`<p>Les vraies règles de cette partie :</p><div class="rtable">Routeur A : <b>${N.B.pre}.*</b> → B · <b>${N.C.pre}.*</b> → C<br>${['B','C'].map(r=>`Routeur ${r} : `+kids(r).map(h=>`<b>${N[h].addr}</b> → ${N[h].em} ${N[h].nm}`).join(' · ')).join('<br>')}</div>`,main);
+      discovery('octo','Comment un routeur sait-il où envoyer un paquet ?',[
+        'Il l\'envoie au hasard et espère qu\'il arrive',
+        'Il lit l\'adresse de destination et suit sa table de routage, morceau par morceau',
+        'Il envoie une copie du paquet à toutes les machines du monde'],1,
+        'Chaque routeur ne connaît qu\'une partie du chemin : il lit le début de l\'adresse et passe le paquet au bon voisin. Si un câble est coupé, le paquet ne passe plus : Internet dépend de son infrastructure physique.');
+    });
+  }
+  g.update=dt=>{
+    if(S.over) return;
+    if(!S.W) layout();
+    S.octo.ph+=dt*.6; S.octo.x=.5+Math.sin(S.octo.ph)*.22; place(octo,S.octo.x*S.W,S.H*.11);
+    if(S.firing>0 && (S.firing-=dt)<=0) octo.classList.remove('fire');
+    if((S.cutT-=dt)<=0){
+      S.cutT=Math.max(3.2,7-S.ok*.25)*rand(.8,1.2);
+      const ok=links.filter(l=>!l.cut);
+      if(ok.length){ const l=pick(ok), a=P(l.a), b=P(l.b), ox=S.octo.x*S.W, oy=S.H*.11, mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+        octo.classList.add('fire'); S.firing=.35; laser(st,ox-8,oy-8,mx,my,'#ff2a2a'); laser(st,ox+8,oy-8,mx,my,'#ff2a2a'); cut(l); }
+    }
+    links.forEach(l=>{ if(l.fix>0 && (l.fix-=dt)<=0){ l.fix=0; l.cut=false; l.line.classList.remove('cut'); l.w.remove(); l.w=null; addPts(2); } });
+    if((S.spawn-=dt)<=0){ const max=S.ok<4?1:S.ok<9?2:3; if(S.pk.length<max) spawn(); S.spawn=rand(2,4); }
+    for(const p of [...S.pk]){
+      if(S.over) break;
+      if(p.to){
+        if(linkTo(p.to).cut){ p.el.classList.add('wait'); continue; }   // bloqué devant un câble coupé
+        p.el.classList.remove('wait');
+        const a=P(p.from), b=P(p.to), d=Math.hypot(b.x-a.x,b.y-a.y)||1;
+        p.t+=dt*170/d; const t=Math.min(1,p.t); p.x=a.x+(b.x-a.x)*t; p.y=a.y+(b.y-a.y)*t; place(p.el,p.x,p.y-26);
+        if(t>=1) arrive(p);
+      } else if(p.wait>0){
+        p.wait-=dt; p.el.innerHTML=`📦 ${p.dest}<small>${Math.ceil(p.wait)}s</small>`;
+        if(p.wait<=0) lose(p,'Trop tard : paquet expiré');
+      }
+    }
+  };
+  const onR=()=>layout(); addEventListener('resize',onR);
+  g.stop=()=>removeEventListener('resize',onR);
+  startGame(g); layout(); labels(); hudUp();
+}
+
+/* =========================================================
+   3 · LA BOÎTE NOIRE : deviner la règle cachée
+   ========================================================= */
+const BOX=[
+  { f:n=>n*2, ok:'Elle double le nombre (× 2)', bad:['Elle ajoute 2','Elle met le nombre au carré','Elle ajoute 10'] },
+  { f:n=>n+7, ok:'Elle ajoute 7', bad:['Elle double le nombre','Elle ajoute 5','Elle retire 7'] },
+  { f:n=>n*n, ok:'Elle met le nombre au carré (n × n)', bad:['Elle double le nombre','Elle ajoute le nombre suivant','Elle multiplie par 4'] },
+  { f:n=>n%2, ok:'Elle donne 0 si le nombre est pair, 1 s\'il est impair', bad:['Elle donne 0 ou 1 au hasard','Elle donne 1 si le nombre est plus grand que 10','Elle donne le dernier chiffre'] },
+  { f:n=>n<10?n+10:n-10, ok:'Si le nombre est plus petit que 10, elle ajoute 10, sinon elle retire 10', bad:['Elle ajoute 10','Elle retire 10','Elle inverse les chiffres'] },
+  { f:n=>Number(n.toString(2)), ok:'Elle écrit le nombre en binaire', bad:['Elle multiplie par 10','Elle écrit le nombre à l\'envers','Elle met le nombre au carré'] }
+];
+function gBox(lv=0){
+  const B=BOX[lv]; const tests=[]; let phase='test';
+  stopGame();
+  head('⬛','La boîte noire',`Boîte ${lv+1} / ${BOX.length}. Cette boîte transforme les nombres selon une <b>règle cachée</b>. Fais des essais, regarde ce qui sort, puis propose ton hypothèse. Moins tu fais d'essais, plus tu gagnes de points.`);
+  const box=mk('div',null,`<div class="bb"><div class="io"><input id="bi" type="number" inputmode="numeric" min="0" max="99" placeholder="0 à 99" aria-label="Nombre à entrer"><button class="btn ok" id="bgo">Entrer ▶</button></div>
+    <div class="io"><div class="bbox" id="bx"><span class="gear">⚙️</span><span class="q">???</span></div></div><div class="io"><div class="out" id="bo">…</div><span class="lead" style="margin:0">ce qui sort</span></div></div>
+    <div class="row c" id="sugg"></div>
+    <div class="card"><table class="hist"><tr><th>Entrée</th><th>Sortie</th></tr><tbody id="bh"></tbody></table><p class="fb" id="bf"></p>
+    <div class="row"><button class="btn ok" id="bhyp" disabled>J'ai trouvé la règle !</button></div><div id="bz"></div></div>`,main);
+  const sugg=()=>{ $('#sugg').innerHTML='Idées : '+shuffle([0,1,2,3,5,7,8,10,12,15,20,25]).slice(0,5).map(v=>`<button class="btn" data-v="${v}">${v}</button>`).join(''); $('#sugg').querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{ $('#bi').value=b.dataset.v; run(); }); };
+  function run(){
+    if(phase!=='test' || $('#bgo').disabled) return;
+    const n=parseInt($('#bi').value,10);
+    if(isNaN(n)||n<0||n>99){ $('#bf').className='fb bad'; $('#bf').textContent='Entre un nombre entre 0 et 99.'; return; }
+    $('#bf').textContent=''; $('#bx').classList.add('run'); $('#bgo').disabled=true;
+    setTimeout(()=>{
+      $('#bx').classList.remove('run'); $('#bgo').disabled=false;
+      const out=B.f(n), o=$('#bo'); o.textContent=out; o.classList.remove('pop'); void o.offsetWidth; o.classList.add('pop');
+      tests.push([n,out]); $('#bh').insertAdjacentHTML('afterbegin',`<tr><td>${n}</td><td>${out}</td></tr>`);
+      $('#bhyp').disabled=tests.length<3; $('#bf').className='fb'; $('#bf').textContent=tests.length<3?`Encore ${3-tests.length} essai${tests.length<2?'s':''} avant de proposer une règle.`:'';
+      $('#bi').value=''; sugg();
+    },500);
+  }
+  $('#bgo').onclick=run; $('#bi').onkeydown=e=>{ if(e.key==='Enter') run(); };
+  $('#bhyp').onclick=()=>{
+    phase='hyp';
+    const opts=shuffle([B.ok,...B.bad]);
+    $('#bz').innerHTML=`<p style="margin-top:12px">Quelle est la règle de la boîte ?</p><div class="opts">${opts.map(o=>`<button class="opt">${o}</button>`).join('')}</div>`;
+    $('#bz').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      if(b.textContent!==B.ok){ b.classList.add('wrong'); b.disabled=true; $('#bf').className='fb bad'; $('#bf').textContent='Cette hypothèse ne colle pas avec tes essais. Refais des essais pour vérifier !'; tests.push(['?','✗']); phase='test'; setTimeout(()=>{ if(phase==='test') $('#bz').innerHTML=''; },1600); return; }
+      b.classList.add('right'); proof();
     });
   };
-  $('#m1n').onclick=next; next();
-}
-function frise(ok){
-  head('⏳','La frise','Voici toutes les inventions, placées à leur vraie date. Utilise le zoom pour regarder de plus près la fin de la frise.');
-  const ZO=[[-2700000,'depuis 2,7 millions d\'années'],[-450000,'depuis 450 000 ans'],[-45000,'depuis 45 000 ans'],[-6000,'depuis 6 000 ans (avant notre ère)'],[1400,'depuis 1400']];
-  let z=0;
-  const box=el(`<p class="prog">Duels réussis : ${ok} / 8</p><div class="card"><p class="gen" id="fz"></p><div class="tl-wrap"><div class="tl" id="tl"></div></div>
-    <div class="row c"><button class="btn" id="zm">− Dézoomer</button><button class="btn ok" id="zp">Zoomer sur la fin ＋</button></div></div><p class="lead" id="fcount" style="margin-top:10px"></p>`);
-  const tl=$('#tl');
-  const nodes=INV.map(v=>{ const d=document.createElement('div'); d.className='dot'; d.title=v[1]+' · '+yr(v[2]); const l=document.createElement('div'); l.className='lab'; l.textContent=v[0]+' '+v[1]; tl.append(d,l); return {v,d,l}; });
-  const draw=()=>{
-    const from=ZO[z][0], to=2030; $('#fz').textContent='Frise '+ZO[z][1];
-    tl.querySelectorAll('.tick').forEach(t=>t.remove());
-    [from,to].forEach((y,i)=>{ const t=document.createElement('div'); t.className='tick'; t.style.left=(i?100:0)+'%'; t.textContent=y<0?(y).toLocaleString('fr-FR'):y; tl.appendChild(t); });
-    let shown=0, crowd=0; const rightZone=from+(to-from)*.9;
-    nodes.forEach(({v,d,l})=>{ const vis=v[2]>=from, x=vis?(v[2]-from)/(to-from)*100:0; d.style.left=l.style.left=x+'%'; d.style.opacity=vis?1:0; l.style.opacity=vis?1:0; if(vis){ shown++; if(v[2]>=rightZone) crowd++; } });
-    $('#fcount').innerHTML=`Sur cette frise : <b>${shown}</b> inventions, dont <b>${crowd}</b> entassées dans le dernier dixième, tout à droite.`;
-    $('#zm').disabled=z===0; $('#zp').disabled=z===ZO.length-1;
-  };
-  $('#zp').onclick=()=>{ z++; draw(); if(z===ZO.length-1 && !D.done.frise_zoom){ D.done.frise_zoom=1; addPts(10); } };
-  $('#zm').onclick=()=>{ z--; draw(); };
-  draw();
-  discovery('frise','Que montre la frise, même quand on zoome ?',[
-    'Les inventions sont réparties régulièrement dans le temps',
-    'Les inventions s\'accélèrent : il y en a de plus en plus, de plus en plus vite',
-    'On n\'a plus rien inventé depuis l\'an 2000'],1,
-    'À chaque zoom, les inventions s\'entassent encore à droite : c\'est une <b>accélération</b>. Deux pistes pour l\'expliquer : les petites inventions anciennes sont oubliées, et l\'information circule de plus en plus vite.');
+  // preuve : prédire 3 sorties avant de les voir
+  function proof(){
+    phase='proof';
+    const ins=shuffle([...Array(30).keys()].map(k=>k+1).filter(k=>!tests.some(t=>t[0]===k))).slice(0,3);
+    $('#bz').innerHTML=`<p style="margin-top:12px">Prouve-le : que va sortir la boîte pour ces nombres ?</p>${ins.map((n,i)=>`<div class="pred"><span>${n} →</span><input data-i="${i}" inputmode="numeric" aria-label="Sortie pour ${n}"></div>`).join('')}<div class="row c"><button class="btn ok" id="bp">Vérifier</button></div>`;
+    $('#bp').onclick=()=>{
+      let ok=0;
+      $('#bz').querySelectorAll('input').forEach((inp,i)=>{ const want=String(B.f(ins[i])), got=inp.value.trim(), g=got===want; if(g) ok++; inp.classList.add(g?'right':'wrong'); if(!g) inp.value=(got||'?')+' ≠ '+want; inp.disabled=true; });
+      $('#bp').remove();
+      const pts=ok===3?Math.max(10,40-tests.length*3):ok*5; addPts(pts);
+      $('#bf').className='fb '+(ok===3?'good':'bad');
+      $('#bf').textContent=ok===3?`Règle prouvée en ${tests.length} essais : +${pts} points !`:`${ok} / 3 prédictions justes : ta règle n'était pas tout à fait comprise.`;
+      mk('div','row c',`${lv+1<BOX.length?'<button class="btn ok" id="bn">Boîte suivante</button>':''}<button class="btn" id="bd">${lv+1<BOX.length?'Arrêter et noter ma découverte':'Noter ma découverte'}</button>`,$('#bz'));
+      if($('#bn')) $('#bn').onclick=()=>gBox(lv+1);
+      $('#bd').onclick=()=>{ box.remove(); discovery('box','Comment comprendre une machine dont on ne voit pas l\'intérieur ?',[
+        'Impossible : il faut forcément ouvrir la machine',
+        'On fait des essais, on note les résultats, on propose une hypothèse et on la teste sur de nouveaux cas',
+        'Il suffit de faire un seul essai'],1,
+        'C\'est la démarche scientifique, et c\'est aussi comme ça qu\'on étudie un algorithme secret (un réseau social, une IA) : essais, hypothèses, prédictions. Une bonne hypothèse doit prédire ce qu\'on n\'a pas encore testé.'); };
+    };
+  }
+  sugg();
 }
 
 /* =========================================================
-   2 · Comment faisait-on avant -5000 ?
+   4 · LE FIL D'ACTU : les émotions se propagent
    ========================================================= */
-const BEFORE=[
-  ['🎵','Écouter de la musique','Chanter et jouer de la flûte ou du tambour autour du feu',['Allumer la radio','Acheter un disque'],'Une appli de streaming'],
-  ['📣','Transmettre un message au loin','Le tambour, les signaux de fumée ou un messager qui court',['Envoyer une lettre par la poste','Le télégraphe'],'Un SMS ou un message instantané'],
-  ['🏹','Apprendre un savoir-faire','Regarder et imiter les anciens, écouter les récits',['Lire un manuel','Aller à l\'école en car'],'Un tutoriel vidéo'],
-  ['🍖','Obtenir sa nourriture','Chasser, pêcher, cueillir, partager avec le groupe',['Aller au marché avec des pièces','Cultiver un champ de blé'],'Le supermarché et la carte bancaire'],
-  ['🌿','Se soigner','Les plantes, le repos, les rituels du groupe',['Aller à la pharmacie','Prendre des antibiotiques'],'Un rendez-vous pris en ligne'],
-  ['🧭','Trouver son chemin','Le soleil, les étoiles, les rivières, la mémoire des lieux',['Une carte routière en papier','Une boussole'],'Le GPS du téléphone']
+const EMO={ col:['😡','Colère','#ff5a5a',.85,3], peur:['😱','Peur','#b69cff',.8,2.5], rire:['😂','Rire','#ffb547',.65,2], joie:['🥰','Entraide','#6ee7a0',.55,1.5], info:['🤔','Info','#5ce1e6',.35,.6] };
+const NEWS=[
+  ['col','LaVraieInfo24','SCANDALE : la cantine va servir des insectes à tous les repas dès lundi !!!',0,'Aucune cantine n\'a annoncé ça : site connu pour ses fausses infos.'],
+  ['joie','Mairie','Grâce à une publication partagée, un lycéen retrouve le chien perdu de sa voisine',1,'Information confirmée par la mairie.'],
+  ['peur','InfoChoc','URGENT : panne d\'Internet mondiale prévue demain, retirez tout votre argent !',0,'Rumeur inventée : aucune source sérieuse.'],
+  ['info','CERN','Le Web a été inventé en 1989 au CERN par Tim Berners-Lee',1,'Fait historique vérifiable.'],
+  ['col','Clash TV','Un influenceur insulte les profs dans une vidéo vue 2 millions de fois',1,'La vidéo existe, mais la partager lui donne encore plus de vues.'],
+  ['rire','Le Parisien','Un chat bloque un train pendant 20 minutes en s\'installant au poste de conduite',1,'Vrai, et ça ne fait de mal à personne.'],
+  ['peur','Gendarmerie','Des cambrioleurs repèrent les maisons vides grâce aux photos de vacances publiées en direct',1,'Conseil de prévention réel de la gendarmerie.'],
+  ['joie','Le lycée','Collecte de vêtements chauds au lycée samedi : déjà 300 sacs !',1,'Annonce officielle du lycée.'],
+  ['col','JeuxNews2000','Le gouvernement va INTERDIRE les jeux vidéo aux moins de 18 ans',0,'Faux : aucune loi de ce type.'],
+  ['peur','@vid_insolite','VIDÉO : un requin filmé dans la Seine à Paris !',0,'C\'est un hypertrucage (deepfake).'],
+  ['info','Santé publique','Étude : un ado sur trois dort moins de 7 heures à cause des écrans le soir',1,'Étude réelle, publiée et sourcée.'],
+  ['rire','Le lycée','Une prof de SNT fait cours déguisée en pieuvre géante',1,'Photo authentique.']
 ];
-function m2(){
-  head('🔥','Avant -5000','Il y a plus de 7 000 ans, sans écriture ni métal. Pour chaque besoin, trouve <b>comment on faisait</b>. Attention aux pièges : certaines réponses sont trop récentes !');
-  let i=0, ok=0;
-  const box=el(`<p class="prog" id="m2p"></p><div class="card"><p class="need" id="m2n"></p><div class="opts" id="m2o"></div><p class="fb" id="m2f"></p><div class="pair" id="m2pair" hidden></div><div class="row c" style="margin-top:10px"><button class="btn ok" id="m2x" hidden>Suivant</button></div></div>`);
-  const show=()=>{
-    if(i>=BEFORE.length){ box.remove(); el(`<p class="card">Tu as trouvé <b>${ok} / ${BEFORE.length}</b> façons de faire d'avant.</p>`);
-      return discovery('avant','Qu\'est-ce qui a changé entre -5000 et aujourd\'hui ?',[
-        'Nos besoins : avant on n\'écoutait pas de musique',
-        'Les besoins sont les mêmes, ce sont les moyens (les techniques) qui ont changé',
-        'Rien n\'a changé'],1,
-        'Écouter de la musique, transmettre, apprendre, se nourrir, se soigner : les besoins humains n\'ont pas changé. Ce sont les <b>techniques</b> qui les ont transformés, et elles prolongent notre corps puis notre mémoire.'); }
-    const [e,need,good,traps,now]=BEFORE[i];
-    $('#m2p').textContent=`Besoin ${i+1} / ${BEFORE.length}`; $('#m2n').textContent=e+' '+need; $('#m2f').textContent=''; $('#m2x').hidden=true; $('#m2pair').hidden=true;
-    const opts=shuffle([good,...traps]);
-    $('#m2o').innerHTML=opts.map(o=>`<button class="opt">${o}</button>`).join('');
-    $('#m2o').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
-      if(!$('#m2x').hidden) return;
-      const g=b.textContent===good; if(g){ ok++; addPts(5); }
-      $('#m2o').querySelectorAll('.opt').forEach(x=>{ x.classList.toggle('right',x.textContent===good); x.classList.toggle('wrong',x===b && !g); });
-      $('#m2f').className='fb '+(g?'good':'bad'); $('#m2f').textContent=g?'Exact !':'Trop récent pour -5000 !';
-      $('#m2pair').innerHTML=`<div class="card"><h4>Avant -5000</h4>${good}</div><div class="card"><h4>Aujourd'hui</h4>${now}</div>`; $('#m2pair').hidden=false;
-      $('#m2x').hidden=false; $('#m2x').focus();
-    });
-  };
-  $('#m2x').onclick=()=>{ i++; show(); }; show();
+function gFeed(){
+  stopGame();
+  head('📱','Le fil d\'actu','Tu as 300 abonnés. Pour chaque publication, choisis : <b>republier</b> ou <b>ignorer</b>. Tu peux vérifier 3 fois une info. Regarde les émotions se propager dans le monde… et ton compteur de likes.');
+  const news=shuffle(NEWS.slice()).slice(0,10);
+  const S={ i:0, likes:0, checks:3, fakeShared:0, shared:0, ev:new Set(), token:{}, busy:false };
+  mk('div',null,`<div class="hud"><span id="fn"></span><span class="likes" id="fl">❤ 0 like</span></div>
+    <div class="feedwrap"><div><div class="post" id="post"></div><div class="row" style="margin-top:10px"><button class="btn ok" id="rp">🔁 Republier</button><button class="btn" id="ig">Ignorer</button><button class="btn" id="vf">🔎 Vérifier (3)</button></div></div>
+    <div><div class="world" id="world"><svg aria-label="Le monde : chaque point est une personne, le blanc c'est toi"></svg></div><div class="gauges" id="gg"></div><div class="events" id="evs"></div></div></div>`,main);
+  // le monde : 46 personnes reliées à leurs voisins proches (toi au centre)
+  const svg=$('#world svg'), NP=46, P=[];
+  for(let k=0;k<NP;k++){ const a=rand(0,Math.PI*2), r=k?Math.sqrt(rand(.02,1))*44:0; P.push({ x:50+Math.cos(a)*r*1.5/1.5, y:50+Math.sin(a)*r, m:{col:0,peur:0,rire:0,joie:0,info:0}, nb:[] }); }
+  P.forEach((p,i)=>{ P.map((q,j)=>[j,Math.hypot(q.x-p.x,q.y-p.y)]).filter(([j])=>j!==i).sort((a,b)=>a[1]-b[1]).slice(0,i?3:7).forEach(([j])=>{ if(!p.nb.includes(j)){ p.nb.push(j); P[j].nb.push(i); } }); });
+  svg.setAttribute('viewBox','0 0 100 100');
+  let lines='';
+  P.forEach((p,i)=>p.nb.forEach(j=>{ if(j>i) lines+=`<line x1="${p.x}" y1="${p.y}" x2="${P[j].x}" y2="${P[j].y}" stroke="#2a2650" stroke-width=".4"/>`; }));
+  svg.innerHTML=lines+P.map((p,i)=>`<circle class="pp" cx="${p.x}" cy="${p.y}" r="${i?1.7:2.8}" fill="${i?'#4a4570':'#fff'}"/>`).join('');
+  const dots=[...svg.querySelectorAll('circle')];
+  const color=i=>{ const m=P[i].m; let best=null, v=.15; for(const k in m){ if(m[k]>v){ v=m[k]; best=k; } } return best?EMO[best][2]:(i?'#4a4570':'#fff'); };
+  const paint=()=>dots.forEach((d,i)=>{ d.setAttribute('fill',color(i)); d.setAttribute('r',(i?1.7:2.8)+Math.min(1.6,Math.max(...Object.values(P[i].m))*1.2)); });
+  const avg=k=>Math.round(P.reduce((s,p)=>s+Math.min(1,p.m[k]),0)/NP*100);
+  function gauges(){
+    const tr=clamp(100-S.fakeShared*18-avg('col')*.3,0,100);
+    $('#gg').innerHTML=[['😡 Colère',avg('col'),'#ff5a5a'],['😱 Peur',avg('peur'),'#b69cff'],['🥰 Entraide',avg('joie'),'#6ee7a0'],['🤝 Confiance',Math.round(tr),'#5ce1e6']].map(([t,v,c])=>`<div class="gauge">${t} ${v}%<div class="g"><div style="width:${v}%;background:${c}"></div></div></div>`).join('');
+    return tr;
+  }
+  function event(t){ if(S.ev.has(t)) return; S.ev.add(t); $('#evs').insertAdjacentHTML('afterbegin',`<div>${t}</div>`); }
+  // propagation : une vague part d'une personne, plus loin pour les émotions fortes
+  function spread(src,e,force){
+    const tok=S.token, base=EMO[e][3], seen=new Set([src]); let front=[src], depth=0;
+    P[src].m[e]+=.6;
+    const step=()=>{
+      if(tok!==S.token) return;
+      depth++; const nx=[];
+      front.forEach(i=>P[i].nb.forEach(j=>{ if(!seen.has(j) && Math.random()<base*force*Math.pow(.9,depth)){ seen.add(j); nx.push(j); P[j].m[e]+=.55; } }));
+      paint(); front=nx;
+      if(nx.length && depth<7) setTimeout(step,260); else afterSpread();
+    };
+    paint(); setTimeout(step,260);
+  }
+  function afterSpread(){
+    const tr=gauges();
+    if(avg('col')>35) event('📢 Une manifestation dégénère en ville : chacun accuse l\'autre camp.');
+    if(avg('peur')>35) event('🛒 Ruée dans les supermarchés : plus de papier toilette !');
+    if(avg('joie')>30) event('🤝 Record de dons à la collecte solidaire du quartier.');
+    if(tr<55) event('📉 Plus personne ne croit les médias : même les vraies infos sont rejetées.');
+    if(avg('rire')>30) event('😂 Le chat du train devient la mascotte de la ville.');
+    S.busy=false; S.i++; next();
+  }
+  function show(){
+    const [e,src,title]=news[S.i], E=EMO[e];
+    $('#fn').textContent=`Publication ${S.i+1} / ${news.length}`;
+    $('#post').innerHTML=`<div class="src"><span class="av">${E[0]}</span>${src} <span class="meta">· il y a ${randi(2,59)} min</span></div><h3>${title}</h3>
+      <span class="tag" style="background:${E[2]}33">${E[0]} ${E[1]}</span><span class="meta">🔥 potentiel : ${Math.round(E[4]*rand(900,1600)).toLocaleString('fr-FR')} partages</span><div id="vres"></div>`;
+    $('#vf').textContent=`🔎 Vérifier (${S.checks})`; $('#vf').disabled=!S.checks;
+  }
+  function next(){
+    if(S.i>=news.length) return end();
+    P.forEach(p=>{ for(const k in p.m) p.m[k]*=.82; }); paint(); gauges();
+    show(); ['#rp','#ig'].forEach(s=>$(s).disabled=false);
+  }
+  function choose(share){
+    if(S.busy) return; S.busy=true; ['#rp','#ig','#vf'].forEach(s=>$(s).disabled=true);
+    const [e,, ,trueNews]=news[S.i];
+    if(share){ S.shared++; if(!trueNews) S.fakeShared++; const gain=Math.round(EMO[e][4]*randi(40,90)); S.likes+=gain; $('#fl').textContent=`❤ ${S.likes.toLocaleString('fr-FR')} likes`; const w=$('#world'); floatTxt(w,w.clientWidth/2,w.clientHeight/2-20,'+'+gain+' ❤','#ff6aa8'); addPts(1); spread(0,e,1); }
+    else spread(randi(5,NP-1),e,.55);   // d'autres le partagent quand même, moins fort
+  }
+  $('#rp').onclick=()=>choose(true); $('#ig').onclick=()=>choose(false);
+  $('#vf').onclick=()=>{ if(!S.checks || S.busy) return; S.checks--; const [, , ,t,why]=news[S.i]; $('#vres').innerHTML=`<div class="verif ${t?'t':'f'}">${t?'✔ Vrai':'✘ Faux'} : ${why}</div>`; $('#vf').disabled=true; $('#vf').textContent=`🔎 Vérifier (${S.checks})`; };
+  function end(){
+    const c=avg('col'), p=avg('peur'), j=avg('joie');
+    const world=(c+p)>(j+20)?'Le monde est devenu <b>tendu et méfiant</b> : colère et peur dominent.':j>=c?'Le monde est plutôt <b>apaisé et solidaire</b>.':'Le monde est <b>partagé</b> : un peu de tout.';
+    D.best.feed=Math.max(D.best.feed||0,S.likes); save();
+    mk('div','card',`<h3 style="margin:0 0 6px">Bilan</h3><p>${world}</p><p>Tu as republié <b>${S.shared}</b> publications, dont <b>${S.fakeShared}</b> fausses, et gagné <b>${S.likes.toLocaleString('fr-FR')} likes</b>.</p>
+      <p class="lead">Compare avec ton voisin : celui qui a le plus de likes a-t-il rendu le monde meilleur ?</p><div class="row"><button class="btn" id="fr">Rejouer</button></div>`,main);
+    $('#fr').onclick=gFeed;
+    discovery('feed','Pourquoi les publications qui mettent en colère ou font peur circulent plus vite ?',[
+      'Parce qu\'elles sont plus souvent vraies',
+      'Parce que les émotions fortes donnent envie de partager, et que les plateformes mettent en avant ce qui fait réagir',
+      'C\'est le hasard'],1,
+      'Les émotions fortes se propagent plus loin et rapportent plus de likes : c\'est l\'<b>économie de l\'attention</b>. Chaque personne est un relais : en republiant ou non, tu changes la direction que prend le monde.');
+  }
+  G.cur={ stop:()=>{ S.token={}; }, over:true };
+  paint(); gauges(); next();
 }
 
 /* =========================================================
-   3 · L'iceberg : commander un billet de train
+   5 · LA BULLE : l'algorithme apprend de tes likes
    ========================================================= */
-const ICE_OK=[['⚡','L\'énergie (électricité, batterie chargée)'],['📶','Le réseau (antennes, box, fibre)'],['🗄️','Des serveurs dans des data centers'],['🏦','La banque qui valide le paiement'],['✉️','Un service qui envoie le billet et les alertes SMS'],['🌊','Des câbles sous-marins et terrestres'],['🔒','Un service de sécurité (mot de passe, code reçu)'],['🍽️','La logistique (repas du wagon-bar commandés)'],['📊','Le marketing (fichier clients mis à jour)'],['🧑‍💻','Des informaticiens qui maintiennent tout ça']];
-const ICE_KO=[['🕊️','Un pigeon voyageur'],['🖨️','Une imprimerie de billets en papier'],['📠','Un fax au guichet'],['🧾','Un carnet à souches']];
-function m3(){
-  head('🧊','L\'iceberg','Tu commandes un billet de train sur ton téléphone : trois touches et c\'est fait. Mais <b>qu\'est-ce qui travaille en coulisse</b> ? Touche tout ce qui est nécessaire, en évitant les pièges.');
-  const all=shuffle([...ICE_OK.map(x=>[...x,1]),...ICE_KO.map(x=>[...x,0])]);
-  let found=0, errs=0;
-  el(`<div class="ice"><div class="tip"><span>📱</span>Ce que tu vois :<br>l'appli, 3 touches</div><div class="sea"></div><div class="layers" id="lay"></div></div>
-    <p class="prog" id="m3p" style="margin-top:10px"></p><div class="chips" id="m3c">${all.map((c,i)=>`<button class="chip" data-i="${i}">${c[0]} ${c[1]}</button>`).join('')}</div><p class="fb" id="m3f"></p>`);
-  const prog=()=>$('#m3p').textContent=`Partie cachée trouvée : ${found} / ${ICE_OK.length}`;
-  prog();
-  $('#m3c').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
-    const c=all[+b.dataset.i]; b.disabled=true;
-    if(c[2]){ found++; addPts(3); b.classList.add('right'); const l=document.createElement('span'); l.className='layer'; l.textContent=c[0]+' '+c[1]; $('#lay').appendChild(l); }
-    else { errs++; b.classList.add('wrong'); $('#m3f').className='fb bad'; $('#m3f').textContent='Ça, c\'est le monde d\'avant : pas besoin pour un billet en ligne.'; }
-    prog();
-    if(found===ICE_OK.length){ $('#m3f').className='fb good'; $('#m3f').textContent=`Tout trouvé, avec ${errs} piège${errs>1?'s':''}. Regarde la taille de la partie immergée !`;
-      $('#m3c').querySelectorAll('.chip').forEach(x=>x.disabled=true);
-      discovery('iceberg','Que montre l\'iceberg ?',[
-        'Une technologie, c\'est seulement l\'appareil qu\'on tient dans la main',
-        'La partie cachée (infrastructure, énergie, services) est bien plus grande que la partie visible',
-        'Le train fonctionne sans électricité'],1,
-        'Une action simple en apparence mobilise des dizaines de systèmes cachés. Il y a un <b>endroit</b> (l\'utilisateur) et un <b>envers</b> (l\'infrastructure) : c\'est difficile d\'être conscient de tout ce qu\'on met en route.'); }
+// thèmes rangés en cercle : chaque thème est voisin des deux d'à côté
+const TOP=[['⚽','Sport'],['🎮','Jeux vidéo'],['💻','Tech'],['🔬','Sciences'],['🌍','Climat'],['🐼','Animaux'],['😂','Humour'],['🎵','Musique'],['👗','Mode'],['🎬','Cinéma'],['🚨','Faits divers'],['🗳️','Politique']];
+const ART=[
+  ['Le PSG gagne au bout du suspense','Une lycéenne sélectionnée en équipe de France de handball','Les JO 2028 dévoilent leurs nouveaux sports'],
+  ['Le jeu le plus attendu de l\'année repoussé','Un joueur termine Zelda en 20 minutes','Les e-sportifs bientôt reconnus comme athlètes ?'],
+  ['Un nouveau téléphone pliable à 2 000 €','Une IA écrit un roman entier','Panne géante chez un réseau social'],
+  ['Le télescope James Webb photographie une galaxie record','Des chercheurs recréent un son vieux de 3 000 ans','Une fusée réutilisable se pose sur une barge'],
+  ['Record de chaleur en octobre','Les glaciers des Alpes ont perdu 10 % en deux ans','Une ville rend ses bus gratuits pour moins polluer'],
+  ['Un bébé panda est né au zoo de Beauval','Les abeilles reviennent dans les villes sans pesticides','Un chien sauve son maître d\'une avalanche'],
+  ['Le mème du chat qui juge tout le monde','Un prof se filme en train de rater sa démo','Les pires titres de films traduits en français'],
+  ['Un rappeur français bat un record de streams','Concert surprise dans le métro','La musique la plus écoutée au monde cette semaine'],
+  ['La mode des années 2000 revient','Une marque accusée de détruire ses invendus','Des vêtements fabriqués avec des bouteilles en plastique'],
+  ['Le film de super-héros de trop ?','Un film d\'animation français aux Oscars','Les séries les plus regardées du mois'],
+  ['Incendie spectaculaire dans un entrepôt','Arnaque au faux colis : des milliers de victimes','Course-poursuite filmée en direct'],
+  ['Le vote à 16 ans en débat','Grève dans les transports jeudi','Un député interpelle le ministre sur les écrans à l\'école']
+];
+const ADJ=(a,b)=>{ const d=Math.abs(a-b); return Math.min(d,TOP.length-d); };
+function gBubble(){
+  stopGame();
+  head('🫧','La bulle','Ton fil te propose 3 nouvelles à chaque tour. <b>Like</b> celle qui t\'intéresse le plus : l\'algorithme apprend ce que tu aimes… Joue 12 tours.');
+  const w=TOP.map(()=>1), seen=new Set();
+  let round=0, mission=null;
+  const box=mk('div',null,`<div class="hud"><span id="br"></span><span class="likes" id="bl"></span></div><div id="bgoal"></div><div class="feed3" id="bf3"></div>
+    <div class="card"><p style="margin:0 0 6px"><b style="color:var(--cyan)">Ce que l'algorithme pense de toi</b></p><div class="prof" id="bprof"></div></div>`,main);
+  const prof=()=>{ const mx=Math.max(...w); $('#bprof').innerHTML=TOP.map((t,i)=>`<div>${t[0]} ${t[1]}<div class="g"><div style="width:${Math.round(w[i]/mx*100)}%"></div></div></div>`).join(''); };
+  // tirage pondéré de 3 thèmes différents
+  function draw(){
+    const idx=TOP.map((_,i)=>i), out=[];
+    for(let k=0;k<3;k++){ let s=idx.reduce((a,i)=>a+w[i],0), r=Math.random()*s; let c=idx[0]; for(const i of idx){ r-=w[i]; if(r<=0){ c=i; break; } } out.push(c); idx.splice(idx.indexOf(c),1); }
+    return out;
+  }
+  function like(t){
+    // boucle de rétroaction : le thème liké et ses voisins montent, le reste baisse
+    TOP.forEach((_,i)=>{ const d=ADJ(i,t); w[i]*= d===0?2.4 : d===1?1.5 : .8; });
+    const s=w.reduce((a,b)=>a+b,0); w.forEach((v,i)=>w[i]=v/s*TOP.length);
+  }
+  function show(){
+    const ts=draw();
+    if(mission){ const near=ts.includes(mission.t); $('#br').textContent=`Mission : ${mission.likes} like${mission.likes>1?'s':''} utilisé${mission.likes>1?'s':''} (objectif ${mission.par})`;
+      if(near) return found(ts); }
+    else $('#br').textContent=`Tour ${round+1} / 12`;
+    $('#bf3').innerHTML=ts.map(t=>{ const a=ART[t].map((x,k)=>[x,k]).filter(([,k])=>!seen.has(t+'-'+k)); const [title,k]=a.length?pick(a):[ART[t][0],0]; return `<div class="nw" data-t="${t}" data-k="${k}"><span class="ic">${TOP[t][0]}</span><span><span class="tt">${title}</span><br><span class="tp">${TOP[t][1]}</span></span><button class="lk" aria-label="J'aime">❤</button></div>`; }).join('');
+    $('#bf3').querySelectorAll('.nw').forEach(n=>{ seen.add(n.dataset.t+'-'+n.dataset.k); n.querySelector('.lk').onclick=()=>{ like(+n.dataset.t); prof(); if(mission){ mission.likes++; if(mission.likes>=15) return failMission(); } else round++; if(!mission && round>=12) return reveal(); show(); }; });
+  }
+  // fin de la phase libre : tout ce que tu n'as pas vu
+  function reveal(){
+    $('#bf3').innerHTML=''; $('#br').textContent='Fin du fil';
+    const tot=TOP.length*3, nb=seen.size;
+    const never=TOP.filter((_,t)=>![0,1,2].some(k=>seen.has(t+'-'+k)));
+    mk('div','card',`<h3 style="margin:0 0 6px">Tout ce que tu n'as pas vu</h3><p>Tu as vu <b>${nb}</b> nouvelles sur ${tot}. ${never.length?`Tu n'as <b>jamais</b> vu un seul article sur : ${never.map(t=>t[0]+' '+t[1]).join(', ')}.`:''}</p>
+      <div class="bubblemap">${TOP.map((tp,t)=>`<div class="tpc"><h4>${tp[0]} ${tp[1]}</h4>${ART[t].map((a,k)=>`<div class="${seen.has(t+'-'+k)?'seen':'unseen'}">${seen.has(t+'-'+k)?'👁':'·'} ${a}</div>`).join('')}</div>`).join('')}</div>
+      <p class="lead" style="margin-top:8px">En vert : ce que l'algorithme t'a montré. En gris : tout le reste du monde.</p><div class="row"><button class="btn ok" id="bm">Mission : sortir de ta bulle ▶</button></div>`,main).scrollIntoView({behavior:'smooth'});
+    $('#bm').onclick=startMission;
+  }
+  // mission : faire apparaître une nouvelle éloignée de ton profil en un minimum de likes
+  function startMission(){
+    main.querySelectorAll('.card:not(:last-of-type)').forEach(()=>{});
+    const top=w.indexOf(Math.max(...w)), far=(top+6)%TOP.length, k=randi(0,2);
+    mission={ t:far, k, likes:0, par:ADJ(top,far)-1 };
+    main.querySelectorAll('.card').forEach(c=>{ if(!c.contains($('#bprof'))) c.remove(); });
+    $('#bgoal').innerHTML=`<div class="goal">🎯 Mission : fais apparaître dans ton fil l'article « ${ART[far][k]} » (${TOP[far][0]} ${TOP[far][1]}).<br><span style="font-weight:400">C'est très loin de ton profil. Objectif : en <b>${mission.par} likes</b> ou moins. Astuce : like des sujets de plus en plus proches.</span></div>`;
+    show(); scrollTo(0,0);
+  }
+  function found(ts){
+    const t=mission.t, others=ts.filter(x=>x!==t);
+    $('#bf3').innerHTML=`<div class="nw target"><span class="ic">${TOP[t][0]}</span><span><span class="tt">${ART[t][mission.k]}</span><br><span class="tp">${TOP[t][1]} · 🎯 trouvé !</span></span><span></span></div>`;
+    const good=mission.likes<=mission.par, pts=Math.max(5,40-Math.max(0,mission.likes-mission.par)*6); addPts(pts);
+    D.best.bubble=Math.max(D.best.bubble||0,pts); save();
+    mk('div','card',`<p class="fb ${good?'good':''}">${good?'Mission réussie':'Mission accomplie'} en ${mission.likes} like${mission.likes>1?'s':''} (objectif ${mission.par}) : +${pts} points.</p><p>Pour sortir de ta bulle, tu as dû <b>changer volontairement</b> ce que tu likes, pas à pas. L'algorithme, lui, ne t'y aurait jamais emmené tout seul.</p>`,main);
+    endDisc();
+  }
+  function failMission(){ mk('div','card','<p class="fb bad">15 likes et toujours rien : la bulle est solide ! Essaie de liker des sujets voisins, un par un.</p>',main); endDisc(); }
+  function endDisc(){
+    discovery('bubble','Pourquoi ton fil ne te montre qu\'une partie des nouvelles ?',[
+      'Parce qu\'il n\'existe pas d\'autres nouvelles',
+      'Parce que l\'algorithme te propose ce qui ressemble à ce que tu as déjà aimé : chaque like renforce ta bulle',
+      'Parce que les journalistes choisissent pour toi'],1,
+      'C\'est une <b>boucle de rétroaction</b> : tu likes, l\'algorithme te montre plus de la même chose, tu likes encore… Ton fil se referme sur ton profil : c\'est une <b>bulle de filtres</b>. En sortir demande un effort volontaire.');
+  }
+  prof(); show();
+}
+
+/* =========================================================
+   6 · LES LIKES : hasard, gamification et superstition
+   ========================================================= */
+const TY=[['chat','🐱','Chat'],['repas','🍕','Repas'],['selfie','🤳','Selfie'],['jeu','🎮','Jeu vidéo'],['sport','⚽','Sport'],['paysage','🌅','Paysage']];
+const MOM=[['matin','☀️','Matin'],['midi','🕛','Midi'],['soir','🌙','Soir']];
+const CAP={ chat:['Mon chat juge ma vie','Il a encore renversé mon verre','Mode sieste activé'], repas:['Les pâtes de minuit','Burger maison','Cantine du jour…'], selfie:['Nouvelle coupe !','Avant le contrôle de maths','Fatigué mais stylé'],
+  jeu:['Top 1 en solo !','Le bug le plus drôle','Speedrun raté'], sport:['Panier du milieu du terrain','Mon premier 10 km','Le but de l\'année (ou pas)'], paysage:['Coucher de soleil au lycée','Brouillard ce matin','La mer en hiver'] };
+const FANS=['lea_28','tom.b','ines_x','noah2009','jade.pix','yanis_off','emma.zz','sacha_k','lucas.art','manon_ok','rayan.mp4','chloe_dsn'];
+const LVL=[[0,'Inconnu'],[15,'Débutant'],[50,'Petite étoile'],[120,'Influenceur'],[250,'Star du lycée'],[500,'Célébrité']];
+let AC=null;
+function ding(f){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); const o=AC.createOscillator(), g=AC.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(.05,AC.currentTime); g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.15); o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+.16); }catch(e){} }
+function toast(t){ document.querySelectorAll('.toast').forEach(e=>e.remove()); const e=mk('div','toast',t,document.body); setTimeout(()=>e.remove(),2200); }
+function gLikes(){
+  stopGame();
+  head('❤️','Les likes','Tu viens de créer ton compte. Publie, gagne des likes, monte de niveau… et essaie de comprendre <b>ce qui fait marcher un post</b>. Attention : ta 🔥 flamme s\'éteint si tu ne publies pas assez vite !');
+  const FT=12, NFREE=10;
+  const S={ posts:[], fol:12, tot:0, streak:0, ft:FT, timer:true, phase:'free', sel:{type:null,mom:null,tag:false}, roll:null, busy:false, jack:randi(1,3), badges:new Set(), lvl:0, test:null, over:false };
+  const ty=id=>TY.find(t=>t[0]===id), mo=id=>MOM.find(m=>m[0]===id);
+  mk('div',null,`<div class="hud"><span id="lk-n"></span><span>👥 <span id="lk-f">12</span> abonnés</span><span class="likes" id="lk-t">❤ 0</span></div>
+    <div class="lvl"><span id="lk-lv"></span><div class="g"><div id="lk-lb"></div></div></div>
+    <div id="lk-goal"></div>
+    <div class="lkwrap"><div class="card" style="margin-top:0">
+      <div class="lbl">1 · QUOI ?</div><div class="chips" id="lk-ty">${TY.map(t=>`<button class="chip" data-v="${t[0]}"><span class="em">${t[1]}</span>${t[2]}</button>`).join('')}</div>
+      <div class="lbl">2 · QUAND ?</div><div class="chips" id="lk-mo">${MOM.map(m=>`<button class="chip" data-v="${m[0]}"><span class="em">${m[1]}</span>${m[2]}</button>`).join('')}</div>
+      <div class="lbl">3 · HASHTAGS ?</div><div class="chips"><button class="chip" id="lk-tag"><span class="em">#️⃣</span>#fyp #viral</button></div>
+      <p class="fb" id="lk-fb" style="margin:8px 0 4px"></p>
+      <div class="row"><button class="btn ok" id="lk-go" style="flex:1">📤 Publier</button></div>
+      <div class="flame" id="lk-fl"><span id="lk-st">🔥 0</span><div class="g"><div id="lk-fg" style="width:100%"></div></div></div>
+    </div><div class="phone" id="lk-ph"><div class="scr" id="lk-scr"><div class="empty">Ton fil est vide.<br>Publie ton premier post !</div></div></div></div>
+    <div id="lk-z"></div>`,main);
+  const scr=$('#lk-scr'), ph=$('#lk-ph');
+  function hud(){
+    $('#lk-n').textContent=S.phase==='free'?`Post ${Math.min(S.posts.length+1,NFREE)} / ${NFREE}`:S.phase==='test'?`Expérience ${Math.min(S.test.done+1,S.test.n)} / ${S.test.n}`:'Bilan';
+    $('#lk-f').textContent=S.fol; $('#lk-t').textContent='❤ '+S.tot.toLocaleString('fr-FR');
+    let l=0; LVL.forEach((v,i)=>{ if(S.tot>=v[0]) l=i; });
+    if(l>S.lvl){ S.lvl=l; toast(`⬆️ Niveau ${l+1} : ${LVL[l][1]} !`); ding(1046); }
+    const nx=LVL[l+1]; $('#lk-lv').textContent=`Niv. ${l+1} · ${LVL[l][1]}`;
+    $('#lk-lb').style.width=(nx?Math.round((S.tot-LVL[l][0])/(nx[0]-LVL[l][0])*100):100)+'%';
+    $('#lk-st').textContent='🔥 '+S.streak;
+  }
+  function badge(id,t){ if(S.badges.has(id)) return; S.badges.add(id); setTimeout(()=>{ if(S.over) return; toast('🏅 Badge débloqué : '+t); ding(1318); },400); }
+  // choix du post
+  const chipsel=()=>{
+    $('#lk-ty').querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.v===S.sel.type));
+    $('#lk-mo').querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.v===S.sel.mom));
+    $('#lk-tag').classList.toggle('on',S.sel.tag);
+    const ok=S.sel.type && S.sel.mom, why=testWhy();
+    $('#lk-go').disabled=!ok || !!why || S.busy || S.phase==='done';
+    $('#lk-fb').className='fb'+(why&&ok?' bad':''); $('#lk-fb').textContent=!ok?'Choisis quoi et quand.':why||'';
+  };
+  $('#lk-ty').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ S.sel.type=c.dataset.v; chipsel(); });
+  $('#lk-mo').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ S.sel.mom=c.dataset.v; chipsel(); });
+  $('#lk-tag').onclick=()=>{ S.sel.tag=!S.sel.tag; chipsel(); };
+  // le vrai « algorithme » : seul le hasard et les abonnés comptent
+  function outcome(forced){
+    const base=S.fol*rand(.2,.5), boost=forced||Math.random()<.13;
+    const views=Math.round(base+(boost?randi(300,1400):randi(0,25)));
+    return { views, likes:Math.round(views*rand(.04,.1)), boost };
+  }
+  function publish(){
+    if(S.busy || !S.sel.type || !S.sel.mom || testWhy() || S.phase==='done') return;
+    S.busy=true; chipsel();
+    const o=outcome(S.phase==='free' && S.posts.length===S.jack);
+    const p=Object.assign({ n:S.posts.length, cap:pick(CAP[S.sel.type]), test:S.test?S.test.slot():null },S.sel,o);
+    S.posts.push(p);
+    if(!S.posts[1]) scr.innerHTML='';
+    const el=document.createElement('div'); el.className='mypost';
+    el.innerHTML=`<span class="ic">${ty(p.type)[1]}</span><span><span class="tx">${esc(p.cap)}</span><br><span class="mt">${mo(p.mom)[1]} ${mo(p.mom)[2]}${p.tag?' · #fyp #viral':''}</span></span><span class="ct">❤ 0</span>`;
+    scr.prepend(el); scr.scrollTop=0;
+    S.streak++; S.ft=FT; if(S.streak>=3) badge('s3','Série de 3 🔥'); if(S.streak>=6) badge('s6','Série de 6 🔥🔥');
+    S.roll={ p, el, ct:el.querySelector('.ct'), cur:0, t:0, dur:o.boost?2.4:1.1, step:Math.max(1,Math.ceil(o.likes/18)), nextH:0 };
+    hud();
+  }
+  $('#lk-go').onclick=publish;
+  function rollDone(){
+    const p=S.roll.p; S.roll=null;
+    S.tot+=p.likes; const gain=Math.round(p.likes*rand(.15,.3)); S.fol+=gain;
+    if(p.likes>=1) badge('l1','Premier like ❤');
+    if(p.likes>=30) badge('v','Post viral 🚀');
+    if(S.tot>=100) badge('c','100 likes au total 💯');
+    if(S.fol>=50) badge('f','50 abonnés 👥');
+    if(p.boost) toast(`🚀 Ton post explose : ${p.likes} likes !`);
+    else if(p.likes===0) toast('😶 Personne n\'a aimé… Réessaie !');
+    S.busy=false; hud();
+    if(S.phase==='free' && S.posts.length>=NFREE) return beliefs();
+    if(S.phase==='test'){ S.test.done++; if(S.test.done>=S.test.n) return results(); goal(); }
+    chipsel();
+  }
+  function heart(){
+    const r=ph.getBoundingClientRect(), e=mk('div','heart','❤️',ph);
+    e.style.left=rand(30,r.width-40)+'px'; e.style.top=(r.height-40)+'px'; e.style.setProperty('--dx',rand(-40,40)+'px');
+    setTimeout(()=>e.remove(),1100);
+  }
+  function notif(){
+    ph.querySelectorAll('.notif').forEach(n=>n.remove());
+    const n=mk('div','notif',`🔔 @${pick(FANS)} a aimé ta publication`,ph); setTimeout(()=>n.remove(),900);
+  }
+  startGame({
+    update(dt){
+      const R=S.roll;
+      if(R){
+        R.t+=dt; const c=Math.min(R.p.likes,Math.floor(R.p.likes*Math.min(1,R.t/R.dur)));
+        if(c>R.cur){ R.cur=c; R.ct.textContent='❤ '+c; if(c>=R.nextH){ R.nextH=c+R.step; heart(); ding(rand(760,980)); if(Math.random()<.35) notif(); } }
+        if(R.t>=R.dur){ R.ct.textContent='❤ '+R.p.likes; if(R.p.boost) R.el.classList.add('viral'); rollDone(); }
+      }
+      else if(S.timer && S.phase!=='done'){
+        S.ft-=dt;
+        if(S.ft<=0){ S.ft=FT; if(S.streak){ S.streak=0; hud(); toast('💧 Ta flamme s\'est éteinte… Publie plus vite !'); } }
+      }
+      $('#lk-fg').style.width=Math.max(0,S.ft/FT*100)+'%'; $('#lk-fl').classList.toggle('low',S.ft<4 && !S.roll);
+    },
+    stop(){ S.over=true; document.querySelectorAll('.toast').forEach(e=>e.remove()); }
   });
+  // ---- étape 2 : quelle est ta croyance ? ----
+  const best=()=>S.posts.slice(0,NFREE).reduce((a,b)=>b.likes>a.likes?b:a);
+  function beliefs(){
+    S.timer=false; S.phase='belief'; chipsel(); hud();
+    const r=best(), other=pick(TY.filter(t=>t[0]!==r.type)), mx=Math.max(1,...S.posts.map(p=>p.likes));
+    const B=shuffle([
+      { t:`Les posts ${ty(r.type)[1]} ${ty(r.type)[2]} marchent mieux`, f:p=>p.type===r.type, lab:`${ty(r.type)[1]} ${ty(r.type)[2]}` },
+      { t:`Les posts ${other[1]} ${other[2]} marchent mieux`, f:p=>p.type===other[0], lab:`${other[1]} ${other[2]}` },
+      { t:`Publier le ${mo(r.mom)[2].toLowerCase()} ${mo(r.mom)[1]} marche mieux`, f:p=>p.mom===r.mom, lab:`le ${mo(r.mom)[2].toLowerCase()} ${mo(r.mom)[1]}` },
+      { t:r.tag?'Les hashtags #️⃣ font exploser les likes':'Les posts sans hashtag marchent mieux', f:p=>p.tag===r.tag, lab:r.tag?'avec hashtags #️⃣':'sans hashtag' },
+      { t:'Les likes, c\'est surtout le hasard 🎲', hasard:true }
+    ]);
+    const z=$('#lk-z'); z.innerHTML='';
+    mk('div','card disc',`<h3>Ce qui marche ?</h3><p>Tes ${NFREE} premiers posts (le plus récent en bas). 🏆 Ton record : <b>${ty(r.type)[1]} ${esc(r.cap)}</b>, ${mo(r.mom)[2].toLowerCase()}${r.tag?', avec hashtags':''} : <b>${r.likes} likes</b>.</p>
+      <div class="hlist">${S.posts.map(p=>`<div><span>${ty(p.type)[1]}${mo(p.mom)[1]}</span><i style="width:${Math.max(2,p.likes/mx*100)}%"></i><span>${p.likes}${p===r?' 🏆':''}</span></div>`).join('')}</div>
+      <p style="margin-top:12px">Quelle est <b>ta croyance</b> ? Choisis-la, puis on la met à l'épreuve, comme pour la boîte noire.</p>
+      <div class="opts">${B.map((b,i)=>`<button class="opt" data-i="${i}">${b.t}</button>`).join('')}</div>`,z).scrollIntoView({behavior:'smooth'});
+    z.querySelectorAll('.opt').forEach(o=>o.onclick=()=>startTest(B[+o.dataset.i],r));
+  }
+  // ---- étape 3 : l'expérience ----
+  function startTest(b,r){
+    $('#lk-z').innerHTML='';
+    if(b.hasard){
+      S.test={ b, n:6, done:0, slot:()=>1 };
+      S.sel={ type:r.type, mom:r.mom, tag:r.tag };
+      ['#lk-ty','#lk-mo'].forEach(s=>$(s).querySelectorAll('.chip').forEach(c=>c.disabled=true)); $('#lk-tag').disabled=true;
+    } else {
+      const slots=shuffle([1,1,1,1,0,0,0,0]);
+      S.test={ b, n:8, done:0, slots, slot(){ return this.slots[this.done]; } };
+    }
+    S.phase='test'; S.timer=true; S.ft=FT; goal(); chipsel(); hud(); scrollTo({top:0,behavior:'smooth'});
+  }
+  function testWhy(){
+    if(S.phase!=='test' || !S.sel.type || !S.sel.mom) return '';
+    const T=S.test; if(T.b.hasard) return '';
+    const m=T.b.f(S.sel), want=T.slot();
+    return m===!!want?'':want?`Ce post doit respecter ta croyance (${T.b.lab}).`:`Ce post ne doit PAS respecter ta croyance (pas ${T.b.lab}).`;
+  }
+  function goal(){
+    const T=S.test;
+    $('#lk-goal').innerHTML=T.b.hasard
+      ?`<div class="goal">🧪 Ta croyance : « ${T.b.t} ». Expérience : republie <b>exactement le même post</b> que ton record, ${T.n} fois. Post ${T.done+1} / ${T.n}.</div>`
+      :`<div class="goal">🧪 Ta croyance : « ${T.b.t} ». Expérience : ${T.n/2} posts AVEC, ${T.n/2} posts SANS, tout le reste au choix.<br>Post ${T.done+1} / ${T.n} : <b>${T.slot()?'AVEC':'SANS'}</b> ${T.b.lab}.</div>`;
+    chipsel();
+  }
+  function results(){
+    S.timer=false; S.phase='done'; chipsel(); hud();
+    const T=S.test, tp=S.posts.filter(p=>p.test!=null), avg=a=>a.length?Math.round(a.reduce((s,p)=>s+p.likes,0)/a.length):0;
+    let html;
+    if(T.b.hasard){
+      const v=tp.map(p=>p.likes);
+      html=`<p>Le même post, publié ${T.n} fois : <b>${v.join(' · ')}</b> likes.</p><p>Entre <b>${Math.min(...v)}</b> et <b>${Math.max(...v)}</b> likes pour exactement le même contenu ! Ton intuition était la bonne.</p>`;
+    } else {
+      const A=tp.filter(p=>p.test===1), N=tp.filter(p=>p.test===0), a=avg(A), n=avg(N), boostA=A.filter(p=>p.boost).length, boostN=N.filter(p=>p.boost).length;
+      html=`<div class="ab"><div class="col">AVEC ${T.b.lab}<div class="big">${a}</div>likes en moyenne<br><span class="lead">${A.map(p=>p.likes).join(' · ')}</span></div><div class="col">SANS<div class="big">${n}</div>likes en moyenne<br><span class="lead">${N.map(p=>p.likes).join(' · ')}</span></div></div>
+        <p>${Math.abs(a-n)<=3?'<b>Presque pareil !</b> Ta croyance ne change rien.':boostA+boostN?`Il y a un écart, mais regarde les détails : il vient de ${boostA+boostN>1?'quelques posts':'un seul post'} qui a explosé. Refais l'expérience et l'écart peut s'inverser.`:`Il y a un petit écart, mais avec ${T.n/2} posts de chaque côté, il peut venir du hasard.`}</p>`;
+    }
+    const z=$('#lk-z'); z.innerHTML='';
+    mk('div','card',`<h3 style="margin:0 0 6px">Résultat de l'expérience</h3>${html}<div class="row"><button class="btn ok" id="lk-rv">🎲 Révéler le secret de l'algorithme</button></div>`,z).scrollIntoView({behavior:'smooth'});
+    $('#lk-rv').onclick=reveal;
+  }
+  function reveal(){
+    $('#lk-goal').innerHTML='';
+    const mx=Math.max(1,...S.posts.map(p=>p.likes)), N=S.posts.length, boosts=S.posts.filter(p=>p.boost).length;
+    addPts(15); D.best.likes=Math.max(D.best.likes||0,S.tot); save();
+    const z=$('#lk-z'); z.innerHTML='';
+    mk('div','card',`<h3 style="margin:0 0 6px">🎲 Le secret de l'algorithme de ce jeu</h3>
+      <div class="algo">vues = abonnés × hasard(20 % à 50 %)
+1 fois sur 8 environ : l'algorithme « teste » ton post
+   auprès d'inconnus → +300 à 1 400 vues
+likes = vues × hasard(4 % à 10 %)
+
+Le sujet, l'heure, les hashtags : AUCUN effet.</div>
+      <p style="margin-top:10px">Tous tes posts (chaque emoji est un post, en hauteur ses likes) :</p>
+      <div class="dots">${S.posts.map((p,i)=>`<span style="left:${(i+.5)/N*100}%;bottom:${p.likes/mx*100}%" title="${p.likes} likes">${ty(p.type)[1]}</span>`).join('')}<span class="ax" style="left:-32px;top:-4px">${mx}</span><span class="ax" style="left:-14px;bottom:-6px">0</span><span class="ax" style="right:0;bottom:-20px">temps →</span></div>
+      <p>${boosts} de tes ${N} posts ont été « tirés au sort » pour être montrés à des inconnus : ce sont eux, tes records. ${S.jack<NFREE?`Et le post n°${S.jack+1} a été boosté exprès, très tôt, pour te faire croire que tu avais trouvé la recette.`:''}</p>
+      <ul>
+        <li><b>Quand on est inconnu, le hasard domine.</b> Avec peu d'abonnés, presque tous les likes viennent de ces coups de pouce aléatoires. Plus on a d'abonnés, plus les résultats deviennent réguliers.</li>
+        <li><b>La superstition.</b> Un succès dû au hasard nous marque, on le répète et on oublie les échecs. En 1948, le psychologue Skinner a observé la même chose chez des pigeons nourris au hasard : chacun répétait le geste qu'il faisait au moment où la graine tombait.</li>
+        <li><b>La gamification.</b> Flamme, badges, niveaux, notifications, compteur qui défile : tout est fait pour que tu reviennes. Une récompense imprévisible (comme une machine à sous) donne encore plus envie de rejouer qu'une récompense régulière.</li>
+      </ul>
+      <p class="lead">Dans les vrais réseaux, le contenu compte un peu. Mais ça, on ne peut le savoir qu'avec beaucoup d'essais comparés, pas avec un seul « coup ».</p>
+      <div class="row"><button class="btn" id="lk-again">Rejouer</button><button class="btn ok" id="lk-d">Noter ma découverte</button></div>`,z).scrollIntoView({behavior:'smooth'});
+    $('#lk-again').onclick=gLikes;
+    $('#lk-d').onclick=()=>{ $('#lk-d').parentNode.remove(); discovery('likes','Pourquoi finit-on par croire qu\'un type de post « marche » ?',[
+      'Parce que c\'est toujours vrai : le sujet décide de tout',
+      'Parce qu\'un succès dû au hasard nous marque, on le répète et on oublie les échecs : c\'est une superstition',
+      'Parce que l\'application nous dit ce qui marche'],1,
+      'Les likes d\'un compte inconnu dépendent surtout du hasard. Le cerveau cherche une cause à chaque succès : il fabrique une <b>superstition</b>. Les récompenses imprévisibles (le <b>renforcement intermittent</b>) et la <b>gamification</b> (flammes, badges, niveaux) nous font revenir, comme une machine à sous.'); };
+  }
+  hud(); chipsel();
 }
 
-/* =========================================================
-   4 · La panne : une journée sans courant
-   ========================================================= */
-const DAY=[
-  ['7h00','Le réveil du téléphone sonne','✅',"Le téléphone a sa batterie : il sonne. Mais il ne rechargera pas."],
-  ['7h30','Prendre une douche chaude','❌',"Le chauffe-eau et souvent la pompe sont électriques."],
-  ['8h00','Prendre le RER ou le tram','❌',"Trains, métros, signalisation : tout est à l'arrêt."],
-  ['8h30','Envoyer un message à un ami','❌',"Les antennes ont peu de batteries de secours : le réseau tombe vite."],
-  ['10h00','Lire un livre papier','✅',"Aucune énergie nécessaire (à part la lumière du jour)."],
-  ['12h30','Payer la cantine par carte','❌',"Terminaux et serveurs bancaires coupés : il faut des espèces."],
-  ['13h00','Retirer de l\'argent au distributeur','❌',"Les distributeurs sont hors service : en Espagne, les gens faisaient la queue avec des pièces."],
-  ['15h00','Jouer au foot dans la cour','✅',"Un ballon suffit !"],
-  ['17h00','Faire un plein d\'essence','❌',"Les pompes sont électriques."],
-  ['19h00','Écouter les infos','✅',"Avec une radio à piles : c'était le conseil des autorités en Espagne."]
-];
-function m4(){
-  head('🔌','La panne','28 avril 2025 : une panne d\'électricité géante coupe l\'Espagne et le Portugal pendant des heures. Pour chaque moment de ta journée, prédis : <b>ça marche ✅ ou ça bloque ❌</b> ?');
-  const ans={};
-  el(`<div class="day" id="day">${DAY.map((d,i)=>`<div class="slot" data-i="${i}"><span class="h">${d[0]}</span><span>${d[1]}<small hidden></small></span><span class="ch"><button data-v="✅" aria-label="ça marche">✅</button><button data-v="❌" aria-label="ça bloque">❌</button></span></div>`).join('')}</div>
-    <div class="row c"><button class="btn ok" id="m4v" disabled>Vérifier mes prédictions</button></div><p class="fb" id="m4f"></p>`);
-  $('#day').querySelectorAll('.slot').forEach(s=>s.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    if(s.classList.contains('res-ok')||s.classList.contains('res-ko')) return;
-    ans[s.dataset.i]=b.dataset.v; s.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-    $('#m4v').disabled=Object.keys(ans).length<DAY.length;
-  }));
-  $('#m4v').onclick=()=>{
-    let ok=0, ko=0;
-    $('#day').querySelectorAll('.slot').forEach(s=>{ const d=DAY[+s.dataset.i], g=ans[s.dataset.i]===d[2]; if(g) ok++; if(d[2]==='❌') ko++;
-      s.classList.add(g?'res-ok':'res-ko'); const sm=s.querySelector('small'); sm.hidden=false; sm.textContent=(d[2]==='✅'?'Ça marche. ':'Ça bloque. ')+d[3]; });
-    addPts(ok*3); $('#m4v').hidden=true;
-    $('#m4f').className='fb good'; $('#m4f').innerHTML=`${ok} / ${DAY.length} bonnes prédictions. <b>${ko}</b> moments sur ${DAY.length} sont bloqués par une seule panne. En juillet 2024, une simple mise à jour ratée (CrowdStrike) a aussi cloué des avions au sol et bloqué des hôpitaux.`;
-    discovery('panne','Que montre la panne ?',[
-      'On pourrait facilement se passer de la technologie',
-      'Nous dépendons de la technologie pour beaucoup de tâches simples, et les systèmes reliés entre eux sont fragiles',
-      'Seuls les ordinateurs tombent en panne'],1,
-      'Une seule panne (électricité, logiciel) bloque des dizaines d\'activités à la fois : les systèmes sont <b>enchevêtrés</b>, donc vulnérables.');
-  };
-}
-
-/* =========================================================
-   5 · Love or Hate ?
-   ========================================================= */
-const LH=[
-  ['🎮','Jouer à des jeux vidéo qui sont de vrais chefs-d\'œuvre'],['📵','Être perdu en pleine campagne sans réseau ni carte téléchargée'],['👋','Garder le contact avec des amis partis loin'],
-  ['😠','Le cyberharcèlement'],['🎧','Découvrir des artistes du monde entier'],['💸','Payer des abonnements chaque mois… et tout perdre en arrêtant'],
-  ['🌍','Parler avec des inconnus à l\'autre bout du monde'],['🎭','Les deepfakes : fausses vidéos très réalistes'],['🧑‍🏫','Apprendre presque tout avec des tutos'],
-  ['🎣','Le phishing : faux messages pour voler tes codes'],['🗺️','Ne plus jamais se perdre grâce au GPS'],['🔋','Passer des heures sur son téléphone sans s\'en rendre compte']
-];
-function m5(){
-  head('💖','Love or Hate ?','Pour chaque situation, réponds vite : tu <b>adores</b> 💖 ou tu <b>détestes</b> 🤮 ? Il n\'y a pas de mauvaise réponse.');
-  const cards=shuffle(LH.slice()); let i=0, love=0, hate=0; const lo=[], ha=[];
-  el(`<p class="prog" id="m5p"></p><div class="swipe" id="sw"></div><div class="row c"><button class="btn big" id="h">🤮</button><button class="btn big" id="l">💖</button></div>`);
-  const show=()=>{
-    $('#m5p').textContent=`Situation ${Math.min(i+1,cards.length)} / ${cards.length}`;
-    if(i>=cards.length) return end();
-    $('#sw').innerHTML=`<div class="sc"><span class="em">${cards[i][0]}</span>${cards[i][1]}</div>`;
-  };
-  const vote=v=>{ if(i>=cards.length) return; const c=$('#sw .sc'); c.classList.add(v?'gor':'gol'); (v?lo:ha).push(cards[i][1]); v?love++:hate++; i++; addPts(1); setTimeout(show,300); };
-  $('#l').onclick=()=>vote(1); $('#h').onclick=()=>vote(0);
-  const end=()=>{
-    $('#l').parentNode.remove(); $('#sw').remove();
-    const pl=Math.round(love/cards.length*100);
-    el(`<div class="card"><p>Ton bilan :</p><div class="bar"><div style="width:${pl}%;background:var(--pink);color:#2a0716">${love?'💖 '+love:''}</div><div style="width:${100-pl}%;background:var(--line)">${hate?'🤮 '+hate:''}</div></div>
-      <p class="lead">Compare avec ton voisin : avez-vous les mêmes ?</p></div>`);
-    discovery('love','Que montre ton bilan ?',[
-      'La technologie est seulement géniale',
-      'La technologie est seulement dangereuse',
-      'Notre relation à la technologie est ambivalente : elle a des côtés qu\'on aime et d\'autres qu\'on rejette'],2,
-      'Presque tout le monde a des 💖 et des 🤮 : la relation est <b>ambivalente</b>. Et les mêmes outils servent à des usages très différents, qui dépendent aussi des intentions de ceux qui les fabriquent.');
-  };
-  show();
-}
-
-/* =========================================================
-   6 · Copier : cassette contre numérique
-   ========================================================= */
-function m6(){
-  head('📼','Copier','Dans les années 1980-90, on copiait les disques sur cassette, puis la cassette sur une autre cassette… Fais des copies de copies et compare avec une copie <b>numérique</b>.');
-  el(`<div class="copies"><div><h3>📼 Copie analogique (cassette)</h3><canvas class="wave" id="wa" width="600" height="160"></canvas><p class="gen" id="ga">Original</p></div>
-    <div><h3>💾 Copie numérique (nombres)</h3><div class="digits" id="dg"></div><p class="gen" id="gd">Original</p></div></div>
-    <div class="row c" style="margin-top:12px"><button class="btn ok" id="cp">Faire une copie de la copie</button><button class="btn" id="play">▶ Écouter la cassette</button></div><p class="fb" id="m6f"></p>`);
-  const N=600, orig=Array.from({length:N},(_,x)=>Math.sin(x/9)*.5+Math.sin(x/3.1)*.22+Math.sin(x/1.7)*.12);
-  let ana=orig.slice(), gen=0;
-  const nums=orig.slice(0,90).map(v=>Math.round((v+1)*127));
-  let dig=nums.slice();
-  const drawA=()=>{ const c=$('#wa'), g=c.getContext('2d'); g.clearRect(0,0,c.width,c.height);
-    g.strokeStyle='#3a3468'; g.beginPath(); orig.forEach((v,x)=>g[x?'lineTo':'moveTo'](x,80-v*60)); g.stroke();
-    g.strokeStyle='#5ce1e6'; g.lineWidth=2; g.beginPath(); ana.forEach((v,x)=>g[x?'lineTo':'moveTo'](x,80-v*60)); g.stroke(); g.lineWidth=1; };
-  const drawD=()=>{ $('#dg').innerHTML=dig.map((v,i)=>v===nums[i]?v:`<i>${v}</i>`).join(' '); };
-  drawA(); drawD();
-  $('#cp').onclick=()=>{
-    gen++;
-    // chaque copie analogique : on perd un peu d'aigus (lissage) et on ajoute du souffle
-    ana=ana.map((v,x)=>((ana[x-2]??v)+(ana[x-1]??v)+v+(ana[x+1]??v)+(ana[x+2]??v))/5*.9+(Math.random()-.5)*.2);
-    dig=dig.slice(); // une copie numérique recopie exactement les mêmes nombres
-    drawA(); drawD(); addPts(2);
-    $('#ga').textContent=`Copie n° ${gen} : le signal s'use, le souffle s'ajoute`; $('#gd').textContent=`Copie n° ${gen} : 0 nombre différent de l'original`;
-    if(gen===6){ $('#m6f').className='fb good'; $('#m6f').textContent='Après 6 copies : la cassette est très abîmée (souffle, aigus perdus), la copie numérique est identique.';
-      discovery('copie','Pourquoi dit-on que copier ne coûte (presque) plus rien ?',[
-        'Parce qu\'une copie numérique est identique à l\'original et ne coûte qu\'un peu d\'énergie, sans support à fabriquer',
-        'Parce que la musique est devenue gratuite pour les artistes',
-        'Parce que les cassettes étaient plus fidèles'],0,
-        'Le numérique, ce sont des <b>nombres</b> : on les recopie à l\'identique, instantanément, des millions de fois. Le coût se déplace : serveurs, réseaux et téléphones consomment de l\'énergie à chaque écoute. Et ce qui ne se copie pas, comme un concert ou un vinyle, prend de la valeur.'); }
-  };
-  // écoute : une mélodie simple + souffle proportionnel au nombre de copies
-  $('#play').onclick=()=>{
-    try{
-      const ac=new (window.AudioContext||window.webkitAudioContext)(), t0=ac.currentTime, notes=[392,440,494,523,494,440,392];
-      const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=Math.max(500,6000/(1+gen)); lp.connect(ac.destination);
-      notes.forEach((f,k)=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type='triangle'; o.frequency.value=f*(1+(Math.random()-.5)*.004*gen); g.gain.setValueAtTime(.0001,t0+k*.28); g.gain.exponentialRampToValueAtTime(.25,t0+k*.28+.03); g.gain.exponentialRampToValueAtTime(.0001,t0+k*.28+.26); o.connect(g).connect(lp); o.start(t0+k*.28); o.stop(t0+k*.28+.3); });
-      if(gen){ const len=ac.sampleRate*2.1, buf=ac.createBuffer(1,len,ac.sampleRate), ch=buf.getChannelData(0); for(let k=0;k<len;k++) ch[k]=(Math.random()*2-1)*Math.min(.25,.035*gen);
-        const s=ac.createBufferSource(); s.buffer=buf; s.connect(ac.destination); s.start(t0); }
-      setTimeout(()=>ac.close(),2600);
-    }catch(e){}
-  };
-}
-
-/* ---------- menu et découvertes ---------- */
-const MISSIONS=[
-  ['frise','⏳','La frise','Quelle invention est la plus ancienne ? Puis zoome sur 2,7 millions d\'années d\'inventions.',m1],
-  ['avant','🔥','Avant -5000','Comment faisait-on pour écouter de la musique ou se soigner, sans écriture ni métal ?',m2],
-  ['iceberg','🧊','L\'iceberg','Un billet de train en 3 touches : qu\'y a-t-il sous la surface ?',m3],
-  ['panne','🔌','La panne','Une journée sans électricité : qu\'est-ce qui marche encore ?',m4],
-  ['love','💖','Love or Hate ?','Tu adores ou tu détestes ? Fais ton bilan.',m5],
-  ['copie','📼','Copier','Copie de copie de cassette contre copie numérique.',m6]
+/* ---------- menu ---------- */
+const GAMES=[
+  ['zombie','🧟','Zombies QCM','Une horde arrive, chaque zombie porte une réponse. Abats le bon avant qu\'il franchisse la barricade !',gZombie],
+  ['octo','🐙','La pieuvre laser','Une pieuvre géante coupe Internet. Répare les câbles et route les paquets sans connaître les règles.',gOcto],
+  ['box','⬛','La boîte noire','Des nombres entrent, d\'autres sortent. Trouve la règle cachée et prouve-la.',()=>gBox(0)],
+  ['feed','📱','Le fil d\'actu','Republier ou pas ? Regarde les émotions se propager et le monde changer.',gFeed],
+  ['bubble','🫧','La bulle','Like ce qui te plaît… et découvre tout ce que l\'algorithme ne t\'a jamais montré.',gBubble],
+  ['likes','❤️','Les likes','Publie, gagne des likes, garde ta flamme… et découvre ce qui fait vraiment marcher un post.',gLikes]
 ];
 function menu(){
-  const n=MISSIONS.filter(m=>D.done[m[0]]).length;
-  main.innerHTML=`<h2>La technologie, c'est quoi ?</h2>
-    <p class="lead">Six missions pour mener l'enquête. À la fin de chacune, note ce que tu as découvert : on s'en servira en classe pour construire le cours ensemble.</p>
-    <div class="missions">${MISSIONS.map(([id,e,t,d],i)=>`<button class="mcard${D.done[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.done[id]?'✓ découverte notée':''}</span></button>`).join('')}</div>
-    <div class="row"><button class="btn${n?' ok':''}" id="notes">📒 Mes découvertes (${n} / ${MISSIONS.length})</button></div>`;
-  main.querySelectorAll('.mcard').forEach(b=>b.onclick=()=>MISSIONS[+b.dataset.i][4]());
+  stopGame();
+  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Six épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
+    <div class="games">${GAMES.map(([id,e,t,d],i)=>`<button class="gcard${D.disc[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.disc[id]?'✓ découverte notée':''}${D.best[id]?` · record ${D.best[id].toLocaleString('fr-FR')}`:''}</span></button>`).join('')}</div>
+    <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button></div>`;
+  main.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>GAMES[+b.dataset.i][4]());
   $('#notes').onclick=notes; scrollTo(0,0);
 }
 function notes(){
-  const lines=MISSIONS.map(([id,e,t])=>{ const d=D.disc[id]; return {id,e,t,d}; });
-  main.innerHTML=`<h2>📒 Mes découvertes</h2><p class="lead">Ce que tu as trouvé pendant l'enquête. Recopie-le dans ton cahier, ou copie-le pour l'envoyer à ton professeur.</p>
-    <ol class="notes">${lines.map(({e,t,d})=>`<li><b>${e} ${t}</b><br>${d?`<span class="q">${esc(d.q)}</span><br>${esc(d.pick||'(pas de réponse)')}${d.txt?`<br>« ${esc(d.txt)} »`:''}`:'<span class="q">Mission pas encore faite.</span>'}</li>`).join('')}</ol>
-    <p>Total : <b>${D.pts} points</b></p>
-    <div class="row"><button class="btn ok" id="cpy">Copier le texte</button><button class="btn" id="back">Retour aux missions</button><button class="btn" id="reset">Tout effacer</button></div><p class="fb" id="nf"></p>`;
-  const txt='Mes découvertes (SNT S1)\n\n'+lines.map(({e,t,d})=>`${e} ${t}\n${d?`${d.q}\n→ ${d.pick||'-'}${d.txt?`\n« ${d.txt} »`:''}`:'(pas faite)'}`).join('\n\n');
-  $('#cpy').onclick=async()=>{ try{ await navigator.clipboard.writeText(txt); $('#nf').className='fb good'; $('#nf').textContent='Copié !'; }catch(e){ $('#nf').className='fb bad'; $('#nf').textContent='La copie automatique ne marche pas ici : sélectionne le texte à la main.'; } };
+  stopGame();
+  const L=GAMES.map(([id,e,t])=>({e,t,d:D.disc[id]}));
+  main.innerHTML=`<h2>📒 Mes découvertes</h2><p class="lead">Recopie-les dans ton cahier, ou copie-les pour ton professeur.</p>
+    <ol class="notes">${L.map(({e,t,d})=>`<li><b>${e} ${t}</b><br>${d?`<span class="q">${esc(d.q)}</span><br>${esc(d.pick||'(pas de réponse)')}${d.txt?`<br>« ${esc(d.txt)} »`:''}`:'<span class="q">Pas encore fait.</span>'}</li>`).join('')}</ol>
+    <p>Total : <b>${D.pts} points</b></p><div class="row"><button class="btn ok" id="cpy">Copier le texte</button><button class="btn" id="back">Menu</button><button class="btn" id="rs">Tout effacer</button></div><p class="fb" id="nf"></p>`;
+  const txt='Mes découvertes (SNT S1)\n\n'+L.map(({e,t,d})=>`${e} ${t}\n${d?`${d.q}\n→ ${d.pick||'-'}${d.txt?`\n« ${d.txt} »`:''}`:'(pas fait)'}`).join('\n\n');
+  $('#cpy').onclick=async()=>{ try{ await navigator.clipboard.writeText(txt); $('#nf').className='fb good'; $('#nf').textContent='Copié !'; }catch(e){ $('#nf').className='fb bad'; $('#nf').textContent='Copie impossible ici : sélectionne le texte à la main.'; } };
   $('#back').onclick=menu;
-  $('#reset').onclick=()=>{ if(confirm('Effacer toutes tes découvertes et tes points ?')){ D={pts:0,done:{},disc:{}}; save(); menu(); } };
-  scrollTo(0,0);
+  $('#rs').onclick=()=>{ if(confirm('Effacer tes découvertes, records et points ?')){ D={pts:0,best:{},disc:{}}; save(); menu(); } };
 }
 $('#home').onclick=menu;
 save(); menu();
