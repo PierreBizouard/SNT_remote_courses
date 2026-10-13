@@ -16,6 +16,7 @@ Une seule page HTML autonome, jouable sur ordinateur, tablette et téléphone.
 - **4 · Le tableau hexa** (+ QCM)
 - **5 · Pixels et lumières**
 - Jeu secret **Turbo conversions** (5 étoiles)
+- Bonus **Détonateurs** (façon Puyo Puyo, hors note) : on colle des blocs 1, 2, 4, 8, 16 contre un détonateur jusqu'à ce que leur somme fasse son nombre ; deux blocs égaux fusionnent (1 + 1 = 10). Deux modes : détonateur en décimal et blocs en binaire, ou l'inverse.
 
 Paliers : un objectif de points débloque le niveau suivant, un second donne une étoile.
 Code enseignant (débloque tout) : voir `TEACHER_CODE` dans le source.

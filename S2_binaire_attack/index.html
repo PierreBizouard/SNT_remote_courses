@@ -247,6 +247,28 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
 
 .l3-q.turbo{left:0;top:0;transform:none}
+/* ---------- bonus : détonateurs (façon Puyo Puyo) ---------- */
+.pu-well{position:absolute;border:2px solid var(--line);border-top:2px dashed var(--bad);border-radius:0 0 10px 10px;background:rgba(8,6,20,.45)}
+.pu{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:28%;border:2px solid #0006;font:700 var(--pf,14px)/1 var(--f-mono);color:#120e24;transition:left .07s linear,top .07s linear;box-shadow:inset 0 -4px 0 #0003,inset 0 3px 0 #fff5;z-index:5}
+.pu small{font-size:.62em;font-weight:500;opacity:.7}
+.pu.v1{background:#6ee7a0}.pu.v2{background:#5ce1e6}.pu.v4{background:#b69cff}.pu.v8{background:#ffb547}.pu.v16{background:#ff6aa8}.pu.v32{background:#ff5a5a;color:#fff}
+.pu.bomb{background:#2a2550;color:var(--fg);border:2px solid var(--amber);border-radius:50%;box-shadow:0 0 12px rgba(255,181,71,.45);z-index:6}
+.pu.bomb .t{font-size:1.05em}
+.pu.bomb .s{font-size:.6em;color:var(--muted);margin-top:2px}
+.pu.bomb.over{border-color:var(--bad);box-shadow:0 0 14px rgba(255,90,90,.7)}
+.pu.bomb.over .s{color:var(--bad)}
+.pu.bomb.hot{animation:pulse .35s infinite alternate}
+.pu .fuse{position:absolute;right:-4px;top:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font:700 10px/18px var(--f-mono);text-align:center}
+.pu.piece{z-index:8;transition:none}
+.pu.ghost{opacity:.18;z-index:4;transition:none}
+.pu.pop{animation:pupop .32s forwards;z-index:9}
+@keyframes pupop{40%{transform:scale(1.35)}100%{transform:scale(0);opacity:0}}
+.pu.merge{animation:pumerge .3s}
+@keyframes pumerge{50%{transform:scale(1.25)}}
+.pu-next{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 6px;background:rgba(8,6,20,.8);border:1px solid var(--line);border-radius:8px;font:400 10px var(--f-display);color:var(--muted);z-index:9}
+.pu-next .pu{position:relative;transition:none}
+.pu-shock{position:absolute;border-radius:50%;border:3px solid var(--amber);transform:translate(-50%,-50%);animation:shock .45s forwards;pointer-events:none;z-index:10}
+@keyframes shock{from{width:10px;height:10px;opacity:1}to{width:180px;height:180px;opacity:0}}
 .turbo-clock{position:absolute;right:12px;top:16px;font:700 22px var(--f-mono);color:var(--amber);z-index:5}
 .hextab.static{position:relative;left:auto;top:auto;width:100%;max-width:380px;margin:0 auto;flex:none;z-index:1}
 .l4-byte .canvaswrap{min-height:110px}
@@ -302,6 +324,7 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 }
 /* ---------- tutoriel « Comprendre le binaire » ---------- */
 .lvcard.learn{border-color:var(--cyan);background:linear-gradient(120deg,var(--panel),#1d2a4a)}
+.lvcard.bonus{border-color:var(--pink);background:linear-gradient(120deg,var(--panel),#3a1a34)}
 .lvcard.learn .n{color:var(--cyan)}
 .lvcard.learn.fresh{box-shadow:0 0 0 2px var(--cyan);animation:lwpulse 1.6s ease-in-out infinite alternate}
 @keyframes lwpulse{to{box-shadow:0 0 0 5px rgba(92,225,230,.25)}}
@@ -432,7 +455,7 @@ function place(e,x,y){ e.style.left = x+'px'; e.style.top = y+'px'; }
 /* ---------- progression : ÉLÉA (SCORM 1.2) si présent, sinon cet appareil ---------- */
 const UNLOCK=[250,300,200,250,300];   // palier 1 : débloque le niveau suivant (et compte pour la note ÉLÉA)
 const STAR=[500,600,450,500,600]; // palier 2 : une étoile ; les 5 étoiles ouvrent le jeu secret
-const NL=5, SECRET=5;
+const NL=5, SECRET=5, BONUS=6;
 const TEACHER_CODE='SNT-PROF';
 const SCORM=(()=>{
   let api=null;
@@ -507,7 +530,7 @@ function best(id){ return Store.data.best[id]||0; }
 function saveBest(id,v){ if(v>best(id)){ Store.data.best[id]=v; } Store.save(); }
 function hasStar(i){ return best(i)>=STAR[i]; }
 function nStars(){ return STAR.filter((x,i)=>hasStar(i)).length; }
-function unlocked(i){ return i===0 || Store.data.prof || (i===SECRET ? nStars()===NL : best(i-1)>=UNLOCK[i-1]); }
+function unlocked(i){ return i===0 || i===BONUS || Store.data.prof || (i===SECRET ? nStars()===NL : best(i-1)>=UNLOCK[i-1]); }
 
 /* ---------- game state & shared helpers ---------- */
 const G = { lv:null, id:0, score:0, lives:3, run:false, pause:false };
@@ -587,7 +610,9 @@ const MODES={
   1:{ list:[['a','Attaque : 3 vies, ça accélère'],['s','Sauvetage : un escalier jusqu\'au fromage, sans perdre de vie']],
       note:'En mode sauvetage, chaque bonne réponse donne une brique. Construis l\'escalier jusqu\'au fromage avant que le tapis roulant ne l\'emporte !', tag:{s:'[sauvetage] '}, tuto:{s:'l1s'} },
   2:{ list:[['b','Boules : une boule = un bit'],['u','Unités : chaque bille vaut 1']],
-      note:'En mode unités, le récipient 16 contient exactement 16 billes, le 8 en contient 8…', tag:{u:'[unités] '}, tuto:{u:'l2u'} }
+      note:'En mode unités, le récipient 16 contient exactement 16 billes, le 8 en contient 8…', tag:{u:'[unités] '}, tuto:{u:'l2u'} },
+  6:{ list:[['d','Détonateur en décimal, blocs en binaire'],['b','Détonateur en binaire, blocs en décimal']],
+      note:'Exemple : un détonateur 13 explose avec les blocs 8, 4 et 1 collés contre lui.', tag:{b:'[binaire] '}, tuto:{} }
 };
 function chooseMode(id){
   const M=MODES[id];
@@ -609,8 +634,8 @@ function startLevel(id,mode){
   stage.innerHTML=''; stage.onpointerdown=stage.onpointermove=stage.onpointerup=stage.onpointercancel=stage.onpointerleave=null; stage.className=''; delete stage.dataset.flash;
   Seal.reset(); Object.assign(G,{ id, score:0, lives:3, run:true, pause:false, time:0, tp:[null,null] });
   $('#menu').hidden=true; $('#app').hidden=false;
-  $('#lvname').textContent = ((MODES[id] && MODES[id].tag[G.mode]) || '') + (id===SECRET ? 'Jeu secret · '+LEVELS[id].name : (id+1)+' · '+LEVELS[id].name+' · palier '+UNLOCK[id]+' · ★ '+STAR[id]);
-  hud(); setCombo(0); Buf.clear();
+  $('#lvname').textContent = ((MODES[id] && MODES[id].tag[G.mode]) || '') + (id===BONUS ? 'Bonus · '+LEVELS[id].name : id===SECRET ? 'Jeu secret · '+LEVELS[id].name : (id+1)+' · '+LEVELS[id].name+' · palier '+UNLOCK[id]+' · ★ '+STAR[id]);
+  hud(); setCombo(0); Buf.clear(); $('#bufrow').hidden=false;
   G.lv = LEVELS[id].make();
   G.lv.start(); measure(); G.lv.layout && G.lv.layout(); G.lv.update(0);
   if(!tutoSeen(tkey(id))) Tuto.run(tkey(id));
@@ -645,7 +670,7 @@ function gameOver(){
       msg+= top>=star ? (prev<star ? '<b class="gold">★ Étoile gagnée !</b>' : '★ Étoile déjà gagnée.') : `Encore <b>${star-top}</b> points pour l'étoile ★ (palier 2 : ${star}).`;
       if(nStars()===NL && starsBefore<NL) msg+='<br><b class="gold">Les '+NL+' étoiles sont réunies : le jeu secret est ouvert !</b>';
     }
-  } else msg='Le jeu secret se rejoue à volonté pour battre ton record.';
+  } else msg=id===BONUS?'Mode bonus : il ne compte pas dans la note, rejoue pour battre ton record.':'Le jeu secret se rejoue à volonté pour battre ton record.';
   // temps de réalisation des paliers, par niveau et par mode (pour comparer les modes)
   const mm=t=>Math.floor(t/60)+' min '+String(Math.round(t%60)).padStart(2,'0')+' s';
   let tmsg='';
@@ -1684,6 +1709,207 @@ function L5(){
   };
 }
 
+/* =========================================================
+   BONUS — Détonateurs (façon Puyo Puyo)
+   Un détonateur 💣 porte un nombre. Colle-lui des blocs-poids (1, 2, 4, 8, 16) :
+   il explose quand la somme des blocs qui le touchent (directement ou en chaîne)
+   vaut exactement son nombre. Deux blocs égaux qui se touchent fusionnent :
+   1 + 1 = 2 (la retenue du binaire, 1 + 1 = 10), et la somme ne change pas.
+   ========================================================= */
+function L6(){
+  const COLS=6, ROWS=12, BIN=G.mode==='b';   // 'd' : détonateur décimal, blocs binaires · 'b' : l'inverse
+  const S={ g:[...Array(ROWS)].map(()=>Array(COLS).fill(null)), p:null, next:null, ft:0, phase:'spawn', rt:0, chain:0, np:0, nb:0, cs:40, ox:0, oy:0, well:null, nextEl:null, ghost:[], over:false, maxT:31 };
+  const fall=()=>Math.max(.16,.85-G.score/1600);
+  const fuse=()=>Math.max(28,60-S.nb*1.2);
+  const binL=v=>`<small>0b</small>${v.toString(2)}`;
+  const label=b=> b.bomb
+    ? `<span class="t">${BIN?binL(b.n):b.n}</span><span class="s"></span><span class="fuse"></span>`
+    : (BIN ? String(b.v) : binL(b.v));
+  function el(b){
+    if(b.el) return b.el;
+    b.el=mk('div','pu '+(b.bomb?'bomb':'v'+b.v),label(b));
+    size(b.el,b.bomb); return b.el;
+  }
+  function size(e,bomb=e.classList.contains('bomb')){ e.style.width=e.style.height=(S.cs-4)+'px'; e.style.setProperty('--pf',Math.round(S.cs*(bomb===BIN?.22:.34))+'px'); }
+  const cellXY=(c,r)=>[S.ox+c*S.cs+2,S.oy+r*S.cs+2];
+  // ---- pièces ----
+  function bombs(){ const L=[]; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){ const b=S.g[r][c]; if(b&&b.bomb) L.push([r,c,b]); } return L; }
+  function needBits(){ let m=0; for(const [r,c,b] of bombs()){ const s=cluster(r,c).sum; if(s<b.n) m|=b.n-s; } if(S.p&&S.p.a.bomb) m|=S.p.a.n; return m; }
+  function weight(){
+    const m=needBits(), opts=[1,2,4,8,16].filter(v=>m&v);
+    if(opts.length && Math.random()<.7) return { v:pick(opts) };
+    return { v:pick([1,1,2,2,4,4,8,16]) };
+  }
+  function newPiece(){
+    S.np++;
+    const nbB=bombs().length;
+    if(nbB===0 || (S.np%5===0 && nbB<3)){
+      let n; const pop=x=>x.toString(2).split('1').length-1, mp=S.nb<3?2:S.nb<8?3:5;
+      do{ n=randi(3,S.maxT); }while(pop(n)>mp || pop(n)<2);
+      return { a:{bomb:true,n,t:fuse()}, b:null };
+    }
+    return { a:weight(), b:weight() };
+  }
+  const off=[[0,-1],[1,0],[0,1],[-1,0]];
+  function cells(p,x=p.x,y=p.y,rot=p.rot){ const L=[[x,y,p.a]]; if(p.b) L.push([x+off[rot][0],y+off[rot][1],p.b]); return L; }
+  const free=(c,r)=>c>=0&&c<COLS&&r<ROWS&&(r<0||!S.g[r][c]);
+  const fits=(p,x,y,rot)=>cells(p,x,y,rot).every(([c,r])=>free(c,r));
+  function spawn(){
+    S.p=S.next||newPiece(); S.next=newPiece();
+    Object.assign(S.p,{ x:2, y:0, rot:0 });
+    if(!fits(S.p,2,0,0)){ S.p=null; S.over=true; G.lives=0; hud(); banner('Le puits est plein !','bad'); G.run=false; setTimeout(gameOver,900); return; }
+    el(S.p.a).classList.add('piece'); if(S.p.b) el(S.p.b).classList.add('piece');
+    drawNext(); S.phase='fall'; S.ft=0;
+  }
+  function drawNext(){
+    S.nextEl.innerHTML='SUIVANT';
+    const n=S.next, mini=b=>{ const e=document.createElement('div'); e.className='pu '+(b.bomb?'bomb':'v'+b.v); e.innerHTML=label(b).replace('<span class="fuse"></span>',''); e.style.width=e.style.height=Math.round(S.cs*.7)+'px'; e.style.setProperty('--pf',Math.round(S.cs*(!!b.bomb===BIN?.15:.24))+'px'); return e; };
+    if(n.b) S.nextEl.appendChild(mini(n.b)); S.nextEl.appendChild(mini(n.a));
+  }
+  function move(dx){ const p=S.p; if(p && S.phase==='fall' && fits(p,p.x+dx,p.y,p.rot)) p.x+=dx; }
+  function rotate(){
+    const p=S.p; if(!p||!p.b||S.phase!=='fall') return;
+    const nr=(p.rot+1)%4;
+    for(const dx of [0,-1,1]) if(fits(p,p.x+dx,p.y,nr)){ p.x+=dx; p.rot=nr; return; }
+  }
+  function land(){
+    const p=S.p; S.p=null;
+    for(const [c,r,b] of cells(p)){ b.el.classList.remove('piece'); if(r>=0) S.g[r][c]=b; else { b.el.remove(); } }
+    S.chain=0; S.phase='resolve'; S.rt=.05;
+  }
+  function drop(){ const p=S.p; if(!p||S.phase!=='fall') return; let n=0; while(fits(p,p.x,p.y+1,p.rot)){ p.y++; n++; } if(n) addScore(Math.ceil(n/2)); land(); }
+  // ---- règles ----
+  function gravity(){
+    let moved=false;
+    for(let c=0;c<COLS;c++){ let w=ROWS-1; for(let r=ROWS-1;r>=0;r--){ const b=S.g[r][c]; if(b){ if(r!==w){ S.g[w][c]=b; S.g[r][c]=null; moved=true; } w--; } } }
+    return moved;
+  }
+  function merges(){
+    let any=false;
+    for(let r=ROWS-1;r>=0;r--) for(let c=0;c<COLS;c++){
+      const b=S.g[r][c]; if(!b||b.bomb) continue;
+      for(const [dc,dr] of [[0,-1],[1,0]]){
+        const r2=r+dr, c2=c+dc; if(r2<0||c2>=COLS) continue;
+        const o=S.g[r2][c2]; if(!o||o.bomb||o.v!==b.v||o.done||b.done) continue;
+        // 1 + 1 = 10 : les deux blocs égaux deviennent un bloc de poids double (la somme ne change pas)
+        o.done=true; S.g[r2][c2]=null; o.el.classList.add('pop'); setTimeout(()=>o.el.remove(),320);
+        b.v*=2; b.done=true; b.el.className='pu merge v'+b.v; b.el.innerHTML=label(b);
+        const [x,y]=cellXY(c,r); floatTxt(x+S.cs/2,y,BIN?`${b.v/2}+${b.v/2}=${b.v}`:`1+1=10`,'good'); addScore(2);
+        any=true; break;
+      }
+    }
+    for(const row of S.g) for(const b of row) if(b) b.done=false;
+    return any;
+  }
+  function cluster(r0,c0){
+    const seen=new Set(), L=[]; let sum=0; const st=[];
+    for(const [dc,dr] of off){ st.push([r0+dr,c0+dc]); }
+    while(st.length){
+      const [r,c]=st.pop(); if(r<0||r>=ROWS||c<0||c>=COLS) continue;
+      const b=S.g[r][c], k=r*COLS+c; if(!b||b.bomb||seen.has(k)) continue;
+      seen.add(k); L.push([r,c]); sum+=b.v;
+      for(const [dc,dr] of off) st.push([r+dr,c+dc]);
+    }
+    return { sum, L };
+  }
+  function blasts(){
+    const hits=[];
+    for(const [r,c,b] of bombs()){ const cl=cluster(r,c); if(cl.sum===b.n) hits.push([r,c,b,cl]); }
+    if(!hits.length) return false;
+    S.chain++; setCombo(S.chain);
+    const kill=new Set();
+    for(const [r,c,b,cl] of hits){
+      kill.add(r*COLS+c); cl.L.forEach(([rr,cc])=>kill.add(rr*COLS+cc));
+      const [x,y]=cellXY(c,r), bits=cl.L.length;
+      const sh=mk('div','pu-shock'); place(sh,x+S.cs/2,y+S.cs/2); setTimeout(()=>sh.remove(),460);
+      addScore((15+bits*10+Math.round(b.t))*S.chain,x+S.cs/2,y);
+      banner(`${BIN?'0b'+b.n.toString(2):b.n} = ${cl.L.map(([rr,cc])=>S.g[rr][cc].v).sort((a,b)=>b-a).join(' + ')}${S.chain>1?' · chaîne x'+S.chain:''}`,'good');
+      S.nb++; if(S.nb%6===0 && S.maxT<63){ S.maxT=63; banner('Les détonateurs montent jusqu\'à 63 !','good'); }
+    }
+    kill.forEach(k=>{ const r=Math.floor(k/COLS), c=k%COLS, b=S.g[r][c]; S.g[r][c]=null; b.el.classList.add('pop'); setTimeout(()=>b.el.remove(),330); });
+    flash('good'); return true;
+  }
+  function step(){ return gravity() || merges() || blasts(); }
+  function misfire(r,c,b){
+    // mèche à zéro : le détonateur saute tout seul et emporte ses voisins, mais tu perds une vie
+    const cl=cluster(r,c);
+    ErrLog.add(6,(BIN?'0b'+b.n.toString(2):b.n)+' (detonateur)',cl.sum+' colle',b.n);
+    [[r,c],...cl.L].forEach(([rr,cc])=>{ const o=S.g[rr][cc]; S.g[rr][cc]=null; o.el.classList.add('pop'); setTimeout(()=>o.el.remove(),330); });
+    loseLife(`Raté : ${BIN?'0b'+b.n.toString(2):b.n} n'était pas ${cl.sum}`);
+    if(G.lives>0){ S.phase='resolve'; S.rt=.3; S.chain=0; }
+  }
+  // ---- affichage ----
+  function render(){
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      const b=S.g[r][c]; if(!b) continue;
+      const e=el(b), [x,y]=cellXY(c,r); place(e,x,y);
+      if(b.bomb){
+        const s=cluster(r,c).sum, over=s>b.n;
+        e.classList.toggle('over',over); e.classList.toggle('hot',b.t<8);
+        e.querySelector('.s').innerHTML=over?'trop !':'Σ '+(BIN?binL(s):s);
+        e.querySelector('.fuse').textContent=Math.ceil(b.t);
+      }
+    }
+    S.ghost.forEach(g=>g.remove()); S.ghost=[];
+    const p=S.p;
+    if(p){
+      let gy=p.y; while(fits(p,p.x,gy+1,p.rot)) gy++;
+      for(const [c,r,b] of cells(p)){ const [x,y]=cellXY(c,r); place(el(b),x,y); if(b.bomb){ b.el.querySelector('.s').innerHTML=''; b.el.querySelector('.fuse').textContent=Math.ceil(b.t); } }
+      for(const [c,r,b] of cells(p,p.x,gy)){ if(r<0) continue; const e=mk('div','pu ghost '+(b.bomb?'bomb':'v'+b.v),''); size(e); const [x,y]=cellXY(c,r); place(e,x,y); S.ghost.push(e); }
+    }
+  }
+  return {
+    start(){
+      setKeys([{label:'◀',k:'ArrowLeft'},{label:'⟳',k:'ArrowUp'},{label:'▶',k:'ArrowRight'},{label:'▼',k:'ArrowDown'},{label:'Lâcher',k:'OK',cls:'ok small',span:2}]);
+      $('#bufrow').hidden=true;
+      S.well=mk('div','pu-well'); S.nextEl=mk('div','pu-next');
+      // au doigt : toucher à gauche / à droite de la pièce la déplace, toucher la pièce la tourne, glisser vers le bas la lâche
+      let sy=null, sx=0;
+      stage.onpointerdown=e=>{ if(G.pause||G.tuto) return; const r=stage.getBoundingClientRect(); sy=e.clientY; sx=e.clientX-r.left; };
+      stage.onpointerup=e=>{
+        if(sy==null||G.pause||G.tuto||!S.p) return; const dy=e.clientY-sy; sy=null;
+        if(dy>60) return drop();
+        const px=S.ox+(S.p.x+.5)*S.cs;
+        if(Math.abs(sx-px)<S.cs*.7) rotate(); else move(sx<px?-1:1);
+        render();
+      };
+      S.next=newPiece(); spawn();
+    },
+    layout(){
+      S.cs=Math.floor(Math.min((W-16)/COLS,(H-14)/ROWS));
+      S.ox=Math.round((W-S.cs*COLS)/2); S.oy=Math.round(H-S.cs*ROWS-6);
+      // sur un écran large, le « suivant » se met à côté du puits
+      if(W-S.ox-S.cs*COLS>S.cs*1.3){ S.nextEl.style.right='auto'; S.nextEl.style.left=(S.ox+S.cs*COLS+10)+'px'; }
+      Object.assign(S.well.style,{ left:(S.ox-2)+'px', top:(S.oy-2)+'px', width:(S.cs*COLS+4)+'px', height:(S.cs*ROWS+4)+'px' });
+      stage.querySelectorAll('.pu:not(.ghost)').forEach(size); if(S.next) drawNext(); render();
+    },
+    update(dt){
+      if(S.over) return;
+      // un détonateur surchargé (« trop ! ») ne peut plus exploser proprement : sa mèche brûle 4 fois plus vite
+      for(const [r,c,b] of bombs()){ b.t-=dt*(cluster(r,c).sum>b.n?4:1); if(b.t<=0 && S.phase!=='resolve'){ misfire(r,c,b); render(); return; } }
+      if(S.p && S.p.a.bomb) S.p.a.t=Math.max(5,S.p.a.t-dt*.5);
+      if(S.phase==='resolve'){
+        S.rt-=dt; if(S.rt>0) return;
+        if(step()){ S.rt=.28; render(); return; }
+        setCombo(0); S.phase='spawn';
+      }
+      if(S.phase==='spawn'){ spawn(); }
+      if(S.phase==='fall'){
+        const p=S.p; S.ft+=dt;
+        if(S.ft>=fall()){ S.ft=0; if(fits(p,p.x,p.y+1,p.rot)) p.y++; else land(); }
+      }
+      render();
+    },
+    key(k){
+      if(k==='ArrowLeft') move(-1); else if(k==='ArrowRight') move(1);
+      else if(k==='ArrowUp') rotate();
+      else if(k==='ArrowDown'){ const p=S.p; if(p&&S.phase==='fall'&&fits(p,p.x,p.y+1,p.rot)){ p.y++; S.ft=0; addScore(1); } }
+      else if(k==='OK') drop();
+      render();
+    }
+  };
+}
+
 /* ---------- tutoriel en bulles ---------- */
 function tutoSeen(id){ return !!Store.data.tuto[id]; }
 function demoEl(cls,html,x,y){ const e=mk('div',cls,html); place(e,x,y); e.dataset.demo='1'; return e; }
@@ -1733,6 +1959,15 @@ TUTOS[5] = [
   { t:'Bravo, tu as trouvé le <b>jeu secret</b> ! 60 secondes, toutes les bases mélangées : binaire, décimal et hexadécimal.', el:'.l3-q' },
   { t:'Chaque bonne réponse ajoute <b>2 secondes</b> et fait monter le multiplicateur. Une erreur retire <b>3 secondes</b>.', el:'.turbo-clock' },
   { t:'Regarde bien la base demandée sous le nombre, puis tape ta réponse et <b>OK</b>.', el:'#inputrow' }
+];
+TUTOS[6] = [
+  { t:'Un <b>détonateur</b> 💣 porte un nombre. Pour le faire exploser, colle-lui des <b>blocs</b> dont la somme fait <b>exactement</b> ce nombre.', el:'.pu.bomb' },
+  { t:'Les blocs valent <b>1, 2, 4, 8 ou 16</b>, les poids du binaire. Exemple : 13 = 8 + 4 + 1, donc colle les blocs 8, 4 et 1. Un bloc compte s\'il touche le détonateur, ou s\'il touche un bloc qui le touche.' },
+  { t:'Selon le mode, le détonateur est écrit en décimal et les blocs en binaire (<b>0b</b>100 = 4), ou l\'inverse. Lis bien les deux bases !' },
+  { t:'Deux blocs <b>égaux</b> qui se touchent fusionnent : 1 + 1 = 2, 2 + 2 = 4… En binaire, c\'est la <b>retenue</b> : 0b1 + 0b1 = 0b10. La somme ne change pas.' },
+  { t:'Sous le nombre, <b>Σ</b> montre la somme déjà collée. Trop de blocs ? Il affiche « trop ! ». La pastille rouge est la <b>mèche</b> : à zéro, le détonateur saute tout seul et tu perds une vie.' },
+  { t:'◀ ▶ déplacent la pièce, ⟳ la tourne, ▼ la descend, <b>Lâcher</b> la fait tomber. Au doigt : touche à gauche ou à droite de la pièce, touche la pièce pour la tourner, glisse vers le bas pour la lâcher.', el:'#keys' },
+  { t:'Plusieurs explosions à la suite font une <b>chaîne</b> : les points sont multipliés. Si le puits déborde, la partie s\'arrête. C\'est un mode bonus : il ne compte pas dans la note.' }
 ];
 TUTOS[0] = [
   { t:'Voici le nombre à écrire en <b>binaire sur 5 bits</b>. Le compteur indique combien de <b>billes</b> il reste à placer : il y en a juste assez.', el:'.l0-left' },
@@ -1821,7 +2056,8 @@ const LEVELS = [
   { name:'Les colonnes 16-8-4-2-1', desc:'Remplis les bons récipients pour écrire le nombre en binaire sur 5 bits. Deux modes : une boule par bit, ou une bille par unité.', make:L2 },
   { name:'Le tableau hexa', desc:'Binaire ↔ hexadécimal sur 4 ou 8 bits. Le tableau de conversion s\'enfuit, se salit et attaque.', make:L3 },
   { name:'Pixels et lumières', desc:'Révèle une image codée en hexa, convertis un de ses octets, puis colorie-la en mélangeant les lumières RVB.', make:L4 },
-  { name:'Turbo conversions', desc:'60 secondes, toutes les bases mélangées : binaire, décimal, hexadécimal. Chaque bonne réponse rajoute du temps.', make:L5 }
+  { name:'Turbo conversions', desc:'60 secondes, toutes les bases mélangées : binaire, décimal, hexadécimal. Chaque bonne réponse rajoute du temps.', make:L5 },
+  { name:'Détonateurs', desc:'Façon Puyo Puyo : colle des blocs 1, 2, 4, 8, 16 contre un détonateur pour que leur somme fasse son nombre. Deux blocs égaux fusionnent : 1 + 1 = 10 !', make:L6 }
 ];
 function renderMenu(){
   const ns=nStars();
@@ -1829,6 +2065,7 @@ function renderMenu(){
   const seen=tutoSeen('learn');
   $('#levels').innerHTML=`<button class="lvcard learn${seen?'':' fresh'}" id="lw-open"><span class="n">0</span><span class="t">Comprendre le binaire</span><span class="d">Tutoriel de démarrage : des billes rangées en paquets de 10, puis de 5, puis de 2. Pourquoi les tas valent 1, 2, 4, 8, 16, et pourquoi l'électronique compte en binaire.</span><span class="b">${seen?'Tutoriel terminé ✓ · à revoir quand tu veux':'Commence par ici !'}</span></button>`+LEVELS.map((l,i)=>{
     const open=unlocked(i), sec=i===SECRET;
+    if(i===BONUS) return `<button class="lvcard bonus" data-i="${i}"><span class="n">💣</span><span class="t">Bonus · ${l.name}</span><span class="d">${l.desc}</span><span class="b">Toujours ouvert, hors note · record : ${best(i)}</span></button>`;
     if(sec){
       return `<button class="lvcard secret${open?'':' locked'}" data-i="${i}" ${open?'':'aria-disabled="true"'}><span class="n">${open?'★':'?'}</span><span class="t">${open?l.name:'Jeu secret'}</span><span class="d">${open?l.desc:'Gagne une étoile ★ dans chacun des '+NL+' niveaux pour le découvrir.'}</span><span class="b">${open?'Record : '+best(i):'Étoiles : '+ns+' / '+NL}</span></button>`;
     }
