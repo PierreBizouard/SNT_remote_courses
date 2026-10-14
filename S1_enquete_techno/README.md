@@ -6,7 +6,7 @@ Séance d'introduction SNT en version ultra-ludique : les élèves font les déc
 | --- | --- |
 | 🧟 Zombies QCM | Un zombie, quatre réponses autour de lui : on tire sur la bonne ; un tir raté part à côté et le zombie accélère (questions du cours) |
 | 🕰️ Les inventions | Familles d'inventions en images à cliquer de la plus ancienne à la plus récente ; chaque bonne réponse part dans la frise ; grande frise construite à la fin (accélération) |
-| ✍️ CyberSpeedScribe | Symboles à recopier en temps limité ; quand un symbole revient, on repasse son propre dessin (autre couleur) ; symboles en pixel art à colorier ; évolution finale, pixels = nombres |
+| ✍️ CyberSpeedScribe | Chaque symbole existe en tracé et en pixel art, les deux versions alternent, en temps limité ; quand un symbole revient, on repasse son propre dessin (autre couleur) ; comparaison tracé / pixels ; évolution finale, pixels = nombres |
 | 🐙 La pieuvre laser | Défense : chaque paquet livré à la bonne tourelle (adresse IPv4 complète) lance un missile ; flèches cliquables aux embranchements ; 5 topologies (arbre, étoile, anneau, maillé, sous-réseaux avec routeurs /24) ; lasers qui coupent des câbles |
 | ⬛ La boîte noire | Comprendre une machine fermée : essais, hypothèse, prédiction (démarche scientifique) |
 | 📱 Le fil d'actu | Les émotions fortes se propagent plus loin : économie de l'attention |

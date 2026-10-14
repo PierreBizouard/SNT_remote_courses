@@ -636,13 +636,18 @@ const SCR_P=[
 ];
 function gScribe(){
   stopGame();
-  head('✍️','CyberSpeedScribe','Recopie chaque symbole <b>avant la fin du chrono</b>. Attention : quand un symbole revient, le modèle n\'est plus l\'original… c\'est <b>ton dessin d\'avant</b>. Parfois, un symbole en pixels : colorie les cases.');
+  head('✍️','CyberSpeedScribe','Recopie chaque symbole <b>avant la fin du chrono</b>. Attention : quand un symbole revient, le modèle n\'est plus l\'original… c\'est <b>ton dessin d\'avant</b>. Chaque symbole existe <b>en tracé</b> ✏️ et <b>en pixels</b> 🟪 (colorie les cases) : les deux versions alternent.');
   const GEN=4, COL=['#2a2440','#00a8c6','#17a35a','#e08a00','#e0307a'];
-  const lines=shuffle(SCR_L.slice()).slice(0,3).map(([n,f])=>({n,kind:'l',orig:f(),cur:null,hist:[]}));
-  const px=pick(SCR_P), pg={ n:px[0], kind:'p', orig:px[1].split(',').map(r=>r.split('').map(Number)), cur:null, hist:[] };
-  const SY=[...lines,pg];
-  // ordre : chaque « génération » repasse tous les symboles, dans un ordre mélangé
-  const Q=[]; for(let g=0;g<GEN;g++) shuffle(SY.slice()).forEach(s=>Q.push([s,g]));
+  // chaque symbole existe en tracé (analogique) et en pixels (numérique)
+  const PIX={ 'Étoile':'00011000,00111100,11111111,01111110,00111100,01111110,11100111,10000001',
+    'Cœur':'01100110,11111111,11111111,11111111,01111110,00111100,00011000,00000000',
+    'Maison':'00011000,00111100,01111110,11111111,01000010,01011010,01011010,01111110',
+    'Smiley':'00111100,01000010,10100101,10000001,10100101,10011001,01000010,00111100',
+    'Éclair':'00001110,00011100,00111000,01111110,00001100,00011000,00110000,01100000' };
+  const pairs=shuffle(SCR_L.filter(([n])=>PIX[n])).slice(0,2).map(([n,f])=>({ n, a:{n,kind:'l',orig:f(),cur:null,hist:[]}, p:{n,kind:'p',orig:PIX[n].split(',').map(r=>r.split('').map(Number)),cur:null,hist:[]} }));
+  const lines=pairs.map(x=>x.a), pg=pairs[0].p, SY=pairs.flatMap(x=>[x.a,x.p]);
+  // tracé et pixels alternent : tracé de A, pixels de B, tracé de B, pixels de A…
+  const Q=[]; for(let g=0;g<GEN;g++){ const [x,y]=shuffle(pairs.slice()); [x.a,y.p,y.a,x.p].forEach(s=>Q.push([s,g])); }
   mk('div','hud','<span id="sc-n"></span><span id="sc-s"></span>',main);
   const box=mk('div','card scbox',`<div class="sctime"><i id="sc-t"></i></div><div id="sc-q" class="qbar" style="margin:8px 0"></div><svg id="sc" class="scv" viewBox="0 0 100 100"></svg>
     <div class="row" style="margin-top:8px"><button class="btn" id="sc-x">Effacer</button><button class="btn ok" id="sc-v">Valider ▶</button></div>`,main);
@@ -702,11 +707,13 @@ function gScribe(){
       return `<div class="scrow"><b>${s.kind==='p'?'🟪':'✏️'} ${s.n}</b><div class="scev"><figure>${mini(s,s.orig,COL[0])}<figcaption>original</figcaption></figure>${s.hist.map((h,i)=>`<figure>${mini(s,h,COL[i+1])}<figcaption>copie ${i+1}<br><b>${s.kind==='l'?gaps[i]+' %':gaps[i]+' case'+(gaps[i]>1?'s':'')}</b></figcaption></figure>`).join('')}</div></div>`;
     }).join('');
     const lg=lines.map(s=>{ const g=s.hist.map(h=>gapL(s.orig,h)); return g[g.length-1]-g[0]; }), grew=lg.filter(x=>x>0).length;
-    const pgap=pg.hist.map(h=>gapP(pg.orig,h));
+    const cmp=pairs.map(x=>{ const la=gapL(x.a.orig,x.a.hist[x.a.hist.length-1]), lp=gapP(x.p.orig,x.p.hist[x.p.hist.length-1]); return `<li><b>${x.n}</b> : tracé, écart final <b>${la} %</b> · pixels, <b>${lp} case${lp>1?'s':''}</b> fausse${lp>1?'s':''} sur 64</li>`; }).join('');
+    const perfect=pairs.filter(x=>gapP(x.p.orig,x.p.hist[x.p.hist.length-1])===0).length;
     D.best.scribe=(D.best.scribe||0)+1; save(); addPts(15);
     mk('div','card',`<h3 style="margin:0 0 6px">L'évolution de tes copies</h3>${rows}
-      <p>${grew>=2?'Pour tes dessins tracés, <b>l\'écart avec l\'original grandit</b> de copie en copie : chaque copie ajoute ses erreurs à celles de la précédente.':'Tu es précis ! Mais regarde bien : tes dessins tracés s\'éloignent quand même un peu de l\'original.'}
-      Pour le dessin en pixels, chaque case est <b>pleine ou vide</b> : ${pgap[pgap.length-1]===0?'tu l\'as recopié parfaitement.':'une erreur reste une erreur, mais on peut la voir et la corriger exactement.'}</p>
+      <h3 style="margin:10px 0 4px">Même symbole, deux façons de le copier</h3><ul>${cmp}</ul>
+      <p>${grew>=1?'En tracé, <b>l\'écart avec l\'original grandit</b> de copie en copie : chaque copie ajoute ses erreurs à celles de la précédente, et on ne peut pas savoir exactement où était le trait d\'origine.':'Tu es très précis en tracé ! Mais regarde bien : tes traits s\'éloignent quand même un peu de l\'original.'}
+      En pixels, chaque case est <b>pleine ou vide</b> : ${perfect===pairs.length?'tu as recopié tes symboles parfaitement.':'une erreur se voit tout de suite, case par case, et peut se corriger exactement.'}</p>
       <p>Une case pleine ou vide, c'est un <b>1</b> ou un <b>0</b>. Ton dessin en pixels peut s'écrire avec des nombres :</p>
       <div class="znums">${pg.orig.map(r=>r.join('')).join('<br>')}</div>
       <p>Une machine recopie ces nombres <b>sans aucune erreur</b>, autant de fois qu'on veut. C'est toute la force du numérique.</p>
@@ -2218,7 +2225,7 @@ function playSel(MY){
 const GAMES=[
   ['zombie','🧟','Zombies QCM','Un zombie arrive avec quatre réponses autour de lui. Tire sur la bonne : un tir raté le fait accélérer !',gZombie],
   ['inv','🕰️','Les inventions','Remets chaque famille d\'inventions dans l\'ordre, de la plus ancienne à la plus récente, puis construis la grande frise.',gInv],
-  ['scribe','✍️','CyberSpeedScribe','Recopie des symboles à toute vitesse… puis recopie tes propres copies. Que deviennent-ils ?',gScribe],
+  ['scribe','✍️','CyberSpeedScribe','Recopie des symboles, en tracé puis en pixels, à toute vitesse… puis recopie tes propres copies. Lesquels s\'abîment ?',gScribe],
   ['octo','🐙','La pieuvre laser','Une pieuvre géante attaque ton réseau. Guide les paquets jusqu\'aux tourelles (adresses IPv4) pour lancer des missiles : arbre, étoile, anneau, maillé, sous-réseaux.',gOcto],
   ['box','⬛','La boîte noire','Des nombres entrent, d\'autres sortent. Trouve la règle cachée et prouve-la.',()=>gBox(0)],
   ['feed','📱','Le fil d\'actu','Republier ou pas ? Regarde les émotions se propager et le monde changer.',gFeed],
