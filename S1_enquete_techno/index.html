@@ -126,6 +126,38 @@ body.paused .stage{filter:blur(14px)}
 .slbar i{display:block;height:100%;background:var(--good)}
 .sltc.on{border-color:var(--amber);background:#3a2f1a}
 @media (max-width:640px){ .dpwrap,.slwrap{grid-template-columns:1fr} .slflux{height:340px} .slg{grid-template-columns:110px 1fr 44px} .dppost{min-height:170px} }
+.z1{position:absolute;transform:translate(-50%,-50%);z-index:10;width:0;height:0}
+.z1 .em{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-size:64px;line-height:1;filter:drop-shadow(0 4px 4px #000a)}
+.z1.angry .em{filter:drop-shadow(0 0 12px red)}
+.z1.dead{animation:die .5s forwards;pointer-events:none}
+.z1.flee{transition:opacity .4s;opacity:0;pointer-events:none}
+.zans{position:absolute;transform:translate(-50%,-50%);width:max-content;padding:7px 10px;background:#f2ead2;color:#2a1a08;border:2px solid #5a3a1a;border-radius:9px;font:700 13px/1.2 var(--f-body);text-align:center;cursor:crosshair;box-shadow:0 3px 0 #5a3a1a}
+.zans.no{text-decoration:line-through;opacity:.45;background:#d9b6b6}
+.zans.yes{background:var(--good)}
+.ivgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0}
+.ivc{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;background:var(--panel);border:2px solid var(--line);border-radius:14px;color:var(--fg);min-height:150px}
+.ivc .pic{font-size:52px;width:92px;height:92px;display:grid;place-items:center;border-radius:50%}
+.ivc b{font-size:14px;text-align:center}
+.ivc small{font:700 12px var(--f-mono);color:var(--amber);min-height:1em}
+.ivc.done{opacity:.35;border-color:var(--good)}
+.ivc.bad{animation:shake .4s;border-color:var(--bad)}
+.ivfr{display:grid;gap:6px;margin-top:10px}
+.ivrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 8px;background:var(--deep);border-radius:10px;min-height:38px}
+.ivrow>b{font-size:13px;min-width:150px}
+.ivrow>span{display:flex;flex-wrap:wrap;gap:4px}
+.ivchip{padding:2px 6px;background:#18382d;border:1px solid var(--good);border-radius:7px;font-size:16px;transition:opacity .2s}
+.ivchip small{font:400 10px var(--f-mono);color:var(--muted)}
+.ivfly{position:fixed;z-index:200;font-size:52px;transform:translate(-50%,-50%);transition:left .55s ease-in,top .55s ease-in,transform .55s ease-in;pointer-events:none}
+.scbox{max-width:560px;margin-inline:auto}
+.sctime{height:10px;border-radius:5px;background:#2a2550;overflow:hidden}
+.sctime i{display:block;height:100%;background:var(--amber);width:100%}
+.scv{display:block;width:100%;max-width:520px;margin:auto;aspect-ratio:1;touch-action:none;border-radius:12px;cursor:crosshair}
+.scrow{margin:8px 0}
+.scrow>b{display:block;margin-bottom:4px}
+.scev{display:flex;gap:6px;overflow-x:auto}
+.scev figure{margin:0;flex:1 1 0;min-width:0;max-width:110px;text-align:center;font-size:11px;color:var(--muted)}
+.scev svg{display:block;width:100%;border-radius:8px}
+.scev b{color:var(--amber)}
 .turret{position:absolute;left:50%;bottom:6px;font-size:42px;transform:translateX(-50%);z-index:20;pointer-events:none}
 .barricade{position:absolute;left:0;right:0;bottom:62px;height:6px;background:repeating-linear-gradient(90deg,#8b5a2b 0 30px,#5a3a1a 30px 34px);opacity:.8}
 .splat{position:absolute;width:70px;height:70px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--blood) 0 40%,transparent 41%),radial-gradient(circle at 80% 30%,var(--blood) 0 14%,transparent 15%),radial-gradient(circle at 20% 75%,var(--blood) 0 12%,transparent 13%);opacity:.85;pointer-events:none;z-index:2}
@@ -378,17 +410,119 @@ function endCard(title,body,again,disc){
 }
 
 /* =========================================================
-   1 · ZOMBIES DU TEMPS : abattre les inventions de la plus ancienne à la plus récente,
-       voir la frise s'accélérer, puis recopier une courbe à la main
+   1 · ZOMBIES QCM : un zombie, quatre réponses autour de lui
    ========================================================= */
-// des familles d'inventions : chaque vague est une lignée à remettre dans l'ordre
+const ZQ=[
+  ['Quelle invention est la plus ancienne ?','La maîtrise du feu',['L\'écriture','La roue','L\'imprimerie']],
+  ['L\'écriture est apparue il y a environ…','5 300 ans',['300 000 ans','500 ans','2 millions d\'années']],
+  ['Homo sapiens existe depuis environ…','300 000 ans',['5 000 ans','2 000 ans','30 millions d\'années']],
+  ['Le numérique, c\'est d\'abord…','Transformer l\'information en nombres',['Tout ce qui est virtuel','Internet','Les jeux vidéo']],
+  ['Que montre l\'iceberg de la technologie ?','La partie cachée est bien plus grande que la partie visible',['Les ordinateurs ont froid','Le téléphone suffit à tout faire']],
+  ['Pourquoi copier un fichier ne coûte presque rien ?','Ce sont des nombres recopiés à l\'identique',['Les fichiers sont petits','Internet est gratuit']],
+  ['Juillet 2024, la mise à jour ratée de CrowdStrike…','A bloqué des millions d\'ordinateurs',['A effacé Internet','A supprimé tous les SMS']],
+  ['Internet et le Web…','Le Web est un service qui utilise Internet',['C\'est exactement la même chose','Internet est un site du Web']],
+  ['En 1703, Leibniz décrit…','Le système binaire',['L\'imprimerie','Le téléphone','La radio']],
+  ['Le métier Jacquard (1801) était programmé avec…','Des cartes perforées',['Un clavier','Un écran tactile','Le Wi-Fi']],
+  ['Avant -5000, comment écoutait-on de la musique ?','Chants, flûtes et tambours',['On n\'en écoutait pas','Avec la radio']],
+  ['Panne de courant géante en Espagne (2025) : qu\'est-ce qui marche ?','Une radio à piles',['Le distributeur de billets','Le métro','La pompe à essence']],
+  ['Le premier smartphone grand public date de…','2007',['1985','1995','2019']],
+  ['Un disque vinyle est un support…','Analogique',['Numérique','Virtuel']],
+  ['Un CD est un support…','Numérique',['Analogique','Biologique']],
+  ['ChatGPT a été rendu public en…','2022',['2007','1999','2012']],
+  ['Le premier ordinateur électronique (ENIAC) date de…','1945',['1890','1981','2000']],
+  ['Internet (ARPANET) est né en…','1969',['1989','2001','1945']],
+  ['Le Web a été inventé en…','1989',['1969','2007','1950']],
+  ['Notre relation à la technologie est…','Ambivalente : on aime et on rejette',['Toujours positive','Toujours négative']],
+  ['Pourquoi les inventions s\'accélèrent ?','L\'information circule de plus en plus vite',['On est plus intelligents qu\'avant','Il n\'y a plus de règles']]
+];
+ZQ.push(
+  ['Une IA comme ChatGPT…','Prédit la suite la plus probable d\'un texte',['Comprend tout comme un humain','Ne se trompe jamais','Cherche dans un livre secret']],
+  ['Un deepfake, c\'est…','Une vidéo ou une voix truquée par une IA',['Un virus informatique','Un réseau social','Une panne d\'Internet']],
+  ['Pour voyager sur Internet, un message est découpé en…','Paquets',['Pixels','Fichiers PDF','Morceaux de câble']],
+  ['Entre les continents, les données d\'Internet passent surtout par…','Des câbles sous-marins',['Des satellites','Des avions','Le Wi-Fi']]
+);
+function gZombie(){
+  head('🧟','Zombies QCM','Un zombie arrive avec <b>quatre réponses</b> autour de lui. <b>Tire</b> sur la bonne réponse. Un tir raté part à côté… et le zombie accélère !');
+  mk('div','hud','<span class="lives" id="zl"></span><span id="zn"></span>',main);
+  const qb=mk('div','qbar',null,main);
+  const st=mk('div','stage zst','<div class="barricade"></div><div class="turret">🔫</div>',main);
+  const QS=shuffle(ZQ.slice()).slice(0,12);
+  const S={ n:-1, lives:3, ok:0, miss:0, z:null, wait:0, over:false, W:0, H:0 };
+  const g={ over:false };
+  const measure=()=>{ S.W=st.clientWidth; S.H=st.clientHeight; };
+  const hudUp=()=>{ $('#zl').textContent='♥'.repeat(Math.max(0,S.lives))+'♡'.repeat(3-Math.max(0,S.lives)); $('#zn').textContent=`Question ${Math.min(S.n+1,QS.length)} / ${QS.length} · ${S.ok} abattus`; };
+  // les 4 réponses se placent aux coins du zombie
+  const SLOT=[[-1,-1],[1,-1],[-1,1],[1,1]];
+  function wave(){
+    if(S.z) S.z.el.remove(); S.n++;
+    if(S.n>=QS.length) return finish();
+    const [q,good,bad]=QS[S.n]; qb.textContent=q; hudUp();
+    const ans=shuffle([good,...bad.slice(0,3)]);
+    const el=mk('div','z1',`<span class="em">🧟</span>${ans.map((a,i)=>`<button class="zans" data-i="${i}">${esc(a)}</button>`).join('')}`,st);
+    const z={ el, ans, good, y:80, vy:14+S.n*1.2, ph:0, x:S.W/2, done:false };
+    el.querySelectorAll('.zans').forEach(b=>b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); shoot(z,+b.dataset.i,b); }));
+    S.z=z; lay(z);
+  }
+  function lay(z){
+    const dx=Math.min(S.W*.27,170), dy=46;
+    z.el.querySelectorAll('.zans').forEach((b,i)=>{ b.style.left=(SLOT[i][0]*dx)+'px'; b.style.top=(SLOT[i][1]*dy)+'px'; b.style.maxWidth=Math.min(S.W*.42,200)+'px'; });
+  }
+  function shoot(z,i,b){
+    if(S.over||G.pause||z.done||b.classList.contains('no')) return;
+    const zx=z.x, zy=z.y;
+    if(z.ans[i]===z.good){
+      z.done=true; S.ok++;
+      laser(st,S.W/2,S.H-30,zx,zy,'#6ee7a0'); b.classList.add('yes');
+      addPts(10+Math.max(0,Math.round((1-zy/S.H)*10)),zx,zy-50,st);
+      const sp=mk('div','splat',null,st); place(sp,zx,zy+10); setTimeout(()=>sp.remove(),1500);
+      z.el.classList.add('dead'); S.wait=1;
+    } else {
+      // le tir part à côté et le zombie accélère
+      S.miss++; b.classList.add('no');
+      const side=(Math.random()<.5?-1:1)*rand(50,80);
+      laser(st,S.W/2,S.H-30,zx+side,zy-20,'#ff5a5a');
+      z.vy*=1.45; z.el.classList.add('angry'); floatTxt(st,zx,zy-70,'Raté ! GRRR, il accélère !','#ff5a5a'); shake(st);
+    }
+  }
+  function bite(){
+    const z=S.z; z.done=true; S.lives--; hudUp(); shake(document.body);
+    const b=mk('div','blood',null,st);
+    for(let k=0;k<9;k++){ const i=mk('i',null,null,b); const s=rand(60,160); Object.assign(i.style,{width:s+'px',height:s+'px',left:rand(-5,85)+'%',top:rand(-5,70)+'%'}); }
+    setTimeout(()=>b.remove(),2300);
+    floatTxt(st,S.W/2,S.H/2,'Mordu ! Réponse : '+z.good,'#ffd0d0');
+    z.el.classList.add('flee'); S.wait=1.8;
+  }
+  function finish(){
+    S.over=g.over=true;
+    D.best.zombie=Math.max(D.best.zombie||0,S.ok); save();
+    const win=S.lives>0;
+    endCard(win?'Tu as survécu !':'Dévoré…', win?`${S.ok} zombies abattus sur ${QS.length}, ${S.miss} tirs ratés. Il te reste ${S.lives} ♥.`:`Les zombies ont franchi la barricade. ${S.ok} abattus avant la fin.`, gZombie, null);
+  }
+  g.update=dt=>{
+    if(S.over) return;
+    if(!S.W) measure();
+    if(S.wait>0){ if((S.wait-=dt)<=0){ if(S.lives<=0) return finish(); wave(); } return; }
+    const z=S.z; if(!z||z.done) return;
+    z.y+=z.vy*dt; z.ph+=dt*2.5; z.x=S.W/2+Math.sin(z.ph)*Math.min(30,S.W*.05);
+    place(z.el,z.x,z.y);
+    if(z.y>S.H-130) bite();
+  };
+  const onR=()=>{ measure(); if(S.z) lay(S.z); };
+  addEventListener('resize',onR);
+  g.stop=()=>removeEventListener('resize',onR);
+  startGame(g); measure(); hudUp(); wave();
+}
+
+/* =========================================================
+   2 · LES INVENTIONS : remettre chaque famille dans l'ordre, puis construire la frise
+   ========================================================= */
 const FAM=[
-  { e:'✍️', t:'Écrire et diffuser', items:[['✍️','Écriture',-3300],['📖','Imprimerie',1450],['⌨️','Machine à écrire',1868],['🕸️','Web',1989],['📱','Smartphone',2007]] },
-  { e:'🔥', t:'Énergie et transport', items:[['🔥','Maîtrise du feu',-400000],['🛞','Roue',-3500],['🚂','Machine à vapeur',1769],['🚆','Train à vapeur',1804],['🚗','Voiture à moteur à explosion',1886]] },
-  { e:'📡', t:'Communiquer à distance', items:[['🗼','Télégraphe à bras (Chappe)',1794],['⚡','Télégraphe électrique',1837],['☎️','Téléphone',1876],['📻','Radio',1895],['🌐','Internet',1969]] },
-  { e:'🧮', t:'Calculer', items:[['🧮','Machine à calculer de Pascal',1642],['0️⃣','Calcul en binaire',1703],['🧵','Cartes perforées (métier Jacquard)',1801],['🖥️','Premier ordinateur',1945],['🔲','Microprocesseur',1971]] },
-  { e:'📷', t:'Images et sons', items:[['🦬','Peintures dans les grottes',-36000],['📷','Photographie',1826],['🎙️','Phonographe',1877],['🎞️','Cinéma',1895],['📺','Télévision',1926]] },
-  { e:'🤖', t:'Machines qui « pensent »', items:[['♞','Automate joueur d\'échecs (truqué !)',1770],['🖥️','Premier ordinateur',1945],['♟️','Ordinateur champion d\'échecs',1997],['🗣️','Assistant vocal',2011],['🤖','ChatGPT',2022]] }
+  { e:'✍️', t:'Écrire et diffuser', c:'#ffb547', items:[['✍️','Écriture',-3300],['📖','Imprimerie',1450],['⌨️','Machine à écrire',1868],['🕸️','Web',1989],['📱','Smartphone',2007]] },
+  { e:'🔥', t:'Énergie et transport', c:'#ff7a5a', items:[['🔥','Maîtrise du feu',-400000],['🛞','Roue',-3500],['🚂','Machine à vapeur',1769],['🚆','Train à vapeur',1804],['🚗','Voiture à moteur à explosion',1886]] },
+  { e:'📡', t:'Communiquer à distance', c:'#5ce1e6', items:[['🗼','Télégraphe à bras (Chappe)',1794],['⚡','Télégraphe électrique',1837],['☎️','Téléphone',1876],['📻','Radio',1895],['🌐','Internet',1969]] },
+  { e:'🧮', t:'Calculer', c:'#b69cff', items:[['🧮','Machine à calculer de Pascal',1642],['0️⃣','Calcul en binaire',1703],['🧵','Cartes perforées (métier Jacquard)',1801],['🖥️','Premier ordinateur',1945],['🔲','Microprocesseur',1971]] },
+  { e:'📷', t:'Images et sons', c:'#ff6aa8', items:[['🦬','Peintures dans les grottes',-36000],['📷','Photographie',1826],['🎙️','Phonographe',1877],['🎞️','Cinéma',1895],['📺','Télévision',1926]] },
+  { e:'🤖', t:'Machines qui « pensent »', c:'#6ee7a0', items:[['♞','Automate joueur d\'échecs (truqué !)',1770],['🖥️','Premier ordinateur',1945],['♟️','Ordinateur champion d\'échecs',1997],['🗣️','Assistant vocal',2011],['🤖','ChatGPT',2022]] }
 ];
 const INV=FAM.flatMap(f=>f.items);
 function fmtY(y){
@@ -396,196 +530,200 @@ function fmtY(y){
   if(y<=-10000) return `il y a ${(-y).toLocaleString('fr-FR')} ans`;
   return y<0?`${-y} av. J.-C.`:String(y);
 }
-function gZombie(){
-  head('🧟','Zombies du temps','Chaque vague est une famille d\'inventions (écrire, se déplacer, calculer…). <b>Abats d\'abord la plus ANCIENNE</b>, puis la suivante : tu reconstruis la lignée. Un mauvais tir touche le zombie mais ne l\'arrête pas : il révèle sa date et devient plus rapide.');
-  mk('div','hud','<span class="lives" id="zl"></span><span id="zn"></span>',main);
+function gInv(){
+  stopGame();
+  head('🕰️','Les inventions','Pour chaque famille, clique les inventions <b>de la plus ancienne à la plus récente</b>. Chaque bonne réponse part dans ta frise. À la fin, on construit la grande frise.');
+  mk('div','hud','<span id="iv-n"></span><span id="iv-s"></span>',main);
   const qb=mk('div','qbar',null,main);
-  const st=mk('div','stage zst','<div class="barricade"></div><div class="turret">🔫</div>',main);
-  const fr=mk('div','zfr',null,main);
-  // 5 familles au hasard, 4 inventions de chaque (on garde toujours la plus ancienne et la plus récente)
-  const FS=shuffle(FAM.slice()).slice(0,5), NW=FS.length;
-  const W=FS.map(f=>{ const it=f.items.slice(); const mid=shuffle(it.slice(1,-1)).slice(0,2); return it.filter(x=>x===it[0]||x===it[it.length-1]||mid.includes(x)); });
-  const S={ w:-1, lives:3, ok:0, err:0, zs:[], wait:0, over:false, W:0, H:0, got:[] };
-  const g={ over:false };
-  const measure=()=>{ S.W=st.clientWidth; S.H=st.clientHeight; };
-  const hudUp=()=>{ $('#zl').textContent='♥'.repeat(Math.max(0,S.lives))+'♡'.repeat(3-Math.max(0,S.lives)); $('#zn').textContent=`Vague ${Math.min(S.w+1,NW)} / ${NW} · ${S.ok} abattus · ${S.err} tirs ratés`; };
-  const frUp=()=>{ fr.innerHTML=FS.map((f,i)=>{ const L=S.got.filter(o=>o.w===i).sort((a,b)=>a.it[2]-b.it[2]); return L.length?`<div class="zrow"><b>${f.e} ${f.t}</b>${L.map(o=>`<span class="zc ${o.ok?'':'miss'}">${o.it[0]} ${esc(o.it[1])}<small>${fmtY(o.it[2])}</small></span>`).join('<i>→</i>')}</div>`:''; }).join('')||'<span class="lead">Tes lignées d\'inventions se remplissent ici.</span>'; };
-  function wave(){
-    S.zs.forEach(z=>z.el.remove()); S.zs=[]; S.w++;
-    if(S.w>=NW) return finish();
-    qb.innerHTML=`${FS[S.w].e} Famille « ${FS[S.w].t} » : abats-les <b>de la plus ancienne à la plus récente</b>`; hudUp();
-    const items=shuffle(W[S.w].slice()), n=items.length;
-    items.forEach((it,i)=>{
-      const el=mk('div','z',`<span class="em">🧟</span><span class="lab">${it[0]} ${esc(it[1])}<span class="dt"></span></span>`,st);
-      const z={ el, it, x:(i+.5)/n*S.W, y:-40-rand(0,40)-(i%2)*70, vy:(13+S.w*3)*rand(.85,1.15), ph:rand(0,6), hit:0 };
-      el.addEventListener('pointerdown',ev=>{ ev.preventDefault(); shoot(z); });
-      S.zs.push(z);
+  const grid=mk('div','ivgrid',null,main);
+  const fr=mk('div','ivfr',null,main);
+  const FS=shuffle(FAM.slice()), S={ r:-1, next:0, err:0, ok:0, t0:performance.now(), got:[] };
+  fr.innerHTML=FS.map((f,i)=>`<div class="ivrow" data-r="${i}"><b style="color:${f.c}">${f.e} ${f.t}</b><span></span></div>`).join('');
+  const hud=()=>{ $('#iv-n').textContent=`Famille ${Math.min(S.r+1,FS.length)} / ${FS.length}`; $('#iv-s').textContent=`✓ ${S.ok} · ✗ ${S.err}`; };
+  function round(){
+    S.r++; S.next=0;
+    if(S.r>=FS.length) return end();
+    const f=FS[S.r], items=f.items.slice().sort((a,b)=>a[2]-b[2]);
+    qb.innerHTML=`${f.e} <b>${f.t}</b> : clique de la plus ancienne à la plus récente`;
+    grid.innerHTML='';
+    shuffle(items.map((it,k)=>[it,k])).forEach(([it,k])=>{
+      const c=mk('button','ivc',`<span class="pic" style="background:radial-gradient(circle at 50% 35%,${f.c}66,${f.c}11 70%)">${it[0]}</span><b>${esc(it[1])}</b><small></small>`,grid);
+      c.onclick=()=>tap(c,it,k,items);
     });
+    hud();
   }
-  const oldest=()=>S.zs.reduce((m,z)=>!m||z.it[2]<m.it[2]?z:m,null);
-  function shoot(z){
-    if(S.over || G.pause || S.wait>0 || !S.zs.includes(z)) return;
-    const zx=parseFloat(z.el.style.left), zy=parseFloat(z.el.style.top);
-    if(z===oldest()){
-      laser(st,S.W/2,S.H-30,zx,zy,'#6ee7a0');
-      S.ok++; addPts(10,zx,zy-30,st);
-      const sp=mk('div','splat',null,st); place(sp,zx,zy+10); setTimeout(()=>sp.remove(),1500);
-      z.el.classList.add('dead'); S.zs=S.zs.filter(o=>o!==z); setTimeout(()=>z.el.remove(),500);
-      S.got.push({it:z.it,ok:1,w:S.w}); frUp(); hudUp();
-      if(!S.zs.length) S.wait=1.1;
+  function tap(c,it,k,items){
+    if(c.disabled) return;
+    if(k===S.next){
+      S.next++; S.ok++; c.disabled=true; addPts(5);
+      // la carte rapetisse et vole vers la frise
+      const row=fr.querySelector(`.ivrow[data-r="${S.r}"] span`);
+      const chip=mk('span','ivchip',`${it[0]} <small>${fmtY(it[2])}</small>`,row); chip.title=it[1];
+      const a=c.getBoundingClientRect(), b=chip.getBoundingClientRect();
+      const fly=mk('div','ivfly',it[0],document.body); Object.assign(fly.style,{left:a.left+a.width/2+'px',top:a.top+a.height/3+'px'});
+      chip.style.opacity=0;
+      requestAnimationFrame(()=>{ Object.assign(fly.style,{left:b.left+b.width/2+'px',top:b.top+b.height/2+'px',transform:'translate(-50%,-50%) scale(.4)'}); });
+      setTimeout(()=>{ fly.remove(); chip.style.opacity=1; },600);
+      c.classList.add('done'); c.querySelector('small').textContent=fmtY(it[2]);
+      S.got.push(it);
+      if(S.next>=items.length){ hud(); setTimeout(round,900); }
+      else hud();
     } else {
-      // touché, mais ce n'est pas le plus ancien : il saigne, recule, montre sa date et accélère
-      laser(st,S.W/2,S.H-30,zx,zy,'#ff5a5a');
-      S.err++; z.hit++; z.vy*=1.25; z.y=Math.max(-20,z.y-45);
-      z.el.classList.add('hit'); z.el.querySelector('.dt').textContent=fmtY(z.it[2]);
-      const b=mk('i','zb',null,z.el); b.style.left=rand(10,70)+'%'; b.style.top=rand(0,40)+'%';
-      floatTxt(st,zx,zy-50,'Touché… mais il y a plus ancien !','#ff9a9a'); shake(st); hudUp();
+      S.err++; c.classList.remove('bad'); void c.offsetWidth; c.classList.add('bad');
+      c.querySelector('small').textContent=fmtY(it[2]);
+      toast(k<S.next?'Celle-là est déjà placée…':'Pas encore : il y a plus ancien !'); hud();
     }
   }
-  function bite(z){
-    S.lives--; shake(document.body);
-    const b=mk('div','blood',null,st);
-    for(let k=0;k<9;k++){ const i=mk('i',null,null,b); const s=rand(60,160); Object.assign(i.style,{width:s+'px',height:s+'px',left:rand(-5,85)+'%',top:rand(-5,70)+'%'}); }
-    setTimeout(()=>b.remove(),2300);
-    floatTxt(st,S.W/2,S.H/2,`Mordu ! ${z.it[1]} : ${fmtY(z.it[2])}`,'#ffd0d0');
-    z.el.classList.add('flee'); S.zs=S.zs.filter(o=>o!==z); setTimeout(()=>z.el.remove(),500);
-    S.got.push({it:z.it,ok:0,w:S.w}); frUp(); hudUp();
-    if(S.lives<=0){ S.zs.forEach(o=>{ S.got.push({it:o.it,ok:0,w:S.w}); o.el.classList.add('flee'); }); S.zs=[]; frUp(); return finish(true); }
-    if(!S.zs.length) S.wait=1.4;
+  function end(){
+    grid.innerHTML=''; qb.innerHTML='Toutes les familles sont dans l\'ordre !';
+    D.best.inv=Math.max(D.best.inv||0,S.ok); save(); addPts(Math.max(5,30-S.err*2));
+    mk('div','row',`<button class="btn ok" id="iv-f">Construire la grande frise ▶</button>`,grid);
+    $('#iv-f').onclick=()=>zFrise(S.got);
   }
-  function finish(dead){
-    S.over=g.over=true;
-    D.best.zombie=Math.max(D.best.zombie||0,S.ok); save();
-    const all=W.flat();
-    overlay(`<h2>${dead?'Dévoré…':'Tu as survécu !'}</h2><p>${S.ok} inventions abattues dans l'ordre, ${S.err} tirs ratés.</p><p>Maintenant, regardons ta frise à la bonne échelle.</p><div class="row c"><button class="btn" id="o-a">Rejouer</button><button class="btn ok" id="o-d">Voir la frise ▶</button></div>`);
-    $('#o-a').onclick=()=>{ $('#ov').hidden=true; gZombie(); };
-    $('#o-d').onclick=()=>{ $('#ov').hidden=true; zFrise(dead?all:all); };
-  }
-  g.update=dt=>{
-    if(S.over) return;
-    if(!S.W) measure();
-    if(S.wait>0){ if((S.wait-=dt)<=0){ S.wait=0; wave(); } return; }
-    for(const z of S.zs){
-      z.y+=z.vy*dt; z.ph+=dt*3;
-      place(z.el,clamp(z.x+Math.sin(z.ph)*8,60,S.W-60),z.y);
-      if(z.y>S.H-80){ bite(z); break; }
-    }
-  };
-  addEventListener('resize',measure);
-  g.stop=()=>removeEventListener('resize',measure);
-  startGame(g); measure(); frUp(); wave();
+  round();
 }
 
-// ---- la frise à l'échelle : tout s'entasse à droite, même quand on zoome ----
+// ---- la grande frise à l'échelle : tout s'entasse à droite, même quand on zoome ----
 function zFrise(items){
   stopGame();
-  head('📏','La frise à la bonne échelle','Voici tes inventions placées à leur vraie date. Change le zoom : que remarques-tu ?');
-  const now=2025, Z=[['Toute l\'histoire',-3400000],['10 000 dernières années',now-10000],['1 000 dernières années',now-1000],['500 dernières années',now-500]];
+  head('📏','La grande frise','Voici toutes tes inventions placées à leur vraie date. Change le zoom : que remarques-tu ?');
+  const now=2025, Z=[['Toute l\'histoire',-420000],['10 000 dernières années',now-10000],['1 000 dernières années',now-1000],['500 dernières années',now-500]];
   const c=mk('div','card',`<div class="row" id="zf-z">${Z.map(([t],i)=>`<button class="btn${i?'':' ok'}" data-i="${i}">${t}</button>`).join('')}</div><div class="zfw"><svg id="zf" viewBox="0 0 1000 260" aria-label="Frise chronologique des inventions"></svg></div><p id="zf-n" class="lead" style="margin:6px 0 0"></p>`,main);
-  const sorted=[...new Set(items)].sort((a,b)=>a[2]-b[2]);
+  const sorted=[...new Map(items.map(it=>[it[1],it])).values()].sort((a,b)=>a[2]-b[2]);
+  let built=0;
   function draw(i){
     const a=Z[i][1], X=y=>40+(y-a)/(now-a)*920;
-    const vis=sorted.filter(it=>it[2]>=a);
+    const vis=sorted.filter(it=>it[2]>=a).slice(0,built||undefined);
     let s=`<line x1="40" y1="200" x2="960" y2="200" stroke="#9d96cc" stroke-width="3"/>`;
     for(let k=0;k<=4;k++){ const y=Math.round(a+(now-a)*k/4); s+=`<line x1="${X(y)}" y1="194" x2="${X(y)}" y2="206" stroke="#9d96cc"/><text x="${X(y)}" y="228" font-size="15" fill="#9d96cc" text-anchor="middle">${y<-9999?Math.round(y/1000).toLocaleString('fr-FR')+' 000':y}</text>`; }
-    // les étiquettes s'empilent quand elles se chevauchent
     const lvl=[]; vis.forEach(it=>{ const x=X(it[2]); let l=0; while(lvl[l]!=null && x-lvl[l]<34) l++; lvl[l]=x; const yy=176-l*30;
       s+=`<line x1="${x}" y1="200" x2="${x}" y2="${yy+6}" stroke="#ffb547" stroke-width="1.5" opacity=".6"/><circle cx="${x}" cy="200" r="5" fill="#ffb547"/><text x="${x}" y="${yy}" font-size="22" text-anchor="middle"><title>${esc(it[1])} : ${fmtY(it[2])}</title>${it[0]}</text>`; });
     $('#zf').innerHTML=s;
-    const half=a+(now-a)/2, right=vis.filter(it=>it[2]>=half).length;
-    $('#zf-n').innerHTML=`${vis.length} inventions visibles, dont <b>${right}</b> dans la moitié droite de la frise.`;
+    const all=sorted.filter(it=>it[2]>=a), half=a+(now-a)/2, right=all.filter(it=>it[2]>=half).length;
+    $('#zf-n').innerHTML=`${all.length} inventions visibles, dont <b>${right}</b> dans la moitié droite de la frise.`;
     c.querySelectorAll('#zf-z .btn').forEach((b,j)=>b.classList.toggle('ok',j===i));
   }
-  c.querySelectorAll('#zf-z .btn').forEach(b=>b.onclick=()=>draw(+b.dataset.i));
+  c.querySelectorAll('#zf-z .btn').forEach(b=>b.onclick=()=>{ built=0; draw(+b.dataset.i); });
+  // la frise se construit invention par invention
+  const tm=setInterval(()=>{ if(!document.body.contains(c)){ clearInterval(tm); return; } built++; draw(0); if(built>=sorted.length){ clearInterval(tm); built=0; } },180);
   draw(0);
-  const q=mk('div','card',`<h3 style="margin:0 0 6px">Ce que montre la frise</h3><div class="opts">${['Les inventions arrivent de plus en plus vite','Les inventions arrivent à un rythme régulier','On invente moins qu\'avant'].map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div><div class="fb"></div>`,main);
-  q.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
-    const ok=b.dataset.i==='0'; q.querySelectorAll('.opt').forEach((x,i)=>{ x.classList.toggle('right',i===0); x.classList.toggle('wrong',x===b&&!ok); x.disabled=true; });
-    const fb=q.querySelector('.fb'); fb.className='fb '+(ok?'good':'bad');
-    fb.innerHTML=(ok?'Oui ! ':'Regarde encore : ')+'<span style="color:var(--fg);font-weight:400">sur toute l\'histoire, sur 10 000 ans, sur 1 000 ans et même sur 500 ans, la plupart des points s\'entassent à droite. Chaque invention aide à faire les suivantes, et l\'information circule de plus en plus vite (écriture, imprimerie, télégraphe, Internet).</span>';
-    if(ok) addPts(10);
-    if(!$('#zf-go')){ const r=mk('div','row',`<button class="btn ok" id="zf-go">Épreuve suivante : la copie ▶</button>`,q); r.style.marginTop='10px'; $('#zf-go').onclick=zCopy; }
-  });
+  const q=mk('div','card',`<h3 style="margin:0 0 6px">Ce que montre la frise</h3><div class="row"><button class="btn ok" id="zf-d">Noter ma découverte</button></div>`,main);
+  $('#zf-d').onclick=()=>{ q.remove(); discovery('inv','Que montre la frise des inventions ?',[
+    'Les inventions arrivent de plus en plus vite',
+    'Les inventions arrivent à un rythme régulier',
+    'On invente moins qu\'avant'],0,
+    'Sur toute l\'histoire, sur 10 000 ans, sur 1 000 ans et même sur 500 ans, la plupart des points s\'entassent à droite. Chaque invention aide à faire les suivantes, et l\'information circule de plus en plus vite (écriture, imprimerie, télégraphe, Internet).'); };
 }
 
-// ---- la copie à la main : on repasse la courbe, puis sa propre copie, encore et encore ----
-function zCopy(){
+/* =========================================================
+   3 · CYBERSPEEDSCRIBE : recopier ses propres copies, à toute vitesse
+   ========================================================= */
+// symboles tracés (coordonnées 0..100) et symboles en pixel art (8 × 8)
+const SCR_L=[
+  ['Étoile',()=>{ const p=[]; for(let i=0;i<=10;i++){ const r=i%2?20:44, a=-Math.PI/2+i*Math.PI/5; p.push([50+r*Math.cos(a),52+r*Math.sin(a)]); } return [p]; }],
+  ['Spirale',()=>{ const p=[]; for(let i=0;i<=60;i++){ const a=i/60*Math.PI*5, r=4+i*.65; p.push([50+r*Math.cos(a),50+r*Math.sin(a)]); } return [p]; }],
+  ['Éclair',()=>[[[58,6],[30,52],[50,52],[38,94],[72,40],[52,40],[66,6]]]],
+  ['Cœur',()=>{ const p=[]; for(let i=0;i<=48;i++){ const t=i/48*Math.PI*2; p.push([50+30*Math.pow(Math.sin(t),3),46-(24*Math.cos(t)-10*Math.cos(2*t)-4*Math.cos(3*t)-2*Math.cos(4*t))]); } return [p]; }],
+  ['Maison',()=>[[[18,90],[18,46],[50,14],[82,46],[82,90],[18,90]],[[42,90],[42,64],[58,64],[58,90]]]],
+  ['Vague',()=>{ const p=[]; for(let i=0;i<=40;i++){ const x=8+i*2.1; p.push([x,50+26*Math.sin(i/40*Math.PI*3)]); } return [p]; }],
+  ['Smiley',()=>{ const c=[]; for(let i=0;i<=40;i++){ const a=i/40*Math.PI*2; c.push([50+40*Math.cos(a),50+40*Math.sin(a)]); } const m=[]; for(let i=0;i<=16;i++){ const a=Math.PI*.15+i/16*Math.PI*.7; m.push([50+24*Math.cos(a),50+24*Math.sin(a)]); } return [c,[[36,36],[36,42]],[[64,36],[64,42]],m]; }]
+];
+const SCR_P=[
+  ['Envahisseur','00100100,00011000,00111100,01011010,11111111,10111101,10100101,00011000'],
+  ['Cœur pixel','01100110,11111111,11111111,11111111,01111110,00111100,00011000,00000000'],
+  ['Fantôme','00111100,01111110,11011011,11111111,11111111,11111111,11011011,10010010'],
+  ['Épée','00000011,00000111,00001110,00011100,10111000,01110000,00100000,01010000']
+];
+function gScribe(){
   stopGame();
-  head('✍️','La copie','Repasse la courbe du doigt (ou à la souris), de gauche à droite. Ensuite, l\'original disparaît : tu dois repasser <b>ta propre copie</b>. Puis encore. Regarde ce qui arrive.');
-  const NC=80, X0=10, X1=310, H=170, colX=i=>X0+(X1-X0)*i/(NC-1);
-  const k1=rand(1.5,2.5), k2=rand(3.5,5.5), p1=rand(0,6), p2=rand(0,6);
-  const orig=[...Array(NC)].map((_,i)=>{ const t=i/(NC-1); return 85+42*Math.sin(t*Math.PI*k1+p1)+20*Math.sin(t*Math.PI*k2+p2); });
-  const GEN=4, copies=[]; let cur=null, drawing=false;
-  const c=mk('div','card',`<div class="hud" style="margin:0 0 6px"><span id="zc-g"></span><span id="zc-e"></span></div>
-    <svg id="zc" class="zcv" viewBox="0 0 320 ${H}"></svg>
-    <div class="row" style="margin-top:8px"><button class="btn" id="zc-x">Effacer</button><button class="btn ok" id="zc-v">Valider ma copie</button></div><p class="lead" id="zc-m" style="margin:6px 0 0"></p>`,main);
-  const svg=$('#zc'), path=a=>a.map((y,i)=>y==null?'':`${colX(i).toFixed(1)},${y.toFixed(1)}`).filter(Boolean).join(' ');
-  const err=a=>a.reduce((s,y,i)=>s+Math.abs(y-orig[i]),0)/NC;
-  const pct=e=>Math.round(e/H*1000)/10;
-  const COL=['#5ce1e6','#6ee7a0','#ffb547','#ff6aa8'];
-  function model(){ return copies.length?copies[copies.length-1]:orig; }
+  head('✍️','CyberSpeedScribe','Recopie chaque symbole <b>avant la fin du chrono</b>. Attention : quand un symbole revient, le modèle n\'est plus l\'original… c\'est <b>ton dessin d\'avant</b>. Parfois, un symbole en pixels : colorie les cases.');
+  const GEN=4, COL=['#2a2440','#00a8c6','#17a35a','#e08a00','#e0307a'];
+  const lines=shuffle(SCR_L.slice()).slice(0,3).map(([n,f])=>({n,kind:'l',orig:f(),cur:null,hist:[]}));
+  const px=pick(SCR_P), pg={ n:px[0], kind:'p', orig:px[1].split(',').map(r=>r.split('').map(Number)), cur:null, hist:[] };
+  const SY=[...lines,pg];
+  // ordre : chaque « génération » repasse tous les symboles, dans un ordre mélangé
+  const Q=[]; for(let g=0;g<GEN;g++) shuffle(SY.slice()).forEach(s=>Q.push([s,g]));
+  mk('div','hud','<span id="sc-n"></span><span id="sc-s"></span>',main);
+  const box=mk('div','card scbox',`<div class="sctime"><i id="sc-t"></i></div><div id="sc-q" class="qbar" style="margin:8px 0"></div><svg id="sc" class="scv" viewBox="0 0 100 100"></svg>
+    <div class="row" style="margin-top:8px"><button class="btn" id="sc-x">Effacer</button><button class="btn ok" id="sc-v">Valider ▶</button></div>`,main);
+  const svg=$('#sc');
+  const S={ i:-1, sym:null, gen:0, strokes:[], grid:null, t:0, T:0, over:false, drawing:false, paint:1 };
+  const g={ over:false };
+  const pathD=strokes=>strokes.map(s=>s.length?'M'+s.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L'):'').join(' ');
   function render(){
-    const m=model(), first=!copies.length;
-    svg.innerHTML=`<defs><filter id="zcb"><feGaussianBlur stdDeviation="${first?0:1.1}"/></filter></defs><rect width="320" height="${H}" fill="#f6f1e2"/>`+
-      `<polyline points="${path(m)}" fill="none" stroke="${first?'#2a2440':'#6b6480'}" stroke-width="${first?3:5}" opacity="${first?1:.55}" filter="url(#zcb)" stroke-linecap="round"/>`+
-      (cur?`<polyline points="${path(cur)}" fill="none" stroke="#d0001f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`:'');
-    $('#zc-g').textContent=first?'Copie 1 / '+GEN+' : repasse l\'original':`Copie ${copies.length+1} / ${GEN} : repasse ta copie n°${copies.length}`;
-    $('#zc-e').textContent=copies.length?`écart de ta dernière copie avec l'original : ${pct(err(copies[copies.length-1]))} %`:'';
-  }
-  function pt(ev){ const r=svg.getBoundingClientRect(); return [(ev.clientX-r.left)/r.width*320,(ev.clientY-r.top)/r.height*H]; }
-  function mark(ev){ const [x,y]=pt(ev); const i=Math.round((x-X0)/(X1-X0)*(NC-1)); if(i<0||i>=NC) return;
-    if(cur.last!=null && Math.abs(i-cur.last)>1){ const a=cur.last, ya=cur[a]; const s=Math.sign(i-a); for(let j=a+s;j!==i;j+=s) cur[j]=ya+(y-ya)*(j-a)/(i-a); }
-    cur[i]=clamp(y,2,H-2); cur.last=i; render(); }
-  svg.addEventListener('pointerdown',ev=>{ ev.preventDefault(); if(!cur) cur=Array(NC).fill(null); cur.last=null; drawing=true; svg.setPointerCapture(ev.pointerId); mark(ev); });
-  svg.addEventListener('pointermove',ev=>{ if(drawing) mark(ev); });
-  const up=()=>{ drawing=false; if(cur) cur.last=null; };
-  svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
-  $('#zc-x').onclick=()=>{ cur=null; render(); };
-  $('#zc-v').onclick=()=>{
-    const filled=cur?cur.filter(y=>y!=null).length:0;
-    if(filled<NC*.85){ $('#zc-m').textContent='Repasse toute la courbe, de bout en bout, avant de valider.'; return; }
-    // on bouche les petits trous
-    const a=cur.slice(0,NC); for(let i=0;i<NC;i++) if(a[i]==null){ let l=i-1; while(l>=0&&a[l]==null) l--; let r=i+1; while(r<NC&&a[r]==null) r++; a[i]=l<0?a[r]:r>=NC?a[l]:a[l]+(a[r]-a[l])*(i-l)/(r-l); }
-    copies.push(a); cur=null; $('#zc-m').textContent='';
-    if(copies.length>=GEN) return result();
-    render();
-  };
-  function result(){
-    c.remove();
-    const E=copies.map(err);
-    const r=mk('div','card',`<h3 style="margin:0 0 6px">Ta copie de copie de copie…</h3>
-      <svg class="zcv" viewBox="0 0 320 ${H}"><rect width="320" height="${H}" fill="#f6f1e2"/><polyline points="${path(orig)}" fill="none" stroke="#2a2440" stroke-width="4"/>${copies.map((a,i)=>`<polyline points="${path(a)}" fill="none" stroke="${COL[i]}" stroke-width="2"/>`).join('')}</svg>
-      <p class="lead" style="margin:6px 0">En noir l'original, en couleur tes ${GEN} copies.</p>
-      <div class="zbars">${E.map((e,i)=>`<div><span>Copie ${i+1}</span><i style="width:${Math.min(100,pct(e)*6)}%;background:${COL[i]}"></i><b>${pct(e)} %</b></div>`).join('')}</div>
-      <p>${E[GEN-1]>E[0]*1.15?'<b>L\'écart grandit</b> à chaque génération : chaque copie ajoute ses propres erreurs à celles de la précédente.':'Tu es très précis ! Mais même chez toi, la dernière copie n\'est pas l\'original : chaque copie ajoute de petites erreurs.'}</p>
-      <div class="row"><button class="btn ok" id="zc-n">Et si on copiait des nombres ?</button></div>`,main);
-    addPts(15);
-    $('#zc-n').onclick=()=>{ $('#zc-n').parentNode.remove(); numeric(r,E); };
-  }
-  function numeric(r,E){
-    const N=16, nums=[...Array(N)].map((_,k)=>Math.round(99-orig[Math.round(k*(NC-1)/(N-1))]/H*99));
-    const back=nums.map(v=>(99-v)/99*H), bx=k=>X0+(X1-X0)*k/(N-1);
-    const box=mk('div','card',`<h3 style="margin:0 0 6px">La copie numérique</h3>
-      <p style="margin:0 0 6px">On mesure la courbe en ${N} points : elle devient une liste de nombres.</p>
-      <div class="znums" id="zn0">${nums.join(' · ')}</div><div id="zn-c"></div>
-      <div class="row" style="margin-top:8px"><button class="btn ok" id="zn-go">Copier les nombres ×4</button></div>`,r);
-    $('#zn-go').onclick=()=>{
-      $('#zn-go').parentNode.remove();
-      let k=0; const t=setInterval(()=>{ k++; mk('div','znums',`<small>copie ${k}</small> ${nums.join(' · ')}`,$('#zn-c')); if(k>=4){ clearInterval(t); done(); } },450);
-    };
-    function done(){
-      mk('div',null,`<svg class="zcv" viewBox="0 0 320 ${H}"><rect width="320" height="${H}" fill="#f6f1e2"/><polyline points="${path(orig)}" fill="none" stroke="#2a2440" stroke-width="4"/><polyline points="${back.map((y,k)=>bx(k).toFixed(1)+','+y.toFixed(1)).join(' ')}" fill="none" stroke="#5ce1e6" stroke-width="2" stroke-dasharray="5 4"/></svg>
-        <div class="zbars">${E.map((e,i)=>`<div><span>À la main ${i+1}</span><i style="width:${Math.min(100,pct(e)*6)}%;background:${COL[i]}"></i><b>${pct(e)} %</b></div>`).join('')}${[1,2,3,4].map(i=>`<div><span>Nombres ${i}</span><i style="width:0"></i><b>0 %</b></div>`).join('')}</div>
-        <p>La 4ᵉ copie des nombres est <b>identique</b> à la 1ʳᵉ : recopier un nombre, c'est le recopier exactement. La courbe redessinée à partir des nombres (en pointillés) est un peu simplifiée : on perd un peu à la <b>mesure</b>, une seule fois, mais plus jamais à la copie.</p>
-        <div class="row"><button class="btn ok" id="zc-d">Noter ma découverte</button></div>`,box);
-      $('#zc-d').onclick=()=>{ $('#zc-d').parentNode.remove(); discovery('zombie','Pourquoi une copie numérique ne s\'abîme pas, alors qu\'une copie à la main s\'éloigne de l\'original ?',[
-        'Parce que le numérique transforme l\'information en nombres, qu\'on recopie à l\'identique',
-        'Parce que les ordinateurs dessinent mieux que les humains',
-        'Parce qu\'une copie numérique est plus rapide'],0,
-        'Le numérique, c\'est d\'abord <b>transformer l\'information en nombres</b>. Un nombre se recopie sans erreur, des milliards de fois : c\'est pour ça qu\'une photo, une musique ou un texte se copient presque gratuitement. Et comme on copie et transmet de plus en plus vite, les inventions s\'accélèrent.'); };
+    const s=S.sym, model=s.cur||s.orig, mc=COL[S.gen];
+    let h=`<rect width="100" height="100" fill="#f6f1e2"/>`;
+    if(s.kind==='l'){
+      h+=`<path d="${pathD(model)}" fill="none" stroke="${mc}" stroke-width="${S.gen?3:2.4}" stroke-linecap="round" stroke-linejoin="round" opacity="${S.gen?.45:.8}"/>`;
+      h+=`<path d="${pathD(S.strokes)}" fill="none" stroke="${COL[S.gen+1]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+    } else {
+      for(let r=0;r<8;r++) for(let c=0;c<8;c++){ const x=4+c*11.5, y=4+r*11.5; h+=`<rect x="${x}" y="${y}" width="11" height="11" rx="1" fill="${S.grid[r][c]?COL[S.gen+1]:model[r][c]?mc+'55':'#fff'}" stroke="#ccc" stroke-width=".3"/>`; }
     }
+    svg.innerHTML=h;
   }
-  render();
+  function next(){
+    S.i++;
+    if(S.i>=Q.length) return end();
+    const [s,gn]=Q[S.i]; S.sym=s; S.gen=gn; S.strokes=[]; S.grid=[...Array(8)].map(()=>Array(8).fill(0));
+    S.T=s.kind==='p'?14:7; S.t=S.T;
+    $('#sc-q').innerHTML=`${s.kind==='p'?'🟪':'✏️'} <b>${s.n}</b> · ${gn?`copie n°${gn+1} : repasse <span style="color:${COL[gn]}">ta copie précédente</span>`:'recopie l\'original'}`;
+    $('#sc-n').textContent=`Symbole ${S.i+1} / ${Q.length}`;
+    render();
+  }
+  function validate(){
+    const s=S.sym;
+    if(s.kind==='l'){ const st=S.strokes.filter(x=>x.length>1); s.cur=st; s.hist.push(st); }
+    else { s.cur=S.grid.map(r=>r.slice()); s.hist.push(s.cur); }
+    addPts(3); next();
+  }
+  function pt(ev){ const r=svg.getBoundingClientRect(); return [clamp((ev.clientX-r.left)/r.width*100,0,100),clamp((ev.clientY-r.top)/r.height*100,0,100)]; }
+  function cell(ev){ const [x,y]=pt(ev), c=Math.floor((x-4)/11.5), r=Math.floor((y-4)/11.5); return r>=0&&r<8&&c>=0&&c<8?[r,c]:null; }
+  svg.addEventListener('pointerdown',ev=>{ ev.preventDefault(); if(S.over||G.pause) return; svg.setPointerCapture(ev.pointerId); S.drawing=true;
+    if(S.sym.kind==='l'){ S.strokes.push([pt(ev)]); }
+    else { const k=cell(ev); if(k){ S.paint=S.grid[k[0]][k[1]]?0:1; S.grid[k[0]][k[1]]=S.paint; } }
+    render(); });
+  svg.addEventListener('pointermove',ev=>{ if(!S.drawing) return;
+    if(S.sym.kind==='l'){ const s=S.strokes[S.strokes.length-1], p=pt(ev), l=s[s.length-1]; if(Math.hypot(p[0]-l[0],p[1]-l[1])>.8) s.push(p); }
+    else { const k=cell(ev); if(k) S.grid[k[0]][k[1]]=S.paint; }
+    render(); });
+  const up=()=>{ S.drawing=false; }; svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
+  $('#sc-x').onclick=()=>{ S.strokes=[]; S.grid=[...Array(8)].map(()=>Array(8).fill(0)); render(); };
+  $('#sc-v').onclick=()=>{ if(!S.over) validate(); };
+  // écart entre deux tracés : distance moyenne entre les points, dans les deux sens
+  function samp(strokes){ const o=[]; strokes.forEach(s=>{ for(let i=1;i<s.length;i++){ const [a,b]=[s[i-1],s[i]], n=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/2)); for(let k=0;k<n;k++) o.push([a[0]+(b[0]-a[0])*k/n,a[1]+(b[1]-a[1])*k/n]); } if(s.length===1) o.push(s[0]); }); return o; }
+  function gapL(A,B){ const a=samp(A), b=samp(B); if(!b.length) return 100; const md=(P,Qs)=>P.reduce((t,p)=>t+Math.min(...Qs.map(q=>Math.hypot(p[0]-q[0],p[1]-q[1]))),0)/P.length; return Math.min(100,Math.round((md(a,b)+md(b,a))/2*10)/10); }
+  const gapP=(A,B)=>{ let d=0; for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(A[r][c]!==B[r][c]) d++; return d; };
+  function mini(s,m,col){ if(s.kind==='l') return `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#f6f1e2"/><path d="${pathD(m)}" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    let h=''; for(let r=0;r<8;r++) for(let c=0;c<8;c++) if(m[r][c]) h+=`<rect x="${4+c*11.5}" y="${4+r*11.5}" width="11" height="11" fill="${col}"/>`; return `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#f6f1e2"/>${h}</svg>`; }
+  function end(){
+    S.over=g.over=true; box.remove();
+    const rows=SY.map(s=>{
+      const gaps=s.hist.map(h=>s.kind==='l'?gapL(s.orig,h):gapP(s.orig,h));
+      return `<div class="scrow"><b>${s.kind==='p'?'🟪':'✏️'} ${s.n}</b><div class="scev"><figure>${mini(s,s.orig,COL[0])}<figcaption>original</figcaption></figure>${s.hist.map((h,i)=>`<figure>${mini(s,h,COL[i+1])}<figcaption>copie ${i+1}<br><b>${s.kind==='l'?gaps[i]+' %':gaps[i]+' case'+(gaps[i]>1?'s':'')}</b></figcaption></figure>`).join('')}</div></div>`;
+    }).join('');
+    const lg=lines.map(s=>{ const g=s.hist.map(h=>gapL(s.orig,h)); return g[g.length-1]-g[0]; }), grew=lg.filter(x=>x>0).length;
+    const pgap=pg.hist.map(h=>gapP(pg.orig,h));
+    D.best.scribe=(D.best.scribe||0)+1; save(); addPts(15);
+    mk('div','card',`<h3 style="margin:0 0 6px">L'évolution de tes copies</h3>${rows}
+      <p>${grew>=2?'Pour tes dessins tracés, <b>l\'écart avec l\'original grandit</b> de copie en copie : chaque copie ajoute ses erreurs à celles de la précédente.':'Tu es précis ! Mais regarde bien : tes dessins tracés s\'éloignent quand même un peu de l\'original.'}
+      Pour le dessin en pixels, chaque case est <b>pleine ou vide</b> : ${pgap[pgap.length-1]===0?'tu l\'as recopié parfaitement.':'une erreur reste une erreur, mais on peut la voir et la corriger exactement.'}</p>
+      <p>Une case pleine ou vide, c'est un <b>1</b> ou un <b>0</b>. Ton dessin en pixels peut s'écrire avec des nombres :</p>
+      <div class="znums">${pg.orig.map(r=>r.join('')).join('<br>')}</div>
+      <p>Une machine recopie ces nombres <b>sans aucune erreur</b>, autant de fois qu'on veut. C'est toute la force du numérique.</p>
+      <div class="row"><button class="btn" id="sc-a">Rejouer</button><button class="btn ok" id="sc-d">Noter ma découverte</button></div>`,main);
+    $('#sc-a').onclick=gScribe;
+    $('#sc-d').onclick=()=>{ $('#sc-d').parentNode.remove(); discovery('scribe','Pourquoi une copie numérique ne s\'abîme pas, alors qu\'une copie à la main s\'éloigne de l\'original ?',[
+      'Parce que le numérique transforme l\'information en nombres, qu\'on recopie à l\'identique',
+      'Parce que les ordinateurs dessinent mieux que les humains',
+      'Parce qu\'une copie numérique est plus rapide'],0,
+      'Le numérique, c\'est d\'abord <b>transformer l\'information en nombres</b> (des 0 et des 1). Un nombre se recopie sans erreur, des milliards de fois : c\'est pour ça qu\'une photo, une musique ou un texte se copient presque gratuitement.'); };
+  }
+  g.update=dt=>{
+    if(S.over||!S.sym) return;
+    S.t-=dt; $('#sc-t').style.width=Math.max(0,S.t/S.T*100)+'%'; $('#sc-s').textContent=`⏱ ${Math.max(0,Math.ceil(S.t))} s`;
+    if(S.t<=0){ S.drawing=false; validate(); }
+  };
+  startGame(g); next();
 }
 
 /* =========================================================
@@ -853,16 +991,16 @@ function gBox(lv=0){
    ========================================================= */
 const EMO={ col:['😡','Colère','#ff5a5a',.85,3], peur:['😱','Peur','#b69cff',.8,2.5], rire:['😂','Rire','#ffb547',.65,2], joie:['🥰','Entraide','#6ee7a0',.55,1.5], info:['🤔','Info','#5ce1e6',.35,.6] };
 const NEWS=[
-  ['col','LaVraieInfo24','SCANDALE : la cantine va servir des insectes à tous les repas dès lundi !!!',0,'Aucune cantine n\'a annoncé ça : site connu pour ses fausses infos.'],
-  ['joie','Mairie','Grâce à une publication partagée, un lycéen retrouve le chien perdu de sa voisine',1,'Information confirmée par la mairie.'],
-  ['peur','InfoChoc','URGENT : panne d\'Internet mondiale prévue demain, retirez tout votre argent !',0,'Rumeur inventée : aucune source sérieuse.'],
-  ['info','CERN','Le Web a été inventé en 1989 au CERN par Tim Berners-Lee',1,'Fait historique vérifiable.'],
-  ['col','Clash TV','Un influenceur insulte les profs dans une vidéo vue 2 millions de fois',1,'La vidéo existe, mais la partager lui donne encore plus de vues.'],
-  ['rire','Le Parisien','Un chat bloque un train pendant 20 minutes en s\'installant au poste de conduite',1,'Vrai, et ça ne fait de mal à personne.'],
-  ['peur','Gendarmerie','Des cambrioleurs repèrent les maisons vides grâce aux photos de vacances publiées en direct',1,'Conseil de prévention réel de la gendarmerie.'],
-  ['joie','Le lycée','Collecte de vêtements chauds au lycée samedi : déjà 300 sacs !',1,'Annonce officielle du lycée.'],
+  ['col','LaVraieInfo24','SCANDALE : le bac sera supprimé dès cette année, remplacé par Parcoursup !!!',0,'Aucune annonce officielle : site connu pour ses fausses infos.'],
+  ['joie','Le lycée','Des lycéens lancent une cagnotte pour un camarade qui a tout perdu dans un incendie',1,'Cagnotte vérifiée, confirmée par le lycée.'],
+  ['peur','InfoChoc','URGENT : Parcoursup va effacer tous les vœux ce soir à minuit, connectez-vous vite !',0,'Rumeur inventée : le calendrier officiel est publié sur le site de Parcoursup.'],
+  ['info','e-Enfance','Cyberharcèlement : le 3018 est un numéro gratuit et anonyme, joignable 7 jours sur 7',1,'Numéro national officiel, géré par l\'association e-Enfance.'],
+  ['col','Clash TV','Un influenceur se moque des élèves en difficulté dans une vidéo vue 2 millions de fois',1,'La vidéo existe, mais la partager lui donne encore plus de vues.'],
+  ['rire','Journal local','Un chat bloque un train pendant 20 minutes en s\'installant au poste de conduite',1,'Vrai, et ça ne fait de mal à personne.'],
+  ['peur','Gendarmerie','Des escrocs recrutent des ados sur Snapchat pour « prêter » leur compte bancaire',1,'Arnaque réelle (« mules financières ») : la gendarmerie alerte régulièrement.'],
+  ['joie','Le lycée','Friperie solidaire au lycée samedi : vêtements à 1 €, déjà 300 pièces données !',1,'Annonce officielle du lycée.'],
   ['col','JeuxNews2000','Le gouvernement va INTERDIRE les jeux vidéo aux moins de 18 ans',0,'Faux : aucune loi de ce type.'],
-  ['peur','@vid_insolite','VIDÉO : un requin filmé dans la Seine à Paris !',0,'C\'est un hypertrucage (deepfake).'],
+  ['peur','@vid_insolite','VIDÉO : une IA pirate tous les téléphones d\'un lycée en 10 secondes !',0,'Vidéo truquée : un montage repéré par des vérificateurs.'],
   ['info','Santé publique','Étude : un ado sur trois dort moins de 7 heures à cause des écrans le soir',1,'Étude réelle, publiée et sourcée.'],
   ['rire','Le lycée','Une prof de SNT fait cours déguisée en pieuvre géante',1,'Photo authentique.']
 ];
@@ -955,20 +1093,20 @@ function gFeed(){
    5 · LA BULLE : l'algorithme apprend de tes likes
    ========================================================= */
 // thèmes rangés en cercle : chaque thème est voisin des deux d'à côté
-const TOP=[['⚽','Sport'],['🎮','Jeux vidéo'],['💻','Tech'],['🔬','Sciences'],['🌍','Climat'],['🐼','Animaux'],['😂','Humour'],['🎵','Musique'],['👗','Mode'],['🎬','Cinéma'],['🚨','Faits divers'],['🗳️','Politique']];
+const TOP=[['⚽','Sport'],['🎮','Jeux vidéo'],['📱','Réseaux sociaux'],['🤖','IA et tech'],['🔐','Arnaques en ligne'],['🎓','Lycée et études'],['💶','Jobs et argent'],['🌍','Climat'],['🩺','Santé'],['🎵','Musique'],['👗','Mode'],['🎬','Séries et ciné']];
 const ART=[
-  ['Le PSG gagne au bout du suspense','Une lycéenne sélectionnée en équipe de France de handball','Les JO 2028 dévoilent leurs nouveaux sports'],
-  ['Le jeu le plus attendu de l\'année repoussé','Un joueur termine Zelda en 20 minutes','Les e-sportifs bientôt reconnus comme athlètes ?'],
-  ['Un nouveau téléphone pliable à 2 000 €','Une IA écrit un roman entier','Panne géante chez un réseau social'],
-  ['Le télescope James Webb photographie une galaxie record','Des chercheurs recréent un son vieux de 3 000 ans','Une fusée réutilisable se pose sur une barge'],
-  ['Record de chaleur en octobre','Les glaciers des Alpes ont perdu 10 % en deux ans','Une ville rend ses bus gratuits pour moins polluer'],
-  ['Un bébé panda est né au zoo de Beauval','Les abeilles reviennent dans les villes sans pesticides','Un chien sauve son maître d\'une avalanche'],
-  ['Le mème du chat qui juge tout le monde','Un prof se filme en train de rater sa démo','Les pires titres de films traduits en français'],
-  ['Un rappeur français bat un record de streams','Concert surprise dans le métro','La musique la plus écoutée au monde cette semaine'],
-  ['La mode des années 2000 revient','Une marque accusée de détruire ses invendus','Des vêtements fabriqués avec des bouteilles en plastique'],
-  ['Le film de super-héros de trop ?','Un film d\'animation français aux Oscars','Les séries les plus regardées du mois'],
-  ['Incendie spectaculaire dans un entrepôt','Arnaque au faux colis : des milliers de victimes','Course-poursuite filmée en direct'],
-  ['Le vote à 16 ans en débat','Grève dans les transports jeudi','Un député interpelle le ministre sur les écrans à l\'école']
+  ['Foot féminin : record d\'affluence en championnat','Une lycéenne sélectionnée en équipe de France de handball','JO d\'hiver 2030 : les Alpes françaises se préparent'],
+  ['Le jeu le plus attendu de l\'année encore repoussé','Une lycéenne de 16 ans en finale d\'un tournoi d\'e-sport','PEGI 16, PEGI 18 : à quoi servent ces logos ?'],
+  ['Réseaux sociaux avant 15 ans : où en est le débat ?','Une « trend » dangereuse envoie des ados aux urgences','Cyberharcèlement : le 3018 répond 7 jours sur 7'],
+  ['ChatGPT et devoirs : les profs changent leurs méthodes','Deepfake : une fausse vidéo d\'élève circule','Panne géante chez un réseau social'],
+  ['Arnaque au faux colis : des milliers de victimes','Faux concours sur Instagram : ne donne jamais ton code','Des ados recrutés comme « mules » financières'],
+  ['Parcoursup : les vœux, mode d\'emploi','Pause numérique : portable rangé toute la journée au collège','Bac de français : le sujet qui a fait réagir'],
+  ['Job d\'été : on peut travailler dès 14 ans, sous conditions','Précarité étudiante : les files s\'allongent aux colis repas','Livreur à vélo : une journée avec un étudiant'],
+  ['Canicule : des écoles fermées en pleine fin d\'année','Les glaciers suisses ont perdu 10 % en deux ans','Une ville rend ses bus gratuits pour moins polluer'],
+  ['Santé mentale des jeunes : grande cause nationale en 2025','Les « puffs » désormais interdites à la vente en France','Sommeil : les ados dorment de moins en moins'],
+  ['Un rappeur français bat un record de streams','Concert surprise dans le métro','Festivals : le prix des billets fait polémique'],
+  ['Seconde main : les ados revendent leurs vêtements en ligne','Fast fashion : la France veut freiner la mode éphémère','La mode des années 2000 revient'],
+  ['Les séries les plus regardées du mois','Un film d\'animation français cartonne au cinéma','Le film de super-héros de trop ?']
 ];
 const ADJ=(a,b)=>{ const d=Math.abs(a-b); return Math.min(d,TOP.length-d); };
 function gBubble(){
@@ -1039,10 +1177,10 @@ function gBubble(){
 /* =========================================================
    6 · LES LIKES : hasard, gamification et superstition
    ========================================================= */
-const TY=[['chat','🐱','Chat'],['repas','🍕','Repas'],['selfie','🤳','Selfie'],['jeu','🎮','Jeu vidéo'],['sport','⚽','Sport'],['paysage','🌅','Paysage']];
+const TY=[['chat','🐱','Chat'],['repas','🍕','Repas'],['selfie','🤳','Selfie'],['jeu','🎮','Jeu vidéo'],['sport','⚽','Sport'],['concert','🎤','Concert']];
 const MOM=[['matin','☀️','Matin'],['midi','🕛','Midi'],['soir','🌙','Soir']];
-const CAP={ chat:['Mon chat juge ma vie','Il a encore renversé mon verre','Mode sieste activé'], repas:['Les pâtes de minuit','Burger maison','Cantine du jour…'], selfie:['Nouvelle coupe !','Avant le contrôle de maths','Fatigué mais stylé'],
-  jeu:['Top 1 en solo !','Le bug le plus drôle','Speedrun raté'], sport:['Panier du milieu du terrain','Mon premier 10 km','Le but de l\'année (ou pas)'], paysage:['Coucher de soleil au lycée','Brouillard ce matin','La mer en hiver'] };
+const CAP={ chat:['Mon chat juge mes révisions','Il s\'est couché sur mon clavier','Mode sieste activé'], repas:['Pâtes de minuit, budget serré','Le kebab d\'après le bac blanc','Cantine du jour…'], selfie:['Nouvelle coupe !','Avant l\'oral du bac','Look 100 % seconde main'],
+  jeu:['Top 1 en solo !','Le bug le plus drôle','Ma première partie classée'], sport:['Panier du milieu du terrain','Mon premier 10 km','Le but de l\'année (ou pas)'], concert:['Premier rang au festival !','Le concert de ma vie','Plus de voix, aucun regret'] };
 const FANS=['lea_28','tom.b','ines_x','noah2009','jade.pix','yanis_off','emma.zz','sacha_k','lucas.art','manon_ok','rayan.mp4','chloe_dsn'];
 const LVL=[[0,'Inconnu'],[15,'Débutant'],[50,'Petite étoile'],[120,'Influenceur'],[250,'Star du lycée'],[500,'Célébrité']];
 let AC=null;
@@ -1854,9 +1992,9 @@ function playReseau(C){
    8 · LA BOUCLE DE DOPAMINE : la récompense imprévisible entretient l'envie
    ========================================================= */
 const DOPA={
-  bof:[['📢','Une pub pour des chaussettes'],['🌫️','Une photo floue du ciel'],['🥱','Ton oncle partage la météo'],['📄','Le règlement du CDI'],['🧾','Une pub pour une banque'],['🪑','Une chaise. Juste une chaise.'],['🚧','Travaux sur la rocade'],['🥦','Recette de brocolis vapeur']],
-  bien:[['🐱','Un chat qui tombe du canapé'],['😂','Un mème qui te fait rire'],['🎵','Le son du moment'],['🍕','Une pizza énorme'],['🐶','Un chien qui fait du skate'],['🎮','Un clip de ton jeu préféré']],
-  top:[['🔥','Une vidéo INCROYABLE'],['💘','Ton crush a liké ta photo !'],['🏆','Badge rare débloqué !'],['🤯','Le secret du prochain épisode'],['⭐','Une star te répond !'],['🎁','Tu as gagné un concours !']]
+  bof:[['📢','Une pub pour des chaussettes'],['🌫️','Une photo floue du ciel'],['🥱','Ton oncle partage la météo'],['📄','Le règlement du CDI'],['🧾','Une pub pour une assurance'],['🪑','Une chaise. Juste une chaise.'],['🚌','Ton bus a 5 min de retard'],['🥦','Recette de brocolis vapeur']],
+  bien:[['🐱','Un chat qui tombe du canapé'],['😂','Un mème sur le bac blanc'],['🎵','Le son du moment'],['⚽','Le but de la semaine'],['🛍️','Une pépite en friperie'],['🎮','Un clip de ton jeu préféré']],
+  top:[['🔥','Une vidéo INCROYABLE'],['💘','Ton crush a liké ta photo !'],['🏆','Badge rare débloqué !'],['🤯','Le secret du prochain épisode'],['🎟️','Places de concert gagnées !'],['🎓','Parcoursup : un « oui » !']]
 };
 const DRV={ bof:0, bien:1, top:3 };
 function gDopa(){
@@ -1957,8 +2095,8 @@ function gDopa(){
 /* =========================================================
    9 · LE SÉLECTEUR : boucle qui s'emballe et contre-réaction
    ========================================================= */
-const TH=[['⚽','Sport','#5ce1e6'],['🎮','Jeux vidéo','#b69cff'],['🎵','Musique','#ff6aa8'],['👗','Mode','#ffb547'],['🔬','Sciences','#6ee7a0'],['📰','Actu','#ff7a5a']];
-const THT=[['Le but de l\'année','Match fou hier soir','Record du monde !','Transfert surprise'],['Nouvelle map','Speedrun record','Bug hilarant','Sortie du jeu attendu'],['Nouveau clip','Concert surprise','Le son de l\'été','Duo inattendu'],['Look de la semaine','Défilé en direct','Friperie : la pépite','Tendance sneakers'],['Une étoile explose','Le robot qui marche','Expérience maison','Un nouveau dinosaure'],['Élections','Météo extrême','Grève demain','Découverte au Pérou']];
+const TH=[['⚽','Sport','#5ce1e6'],['🎮','Jeux vidéo','#b69cff'],['🎵','Musique','#ff6aa8'],['🎓','Orientation','#ffb547'],['🌍','Climat','#6ee7a0'],['🤖','Réseaux & IA','#ff7a5a']];
+const THT=[['Le but de l\'année','Match fou hier soir','Record du monde !','Transfert surprise'],['Nouvelle map','Speedrun record','Bug hilarant','Tournoi e-sport'],['Nouveau clip','Concert surprise','Le son de l\'été','Billets de festival'],['Parcoursup : J-7','Bac : le sujet de philo','Fiches de révision','Quel métier pour moi ?'],['Canicule en juin','Marche pour le climat','Vélo ou bus ?','Éco-anxiété : en parler'],['ChatGPT et devoirs','Deepfake démasqué','Majorité numérique','Pause numérique']];
 function gSel(){
   head('🎚️','Le sélecteur','Choisis <b>2 thèmes</b> que tu aimes. Ensuite, tu likes dans le flux et tu règles le sélecteur de l\'algorithme… et tu regardes si le flux te ressemble.');
   const box=mk('div','games',null,main); const picks=new Set();
@@ -2078,7 +2216,9 @@ function playSel(MY){
 
 /* ---------- menu ---------- */
 const GAMES=[
-  ['zombie','🧟','Zombies du temps','Une horde d\'inventions attaque : abats-les de la plus ancienne à la plus récente. Puis recopie une courbe à la main… et regarde-la s\'abîmer.',gZombie],
+  ['zombie','🧟','Zombies QCM','Un zombie arrive avec quatre réponses autour de lui. Tire sur la bonne : un tir raté le fait accélérer !',gZombie],
+  ['inv','🕰️','Les inventions','Remets chaque famille d\'inventions dans l\'ordre, de la plus ancienne à la plus récente, puis construis la grande frise.',gInv],
+  ['scribe','✍️','CyberSpeedScribe','Recopie des symboles à toute vitesse… puis recopie tes propres copies. Que deviennent-ils ?',gScribe],
   ['octo','🐙','La pieuvre laser','Une pieuvre géante attaque ton réseau. Guide les paquets jusqu\'aux tourelles (adresses IPv4) pour lancer des missiles : arbre, étoile, anneau, maillé, sous-réseaux.',gOcto],
   ['box','⬛','La boîte noire','Des nombres entrent, d\'autres sortent. Trouve la règle cachée et prouve-la.',()=>gBox(0)],
   ['feed','📱','Le fil d\'actu','Republier ou pas ? Regarde les émotions se propager et le monde changer.',gFeed],
@@ -2090,7 +2230,7 @@ const GAMES=[
 ];
 function menu(){
   stopGame();
-  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Neuf épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
+  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Onze épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
     <div class="games">${GAMES.map(([id,e,t,d],i)=>`<button class="gcard${D.disc[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.disc[id]?'✓ découverte notée':''}${D.best[id]?` · record ${D.best[id].toLocaleString('fr-FR')}`:''}</span></button>`).join('')}</div>
     <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button></div>`;
   main.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>GAMES[+b.dataset.i][4]());
