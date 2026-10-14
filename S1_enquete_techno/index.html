@@ -81,6 +81,51 @@ body.paused .stage{filter:blur(14px)}
 .zbars i{display:block;height:12px;border-radius:6px;min-width:2px;background:var(--good)}
 .znums{font:700 14px var(--f-mono);padding:6px 8px;background:var(--deep);border-radius:8px;margin-top:4px;overflow-wrap:anywhere}
 .znums small{color:var(--muted);font-weight:400;margin-right:6px}
+.dpwrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.dpphone{position:relative;background:#0b0a1c;border:3px solid #3a3468;border-radius:26px;padding:16px 12px;max-width:340px;margin:auto}
+.dppost{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:14px;background:#f6f1e2;color:#2a2440;text-align:center;padding:12px;position:relative;overflow:hidden}
+.dppost.load{background:#d9d4c4}
+.dppost.top{background:linear-gradient(135deg,#ffe08a,#ff9ad0);animation:pop .35s}
+.dppost.bof{background:#e6e3da;color:#777}
+.dpe{font-size:64px;line-height:1}
+.dptx{font:700 17px var(--f-body)}
+.dpsp{position:absolute;inset:0;font-size:40px;display:flex;align-items:flex-start;justify-content:flex-end;padding:8px}
+@keyframes pop{from{transform:scale(.85)}to{transform:scale(1)}}
+.dpnotif{position:absolute;top:-10px;right:-6px;z-index:5;background:var(--bad);color:#fff;border-radius:16px;padding:6px 10px;font:700 15px var(--f-mono);cursor:pointer;box-shadow:0 0 0 4px #ff5a5a55;animation:pop .4s}
+.dpgo{min-width:150px;font-size:18px}
+.dpbrain{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:10px}
+.dpbrain svg{display:block;width:100%;height:auto;border-radius:8px}
+.dpt{font:700 13px var(--f-body);color:var(--muted);margin-bottom:4px}
+.dpg{height:14px;border-radius:7px;background:#2a2550;overflow:hidden}
+.dpg i{display:block;height:100%;width:0;background:var(--pink);transition:width .3s}
+.dploop{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.dploop span{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font:700 12px var(--f-body);text-align:center;transition:background .2s}
+.dploop span.on{background:var(--amber);color:var(--ink)}
+.dploop.big span{font-weight:400;font-size:13px}
+.dploop span:nth-child(3){order:4} .dploop span:nth-child(4){order:3}
+.slwrap{display:grid;grid-template-columns:1fr 1.1fr;gap:12px;align-items:start}
+.slflux{height:min(70vh,560px)}
+.slit{position:absolute;width:56%;display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center;padding:8px 10px;background:#f6f1e2;color:#2a2440;border:3px solid;border-radius:12px;cursor:pointer;transition:transform .2s}
+.slit span{grid-row:span 2;font-size:26px}
+.slit b{font:700 13px var(--f-body);color:#2a2440}
+.slit i{font:400 11px var(--f-body);color:#6b6480;font-style:normal}
+.slit.liked{transform:scale(.92);background:#ffd6e8}
+.slsel{display:grid;gap:8px;background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:10px}
+.slsel label{display:grid;font:700 14px var(--f-body)}
+.slsel small{font-weight:400;color:var(--muted);font-size:12px}
+.slsel input{width:100%;accent-color:var(--amber);height:28px}
+.slg{display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center;margin-top:8px;font-size:13px}
+.slhist{display:flex;gap:2px;margin-top:8px;height:14px}
+.slhist i{flex:1;border-radius:2px}
+.slprof{margin-top:8px;font-size:12px;color:var(--muted)}
+.slprof>div{display:grid;grid-template-columns:24px 1fr;gap:6px;align-items:center;margin-top:2px}
+.slprof .dpg{height:8px}
+.slloop{display:grid;gap:6px;margin-top:8px;font-size:13px}
+.slloop div{padding:6px 8px;border:1px solid var(--line);border-radius:8px;transition:opacity .3s}
+.slbar{display:inline-block;width:80px;height:10px;border-radius:5px;background:#2a2550;vertical-align:middle;overflow:hidden}
+.slbar i{display:block;height:100%;background:var(--good)}
+.sltc.on{border-color:var(--amber);background:#3a2f1a}
+@media (max-width:640px){ .dpwrap,.slwrap{grid-template-columns:1fr} .slflux{height:340px} .slg{grid-template-columns:110px 1fr 44px} .dppost{min-height:170px} }
 .turret{position:absolute;left:50%;bottom:6px;font-size:42px;transform:translateX(-50%);z-index:20;pointer-events:none}
 .barricade{position:absolute;left:0;right:0;bottom:62px;height:6px;background:repeating-linear-gradient(90deg,#8b5a2b 0 30px,#5a3a1a 30px 34px);opacity:.8}
 .splat{position:absolute;width:70px;height:70px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--blood) 0 40%,transparent 41%),radial-gradient(circle at 80% 30%,var(--blood) 0 14%,transparent 15%),radial-gradient(circle at 20% 75%,var(--blood) 0 12%,transparent 13%);opacity:.85;pointer-events:none;z-index:2}
@@ -1729,6 +1774,232 @@ function playReseau(C){
   drawNet(); intro();
 }
 
+/* =========================================================
+   8 · LA BOUCLE DE DOPAMINE : la récompense imprévisible entretient l'envie
+   ========================================================= */
+const DOPA={
+  bof:[['📢','Une pub pour des chaussettes'],['🌫️','Une photo floue du ciel'],['🥱','Ton oncle partage la météo'],['📄','Le règlement du CDI'],['🧾','Une pub pour une banque'],['🪑','Une chaise. Juste une chaise.'],['🚧','Travaux sur la rocade'],['🥦','Recette de brocolis vapeur']],
+  bien:[['🐱','Un chat qui tombe du canapé'],['😂','Un mème qui te fait rire'],['🎵','Le son du moment'],['🍕','Une pizza énorme'],['🐶','Un chien qui fait du skate'],['🎮','Un clip de ton jeu préféré']],
+  top:[['🔥','Une vidéo INCROYABLE'],['💘','Ton crush a liké ta photo !'],['🏆','Badge rare débloqué !'],['🤯','Le secret du prochain épisode'],['⭐','Une star te répond !'],['🎁','Tu as gagné un concours !']]
+};
+const DRV={ bof:0, bien:1, top:3 };
+function gDopa(){
+  head('🧠','La boucle de dopamine','Fais défiler ton fil. À côté, un cerveau simulé montre ta <b>dopamine</b>, la molécule de l\'envie. Observe quand elle monte… et quand elle chute.');
+  mk('div','hud','<span id="dp-ph"></span><span id="dp-n"></span>',main);
+  mk('div','dpwrap',`<div><div class="dpphone"><div class="dpnotif" id="dp-not" hidden>🔔 <b>3</b></div><div class="dppost" id="dp-post"></div></div>
+      <div class="row" style="margin-top:8px"><button class="btn ok dpgo" id="dp-go">Suivant ▶</button><button class="btn" id="dp-stop" hidden>J'arrête</button></div></div>
+    <div class="dpbrain"><div class="dpt">🧠 Dopamine</div><svg id="dp-c" viewBox="0 0 300 120" aria-label="Courbe de dopamine"></svg>
+      <div class="dpt" style="margin-top:6px">🤤 Envie de continuer</div><div class="dpg"><i id="dp-e"></i></div>
+      <div class="dploop" id="dp-loop"><span data-k="0">🔔 Déclencheur</span><span data-k="1">👆 Action</span><span data-k="2">🎁 Récompense</span><span data-k="3">🤤 Envie</span></div>
+      <p class="lead" id="dp-m" style="margin:6px 0 0;font-size:13px"></p></div>`,main);
+  const z=mk('div',null,null,main);
+  // phase 1 : récompense prévisible (bof, bof, SUPER…) ; phase 2 : récompense imprévisible
+  const S={ ph:1, n:0, n2:0, V:[0,0,0], V2:0, pts:[], env:.3, busy:false, notT:rand(6,10), nots:0, d1:[], d2:[], over:false, idle:0 };
+  const g={ over:false };
+  const hud=()=>{ $('#dp-ph').textContent=S.ph===1?'Phase 1 : fil prévisible':'Phase 2 : fil imprévisible'; $('#dp-n').textContent=S.ph===1?`Post ${S.n} / 15`:`${S.n2} posts`; };
+  const loop=k=>{ document.querySelectorAll('#dp-loop span').forEach(s=>s.classList.toggle('on',+s.dataset.k===k)); };
+  function plot(v,kind){ S.pts.push({v,kind}); if(S.pts.length>36) S.pts.shift(); draw(); }
+  function draw(){
+    const P=S.pts, x=i=>8+i*(284/35), y=v=>60-clamp(v,-1.6,3)*17;
+    let s=`<rect width="300" height="120" fill="#0b0a1c"/><line x1="0" y1="60" x2="300" y2="60" stroke="#3a3468" stroke-dasharray="4 4"/><text x="296" y="56" font-size="9" fill="#9d96cc" text-anchor="end">niveau de base</text>`;
+    s+=`<polyline fill="none" stroke="#ffb547" stroke-width="2.5" stroke-linejoin="round" points="${P.map((p,i)=>`${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ')}"/>`;
+    P.forEach((p,i)=>{ if(p.kind) s+=`<circle cx="${x(i)}" cy="${y(p.v)}" r="3" fill="${p.kind==='cue'?'#5ce1e6':p.v<-.2?'#ff5a5a':'#6ee7a0'}"/>`; });
+    $('#dp-c').innerHTML=s;
+  }
+  const envUp=()=>{ $('#dp-e').style.width=Math.round(clamp(S.env,0,1)*100)+'%'; };
+  function show(kind){ const [e,t]=pick(DOPA[kind]); $('#dp-post').innerHTML=`<div class="dpe ${kind}">${e}</div><div class="dptx">${t}</div>${kind==='top'?'<div class="dpsp">✨</div>':''}`; $('#dp-post').className='dppost '+kind; }
+  function next(fromNotif){
+    if(S.busy||S.over) return; S.busy=true; S.idle=0;
+    let kind, exp;
+    if(S.ph===1){ const pos=S.n%3; kind=pos===2?'top':'bof'; exp=S.V[pos]; }
+    else { const r=Math.random(); kind=fromNotif?(r<.5?'top':'bien'):r<.25?'top':r<.55?'bien':'bof'; exp=S.V2; }
+    loop(1);
+    // anticipation : la dopamine monte AVANT la récompense quand on l'attend
+    plot(0,null); plot(exp*.8,'cue');
+    $('#dp-post').className='dppost load'; $('#dp-post').innerHTML='<div class="dpe">⏳</div>';
+    setTimeout(()=>{
+      if(S.over) return;
+      const r=DRV[kind], d=r-exp;
+      if(S.ph===1){ const pos=S.n%3; S.V[pos]+=.45*d; S.n++; S.d1.push(d); }
+      else { S.V2+=.2*d; S.n2++; S.d2.push(d); }
+      show(kind); loop(2); plot(d,'rew'); plot(0,null);
+      S.env=clamp(S.env*.82+.15*Math.abs(d)+(d<0?.1:0)+(S.ph===2?.03:0),0,1); envUp();
+      const m=d>1.2?'Surprise ! Pic de dopamine.':d<-.3?'Tu attendais mieux : la dopamine chute sous la normale… et tu as envie de réessayer.':Math.abs(d)<.3&&r>0?'Tu savais que ça arrivait : presque plus de pic au moment de la récompense.':S.ph===1&&exp>1.2&&kind==='top'?'La dopamine monte maintenant AVANT le post, dès que tu sais qu\'il arrive.':'Rien de spécial.';
+      $('#dp-m').textContent=m;
+      setTimeout(()=>loop(3),500);
+      S.busy=false; hud();
+      if(S.ph===1 && S.n>=15) endPhase1();
+      if(S.ph===2 && S.n2>=8) $('#dp-stop').hidden=false;
+      if(S.ph===2 && S.n2>=45) finish();
+    },550);
+  }
+  function endPhase1(){
+    S.busy=true;
+    const last=S.d1.slice(-3).map(Math.abs), avgL=last.reduce((a,b)=>a+b,0)/3, first=Math.abs(S.d1[2]);
+    z.innerHTML=''; mk('div','card',`<h3 style="margin:0 0 6px">Fil prévisible : ton cerveau a compris le truc</h3>
+      <p>Au début, le super post a fait un pic de dopamine de <b>${first.toFixed(1)}</b>. À la fin, seulement <b>${avgL.toFixed(1)}</b> : comme tu savais qu'un super post arrive tous les 3, ce n'était plus une surprise. La dopamine montait <b>avant</b>, au moment d'appuyer (points bleus), puis plus rien.</p>
+      <p>Ton envie de continuer : <b>${Math.round(S.env*100)} %</b>. Prévisible = vite ennuyeux.</p>
+      <p><b>Phase 2</b> : maintenant, impossible de deviner ce qui arrive. Fais défiler aussi longtemps que tu veux, et appuie sur « J'arrête » quand tu as envie d'arrêter.</p>
+      <div class="row"><button class="btn ok" id="dp-p2">Phase 2 ▶</button></div>`,z);
+    $('#dp-p2').onclick=()=>{ z.innerHTML=''; S.ph=2; S.busy=false; S.V2=1; hud(); $('#dp-m').textContent=''; $('#dp-post').className='dppost'; $('#dp-post').innerHTML='<div class="dpe">📱</div><div class="dptx">Appuie sur Suivant</div>'; };
+  }
+  function finish(){
+    if(S.over) return; S.over=g.over=true; $('#dp-go').disabled=true; $('#dp-stop').hidden=true; $('#dp-not').hidden=true;
+    const av=a=>a.length?a.reduce((x,y)=>x+Math.abs(y),0)/a.length:0, a1=av(S.d1.slice(-6)), a2=av(S.d2.slice(-10));
+    addPts(20); D.best.dopa=Math.max(D.best.dopa||0,S.n2); save();
+    z.innerHTML='';
+    mk('div','card',`<h3 style="margin:0 0 6px">Ce qui se passait dans ton cerveau</h3>
+      <ul><li>Fil prévisible : surprise moyenne à la fin <b>${a1.toFixed(1)}</b>. Fil imprévisible : <b>${a2.toFixed(1)}</b>, ${a2>a1*1.5?'beaucoup plus':'plus'} : le cerveau n'arrive jamais à prévoir, donc il reste en alerte.</li>
+      <li>Tu as fait défiler <b>${S.n2} posts</b> dans la phase 2${S.nots?`, et tu as touché <b>${S.nots} notification${S.nots>1?'s':''}</b> 🔔`:''}.</li>
+      <li>Après chaque post décevant, la dopamine tombait <b>sous la normale</b> : un petit manque, qui donne envie… du post suivant.</li></ul>
+      <div class="dploop big"><span>🔔 <b>Déclencheur</b><br>notification, ennui, pouce sur l'écran</span><span>👆 <b>Action</b><br>faire défiler, ouvrir l'appli</span><span>🎁 <b>Récompense imprévisible</b><br>parfois super, souvent bof</span><span>🤤 <b>Envie</b><br>la dopamine pousse à recommencer</span></div>
+      <h3 style="margin:12px 0 6px">Ce que disent les chercheurs</h3>
+      <ul><li>Wolfram Schultz (1997) a mesuré les neurones à dopamine de singes : ils s'activent pour une récompense <b>inattendue</b>, puis, une fois qu'elle est prévisible, pour le <b>signal</b> qui l'annonce. Si la récompense attendue ne vient pas, leur activité chute. C'est l'« erreur de prédiction ».</li>
+      <li>La dopamine n'est pas la molécule du plaisir mais celle de l'<b>envie</b> et de l'apprentissage : elle pousse à chercher.</li>
+      <li>Les récompenses imprévisibles (machines à sous, défilement infini, likes) sont celles qui font le plus recommencer (Skinner, voir l'épreuve des likes).</li>
+      <li>Nuance : parler d'« addiction » aux écrans fait débat. L'effet moyen des écrans sur le bien-être des ados mesuré par les études est faible (Orben et Przybylski, 2019) ; tout dépend de l'usage.</li></ul>
+      <p><b>Casser la boucle</b> : couper le déclencheur (notifications), rendre l'action moins facile (se déconnecter, appli hors de l'écran d'accueil), mettre une fin (minuteur, pas de défilement infini).</p>
+      <div class="row"><button class="btn ok" id="dp-d">Noter ma découverte</button></div>`,z);
+    $('#dp-d').onclick=()=>{ $('#dp-d').parentNode.remove(); discovery('dopa','Pourquoi a-t-on du mal à arrêter de faire défiler un fil ?',[
+      'Parce que les récompenses imprévisibles entretiennent l\'envie : la dopamine pousse à chercher la prochaine',
+      'Parce que chaque post fait toujours autant plaisir',
+      'Parce que le téléphone nous empêche physiquement d\'arrêter'],0,
+      'La dopamine réagit à la <b>surprise</b> : quand on ne peut pas prévoir si le prochain post sera super, chaque post décevant crée un petit manque et chaque bon post un pic. Déclencheur → action → récompense imprévisible → envie : c\'est une boucle.'); };
+  }
+  $('#dp-go').onclick=()=>next(false);
+  $('#dp-stop').onclick=finish;
+  $('#dp-not').onclick=()=>{ $('#dp-not').hidden=true; S.nots++; loop(0); setTimeout(()=>next(true),250); };
+  g.update=dt=>{
+    if(S.over) return;
+    S.idle+=dt; S.env=Math.max(0,S.env-dt*.02); envUp();
+    // phase 2 : une notification arrive quand on ralentit
+    if(S.ph===2 && !S.busy && $('#dp-not').hidden && (S.notT-=dt)<=0){ $('#dp-not').hidden=false; $('#dp-not b').textContent=randi(1,9); loop(0); S.notT=rand(5,11); }
+  };
+  startGame(g); hud(); draw(); envUp(); show('bof'); $('#dp-post').innerHTML='<div class="dpe">📱</div><div class="dptx">Appuie sur Suivant pour faire défiler</div>';
+}
+
+/* =========================================================
+   9 · LE SÉLECTEUR : boucle qui s'emballe et contre-réaction
+   ========================================================= */
+const TH=[['⚽','Sport','#5ce1e6'],['🎮','Jeux vidéo','#b69cff'],['🎵','Musique','#ff6aa8'],['👗','Mode','#ffb547'],['🔬','Sciences','#6ee7a0'],['📰','Actu','#ff7a5a']];
+const THT=[['Le but de l\'année','Match fou hier soir','Record du monde !','Transfert surprise'],['Nouvelle map','Speedrun record','Bug hilarant','Sortie du jeu attendu'],['Nouveau clip','Concert surprise','Le son de l\'été','Duo inattendu'],['Look de la semaine','Défilé en direct','Friperie : la pépite','Tendance sneakers'],['Une étoile explose','Le robot qui marche','Expérience maison','Un nouveau dinosaure'],['Élections','Météo extrême','Grève demain','Découverte au Pérou']];
+function gSel(){
+  head('🎚️','Le sélecteur','Choisis <b>2 thèmes</b> que tu aimes. Ensuite, tu likes dans le flux et tu règles le sélecteur de l\'algorithme… et tu regardes si le flux te ressemble.');
+  const box=mk('div','games',null,main); const picks=new Set();
+  box.innerHTML=TH.map(([e,t],i)=>`<button class="gcard sltc" data-i="${i}"><span class="e">${e}</span><span class="t">${t}</span></button>`).join('');
+  const go=mk('div','row',`<button class="btn ok" id="sl-go" disabled>C'est parti ▶</button>`,main);
+  box.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; if(picks.has(i)) picks.delete(i); else if(picks.size<2) picks.add(i); box.querySelectorAll('.gcard').forEach(x=>x.classList.toggle('on',picks.has(+x.dataset.i))); $('#sl-go').disabled=picks.size!==2; });
+  $('#sl-go').onclick=()=>playSel([...picks]);
+}
+function playSel(MY){
+  stopGame();
+  head('🎚️','Le sélecteur','Touche un post du flux pour le liker. Règle le sélecteur. Regarde ce que devient le flux.');
+  mk('div','hud','<span id="sl-ms"></span><span class="likes" id="sl-l">❤ 0</span>',main);
+  const mis=mk('div','qbar',null,main);
+  mk('div','slwrap',`<div class="world slflux" id="sl-f"></div>
+    <div><div class="slsel">
+      <label>🔁 Renforcement <small>plus tu likes un thème, plus il revient</small><input type="range" id="sl-r" min="0" max="100" value="50"></label>
+      <label>🎲 Découverte <small>part de posts tirés au hasard</small><input type="range" id="sl-d" min="0" max="100" value="30"></label>
+      <label>🧯 Anti-répétition <small>freine un thème qui prend trop de place</small><input type="range" id="sl-a" min="0" max="100" value="0"></label></div>
+      <div class="slg"><span>🎯 Le flux te ressemble</span><div class="dpg"><i id="sl-m"></i></div><b id="sl-mv"></b></div>
+      <div class="slg"><span>🌈 Diversité du flux</span><div class="dpg"><i id="sl-v" style="background:var(--cyan)"></i></div><b id="sl-vv"></b></div>
+      <div class="slhist" id="sl-h"></div>
+      <div class="slprof" id="sl-p"></div>
+      <div class="slloop"><div id="sl-lp">➕ <b>Boucle qui s'emballe</b> : tu likes → l'algorithme renforce ce thème → il en montre plus → tu likes plus</div><div id="sl-lm">➖ <b>Contre-réaction</b> : un thème prend trop de place → l'anti-répétition le freine → le flux se rééquilibre</div></div>
+    </div>`,main);
+  const z=mk('div',null,null,main);
+  const S={ prof:TH.map(()=>1), it:[], hist:[], likes:0, t:0, spawn:0, m:0, hold:0, fav:null, favL:0, mt:0, over:false, log:[] };
+  const g={ over:false };
+  const val=id=>+$(id).value/100;
+  const flux=$('#sl-f');
+  const share=k=>S.hist.length?S.hist.filter(x=>x===k).length/S.hist.length:0;
+  function weights(){
+    const r=val('#sl-r'), d=val('#sl-d'), a=val('#sl-a'), gam=.3+4*r;
+    let w=S.prof.map(p=>Math.pow(p,gam)); const sw=w.reduce((x,y)=>x+y,0); w=w.map(x=>x/sw);
+    w=w.map((x,k)=>((1-d)*x+d/6)*Math.exp(-5*a*Math.max(0,share(k)-.22)));
+    const s2=w.reduce((x,y)=>x+y,0); return w.map(x=>x/s2);
+  }
+  function spawn(){
+    const w=weights(); let r=Math.random(), k=0; while(k<5 && (r-=w[k])>0) k++;
+    const el=mk('div','slit',`<span>${TH[k][0]}</span><b>${pick(THT[k])}</b><i>${TH[k][1]}</i>`,flux);
+    el.style.borderColor=TH[k][2];
+    const o={ el, k, y:-50, x:rand(4,40) };
+    el.style.left=o.x+'%';
+    el.addEventListener('pointerdown',ev=>{ ev.preventDefault(); like(o); });
+    S.it.push(o); S.hist.push(k); if(S.hist.length>30) S.hist.shift();
+  }
+  function like(o){
+    if(o.liked||S.over) return; o.liked=1; S.likes++; o.el.classList.add('liked');
+    const r=val('#sl-r'); S.prof[o.k]+=.25+.9*r;
+    if(S.ms===1 && o.k===S.fav) S.favL++;
+    const h=mk('div','rsheart','❤️',flux); h.style.left=(o.x+10)+'%'; h.style.top=o.y+'px'; setTimeout(()=>h.remove(),1200);
+    $('#sl-l').textContent='❤ '+S.likes;
+  }
+  function gauges(){
+    const m=S.hist.length?S.hist.filter(k=>MY.includes(k)).length/S.hist.length:0;
+    const c=TH.map((_,k)=>share(k)).filter(p=>p>0), H=-c.reduce((s,p)=>s+p*Math.log(p),0)/Math.log(6);
+    S.m=m; S.div=H;
+    $('#sl-m').style.width=Math.round(m*100)+'%'; $('#sl-mv').textContent=Math.round(m*100)+' %';
+    $('#sl-v').style.width=Math.round(H*100)+'%'; $('#sl-vv').textContent=Math.round(H*100)+' %';
+    $('#sl-h').innerHTML=S.hist.map(k=>`<i style="background:${TH[k][2]}" title="${TH[k][1]}"></i>`).join('');
+    const sp=S.prof.reduce((x,y)=>x+y,0);
+    $('#sl-p').innerHTML='<small>Ce que l\'algorithme croit que tu aimes :</small>'+TH.map(([e,t,c],k)=>`<div><span>${e}</span><div class="dpg"><i style="width:${Math.round(S.prof[k]/sp*100)}%;background:${c}"></i></div></div>`).join('');
+    const r=val('#sl-r'), a=val('#sl-a');
+    $('#sl-lp').style.opacity=.35+.65*r; $('#sl-lm').style.opacity=.35+.65*a;
+  }
+  // missions
+  function mission(){
+    $('#sl-ms').textContent=`Mission ${S.ms+1} / 3`;
+    if(S.ms===0) mis.innerHTML=`🎯 Fais que le flux te ressemble à <b>85 %</b> (tes thèmes : ${MY.map(k=>TH[k][0]+' '+TH[k][1]).join(' et ')})`;
+    if(S.ms===1) mis.innerHTML=`💥 Tu te passionnes soudain pour <b>${TH[S.fav][0]} ${TH[S.fav][1]}</b> ! Like <b>3</b> posts de ce thème (${S.favL} / 3)`;
+    if(S.ms===2) mis.innerHTML=`⚖️ L'équilibre : garde <b>ressemblance ≥ 55 %</b> ET <b>diversité ≥ 75 %</b> pendant 10 s <span class="slbar"><i style="width:${Math.round(S.hold/10*100)}%"></i></span>`;
+  }
+  function hint(t){ toast(t); }
+  function done(){
+    S.log.push({ms:S.ms, t:Math.round(S.mt), r:val('#sl-r'), d:val('#sl-d'), a:val('#sl-a')});
+    addPts(15);
+    if(S.ms===0){ // le thème que l'algorithme a le plus oublié
+      const c=TH.map((_,k)=>k).filter(k=>!MY.includes(k)).sort((a,b)=>S.prof[a]-S.prof[b]); S.fav=c[0]; S.favL=0;
+      toast('✓ Le flux te ressemble ! Regarde la diversité…');
+    } else if(S.ms===1) toast('✓ Retrouvé !');
+    S.ms++; S.mt=0; S.hold=0; S.hinted=0;
+    if(S.ms>=3) return finish();
+    mission();
+  }
+  function finish(){
+    S.over=g.over=true; D.best.sel=Math.max(D.best.sel||0,S.likes); save();
+    z.innerHTML='';
+    mk('div','card',`<h3 style="margin:0 0 6px">Deux boucles</h3>
+      <ul><li><b>Mission 1</b> : tes likes ont renforcé tes thèmes, qui sont revenus plus souvent, que tu as likés encore plus… C'est une <b>boucle de rétroaction positive</b> : elle <b>amplifie</b>. Résultat : un flux qui te ressemble, mais une diversité qui s'effondre (c'est la bulle).</li>
+      <li><b>Mission 2</b> : le thème que tu voulais n'apparaissait presque plus, donc tu ne pouvais pas le liker, donc il n'apparaissait pas… Pour en sortir il faut de la <b>découverte</b> : du hasard qui casse la boucle.</li>
+      <li><b>Mission 3</b> : l'anti-répétition est une <b>contre-réaction</b> (rétroaction négative) : plus un thème prend de place, plus elle le freine. Elle <b>stabilise</b>, comme un thermostat ou la transpiration qui fait baisser la température du corps.</li></ul>
+      <p>Les vrais réseaux règlent ces boutons pour que tu restes le plus longtemps possible. Depuis 2023, en Europe, le règlement sur les services numériques (DSA) oblige les très grandes plateformes à proposer au moins un fil qui n'est <b>pas</b> basé sur ton profil.</p>
+      <div class="row"><button class="btn" id="sl-a2">Rejouer</button><button class="btn ok" id="sl-dd">Noter ma découverte</button></div>`,z);
+    $('#sl-a2').onclick=gSel;
+    $('#sl-dd').onclick=()=>{ $('#sl-dd').parentNode.remove(); discovery('sel','Pourquoi un fil peut-il finir par ne montrer presque qu\'une seule chose ?',[
+      'Parce que like → plus du même → encore plus de likes : une boucle de rétroaction qui s\'emballe',
+      'Parce que les autres thèmes n\'existent plus',
+      'Parce que l\'algorithme choisit au hasard'],0,
+      'Une <b>boucle de rétroaction positive</b> amplifie ce qui existe déjà : c\'est elle qui fabrique la bulle. Une <b>contre-réaction</b> (découverte, anti-répétition) freine l\'emballement et rééquilibre le flux.'); };
+    z.scrollIntoView({behavior:'smooth'});
+  }
+  g.update=dt=>{
+    if(S.over) return;
+    S.t+=dt; S.mt+=dt; S.spawn-=dt;
+    if(S.spawn<=0){ spawn(); S.spawn=.85; }
+    const H=flux.clientHeight;
+    for(const o of S.it){ o.y+=62*dt; o.el.style.top=o.y+'px'; }
+    S.it=S.it.filter(o=>{ if(o.y>H+10){ o.el.remove(); return false; } return true; });
+    // l'algorithme oublie lentement ce qu'on ne like plus
+    const r=val('#sl-r'); S.prof=S.prof.map(p=>Math.max(.15,p*(1-dt*.015*(.3+r))));
+    gauges();
+    if(S.ms===0 && S.hist.length>=12 && S.m>=.85) done();
+    else if(S.ms===1){ mission(); if(S.favL>=3) done(); else if(S.mt>25 && !S.hinted){ S.hinted=1; hint(`Ton flux ne te montre presque plus ${TH[S.fav][1]}… quel bouton du sélecteur changer ?`); } }
+    else if(S.ms===2){ if(S.m>=.55 && S.div>=.75) S.hold+=dt; else S.hold=Math.max(0,S.hold-1.5*dt); mission(); if(S.hold>=10) done(); else if(S.mt>30 && !S.hinted){ S.hinted=1; hint('Essaie l\'anti-répétition : c\'est une contre-réaction.'); } }
+  };
+  S.ms=0; mission(); startGame(g);
+}
+
 /* ---------- menu ---------- */
 const GAMES=[
   ['zombie','🧟','Zombies du temps','Une horde d\'inventions attaque : abats-les de la plus ancienne à la plus récente. Puis recopie une courbe à la main… et regarde-la s\'abîmer.',gZombie],
@@ -1737,11 +2008,13 @@ const GAMES=[
   ['feed','📱','Le fil d\'actu','Republier ou pas ? Regarde les émotions se propager et le monde changer.',gFeed],
   ['bubble','🫧','La bulle','Like ce qui te plaît… et découvre tout ce que l\'algorithme ne t\'a jamais montré.',gBubble],
   ['likes','❤️','Les likes','Publie, gagne des likes, garde ta flamme… et découvre ce qui fait vraiment marcher un post.',gLikes],
-  ['reseau','🌐','Le réseau','Rappeuse, acteur, streameuse, médecin, prof… : deux semaines d\'actu étudiante, 100 posts, des émotions qui se propagent. Gagne des abonnés… puis retrouve la réalité.',gReseau]
+  ['reseau','🌐','Le réseau','Rappeuse, acteur, streameuse, médecin, prof… : deux semaines d\'actu étudiante, 100 posts, des émotions qui se propagent. Gagne des abonnés… puis retrouve la réalité.',gReseau],
+  ['dopa','🧠','La boucle de dopamine','Fais défiler un fil et regarde ta dopamine en direct : pourquoi est-ce si dur d\'arrêter ?',gDopa],
+  ['sel','🎚️','Le sélecteur','Like, règle l\'algorithme et regarde le flux : boucle qui s\'emballe ou contre-réaction ?',gSel]
 ];
 function menu(){
   stopGame();
-  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Sept épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
+  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Neuf épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
     <div class="games">${GAMES.map(([id,e,t,d],i)=>`<button class="gcard${D.disc[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.disc[id]?'✓ découverte notée':''}${D.best[id]?` · record ${D.best[id].toLocaleString('fr-FR')}`:''}</span></button>`).join('')}</div>
     <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button></div>`;
   main.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>GAMES[+b.dataset.i][4]());
