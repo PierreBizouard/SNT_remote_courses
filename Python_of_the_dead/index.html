@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Python of the Dead</title>
+<style>
+:root{--bg:#0d0f14;--panel:#161a23;--line:#2a3142;--txt:#e7ecf3;--mut:#8b96a8;--acc:#4ade80;--warn:#fbbf24;--bad:#f87171;--blue:#60a5fa;--code:#c4b5fd}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#0d0f14}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+code,.mono,input{font-family:ui-monospace,"Cascadia Code",Consolas,monospace}
+button{font:inherit;cursor:pointer}
+.app{display:flex;flex-direction:column;height:100dvh;max-width:1100px;margin:0 auto}
+header{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:16px;margin:0;color:var(--acc);letter-spacing:.5px}
+header .sp{flex:1}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;white-space:nowrap}
+.btn{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
+.btn:hover{border-color:var(--acc)}
+.btn.ok{background:var(--acc);color:#05200f;border-color:var(--acc);font-weight:700}
+.main{flex:1;display:grid;grid-template-columns:1fr 280px;min-height:0}
+@media (max-width:760px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto}}
+.arena{position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 120%,#1f2a1f 0,#0d0f14 70%);min-height:200px}
+.arena::after{content:"";position:absolute;left:0;right:0;bottom:44px;height:2px;background:repeating-linear-gradient(90deg,var(--bad) 0 10px,transparent 10px 20px);opacity:.5}
+.z{position:absolute;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;transition:opacity .3s;max-width:30%;z-index:1}
+.z.target{z-index:2}
+@media (max-width:760px){.z .fr{font-size:11.5px;padding:3px 6px}.z .bd{font-size:30px}pre.py{font-size:11px}}
+.z .fr{background:#fff;color:#111;border-radius:10px;padding:4px 8px;font-size:13px;font-weight:600;text-align:center;box-shadow:0 2px 0 #0006;position:relative}
+.z .fr::after{content:"";position:absolute;bottom:-6px;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
+.z .hint{font-size:12px;color:var(--code);margin-top:2px;opacity:.85}
+.z .bd{font-size:38px;line-height:1;margin-top:6px;filter:drop-shadow(0 3px 0 #0008)}
+.z.target .fr{outline:3px solid var(--acc)}
+.z.boss .bd{font-size:54px}
+.z.dead{opacity:0;transform:translateX(-50%) scale(1.4) rotate(20deg)}
+.z.wiggle .bd{animation:wg .5s}
+@keyframes wg{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hud{position:absolute;left:8px;right:8px;bottom:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.hud .gun{background:#000a;border:1px solid var(--line);border-radius:8px;padding:3px 8px}
+.hud .gun.jam{border-color:var(--warn);color:var(--warn);animation:bl 1s infinite}
+.hud .gun.empty{border-color:var(--bad);color:var(--bad);animation:bl 1s infinite}
+@keyframes bl{50%{opacity:.5}}
+.shot{position:absolute;height:3px;background:linear-gradient(90deg,transparent,var(--acc));transform-origin:0 50%;pointer-events:none;animation:fd .25s forwards}
+@keyframes fd{to{opacity:0}}
+.boom{position:absolute;font-size:44px;transform:translate(-50%,-50%);animation:bm .6s forwards;pointer-events:none}
+@keyframes bm{from{transform:translate(-50%,-50%) scale(.5)}to{transform:translate(-50%,-50%) scale(2);opacity:0}}
+.flash{position:absolute;inset:0;background:var(--bad);opacity:.35;animation:fd .4s forwards;pointer-events:none}
+.side{border-left:1px solid var(--line);padding:10px;overflow:auto;background:var(--panel)}
+@media (max-width:760px){.side{border-left:0;border-top:1px solid var(--line);max-height:26vh;padding:6px 10px}}
+.side h3{margin:0 0 6px;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:1px}
+.mem{display:flex;flex-direction:column;gap:6px}
+@media (max-width:760px){.mem{flex-direction:row;overflow-x:auto}}
+.var{display:flex;gap:6px;align-items:flex-start;font-size:13px;flex:0 0 auto}
+.var .nm{font-family:ui-monospace,monospace;color:var(--blue);font-weight:700;padding-top:4px}
+.var .ar{color:var(--mut);padding-top:4px}
+.obj{border:1px solid var(--line);border-radius:8px;background:var(--bg);font-family:ui-monospace,monospace;font-size:12px;min-width:120px}
+.obj .t{background:#2b2350;color:var(--code);padding:2px 6px;border-radius:7px 7px 0 0;font-weight:700}
+.obj .r{padding:1px 6px;display:flex;justify-content:space-between;gap:10px}
+.obj .r b{font-weight:400;color:var(--warn)}
+.obj.flash2{animation:fl2 .6s}
+@keyframes fl2{0%{box-shadow:0 0 0 3px var(--acc)}}
+.lst{display:flex;font-family:ui-monospace,monospace;font-size:12px;padding:4px}
+.lst .c{border:1px solid var(--line);padding:2px 6px;text-align:center;background:var(--bg)}
+.lst .c i{display:block;font-style:normal;color:var(--mut);font-size:10px}
+.lst .empty{color:var(--mut);padding:2px 6px}
+.val{font-family:ui-monospace,monospace;font-size:12px;color:var(--warn);padding-top:4px}
+.bottom{border-top:1px solid var(--line);padding:6px 10px 10px;background:var(--panel)}
+.cons{font-family:ui-monospace,monospace;font-size:13px;min-height:3.9em;max-height:5.6em;overflow:auto;margin-bottom:6px;white-space:pre-wrap}
+.cons .in{color:var(--mut)}
+.cons .out{color:var(--txt)}
+.cons .err{color:var(--bad)}
+.cons .tip{color:var(--warn)}
+.cons .good{color:var(--acc)}
+.inrow{display:flex;gap:6px;align-items:center}
+.inrow .pr{font-family:ui-monospace,monospace;color:var(--acc);font-weight:700}
+.inrow input{flex:1;min-width:0;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:16px}
+.inrow input:focus{outline:2px solid var(--acc);border-color:transparent}
+.sym{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.sym button{font-family:ui-monospace,monospace;background:var(--bg);color:var(--code);border:1px solid var(--line);border-radius:6px;padding:4px 0;min-width:34px;font-size:15px}
+.ov{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10;overflow:auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;max-width:640px;width:100%;max-height:100%;overflow:auto}
+.card h2{margin:0 0 8px;color:var(--acc)}
+.card p{margin:6px 0}
+pre.py{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto;font-size:13px;margin:8px 0;line-height:1.45}
+.k{color:#f472b6}.s{color:#86efac}.cm{color:var(--mut)}.f{color:var(--blue)}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+.tbl td{border-top:1px solid var(--line);padding:4px 6px;vertical-align:top}
+.tbl td:last-child{font-family:ui-monospace,monospace;color:var(--code);white-space:nowrap}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.waves{display:grid;gap:8px;margin:10px 0}
+.wv{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);text-align:left;color:var(--txt)}
+.wv:disabled{opacity:.45;cursor:not-allowed}
+.wv .e{font-size:26px}
+.wv small{color:var(--mut);display:block}
+.stars{margin-left:auto;color:var(--warn);white-space:nowrap}
+.setup{font-family:ui-monospace,monospace;color:var(--code);font-size:16px;background:var(--bg);padding:6px 10px;border-radius:8px;display:inline-block}
+</style>
+
+<div class="app">
+  <header>
+    <h1>🧟 PYTHON OF THE DEAD</h1>
+    <span class="pill" id="h-w">Menu</span>
+    <span class="pill" id="h-l"></span>
+    <span class="pill" id="h-s">0 pt</span>
+    <span class="sp"></span>
+    <button class="btn" id="b-cheat">📜 Antisèche</button>
+    <button class="btn" id="b-menu">☰</button>
+  </header>
+  <div class="main">
+    <div class="arena" id="ar">
+      <div class="hud" id="hud"></div>
+    </div>
+    <div class="side"><h3>🧠 La mémoire de Python</h3><div class="mem" id="mem"></div></div>
+  </div>
+  <div class="bottom">
+    <div class="cons" id="cons"></div>
+    <div class="inrow"><span class="pr">&gt;&gt;&gt;</span><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="tape ton code Python ici"><button class="btn ok" id="go">⏎</button></div>
+    <div class="sym" id="sym"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rand=(a,b)=>a+Math.random()*(b-a), randi=(a,b)=>Math.floor(rand(a,b+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
+const KEY='snt-python-dead';
+let D={best:{},stars:{}}; try{ D=Object.assign(D,JSON.parse(localStorage.getItem(KEY)||'{}')); }catch(e){}
+const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(D)); }catch(e){} };
+
+/* ---------- le mini-Python : variables, objets Gun, listes ---------- */
+const CAP=6;
+let NEXTID=1;
+class Gun{ constructor(){ this.id=NEXTID++; this.munitions=CAP; this.couleur='gris'; this.enraye=false; } }
+const GUN_ATTR=['munitions','couleur','enraye'];
+const GUN_METH=['afficher','viser','tirer','reload','debloquer'];
+const LIST_METH=['append','pop','remove'];
+let V={};           // les variables
+let lastEffect=null; // ce que la dernière commande a provoqué (pour le jeu)
+
+class PyErr extends Error{ constructor(type,msg,tip){ super(msg); this.type=type; this.tip=tip; } }
+const typeName=v=>v instanceof Gun?'Gun':Array.isArray(v)?'list':typeof v==='number'?'int':typeof v==='string'?'str':typeof v==='boolean'?'bool':v===GunClass?'type':'NoneType';
+const GunClass={cls:'Gun'};
+function repr(v){
+  if(v===undefined||v===null) return 'None';
+  if(v===GunClass) return "<class 'Gun'>";
+  if(v instanceof Gun) return `<Gun object n°${v.id}>`;
+  if(Array.isArray(v)) return '['+v.map(repr).join(', ')+']';
+  if(typeof v==='string') return "'"+v+"'";
+  if(typeof v==='boolean') return v?'True':'False';
+  if(v&&v.bound) return `<bound method Gun.${v.bound} of <Gun object n°${v.obj.id}>>`;
+  if(v&&v.lbound) return `<built-in method ${v.lbound} of list object>`;
+  return String(v);
+}
+const show=v=>typeof v==='string'?v:repr(v);
+
+// découpe des arguments séparés par des virgules (hors chaînes)
+function splitArgs(s){ const out=[]; let cur='', q=null, d=0; for(const ch of s){ if(q){ cur+=ch; if(ch===q) q=null; continue; } if(ch==='"'||ch==="'"){ q=ch; cur+=ch; continue; } if(ch==='('||ch==='[') d++; if(ch===')'||ch===']') d--; if(ch===','&&d===0){ out.push(cur.trim()); cur=''; continue; } cur+=ch; } if(cur.trim()) out.push(cur.trim()); return out; }
+
+function getVar(n){ if(n in V) return V[n]; if(n==='Gun') return GunClass;
+  const near=Object.keys(V).find(k=>k.toLowerCase()===n.toLowerCase());
+  throw new PyErr('NameError',`name '${n}' is not defined`, near?`Python fait la différence entre majuscules et minuscules : tu voulais sans doute « ${near} ».`:n.toLowerCase()==='gun'?'Cette variable n\'existe pas encore : il faut d\'abord la créer (gun = Gun()).':'Cette variable n\'existe pas : vérifie l\'orthographe ou crée-la d\'abord.'); }
+
+function evalExpr(e){
+  e=e.trim();
+  if(!e) throw new PyErr('SyntaxError','invalid syntax','Il manque quelque chose.');
+  let m;
+  if(/^-?\d+$/.test(e)) return +e;
+  if(e==='True') return true; if(e==='False') return false; if(e==='None') return null;
+  if(m=e.match(/^"([^"]*)"$/)||e.match(/^'([^']*)'$/)) return m[1];
+  if(/^["']/.test(e)) throw new PyErr('SyntaxError','unterminated string literal','Une chaîne de caractères s\'ouvre ET se ferme avec des guillemets : "rouge".');
+  if(e[0]==='['){ if(e[e.length-1]!==']') throw new PyErr('SyntaxError',"'[' was never closed",'Une liste s\'ouvre avec [ et se ferme avec ].'); return splitArgs(e.slice(1,-1)).map(evalExpr); }
+  if(m=e.match(/^len\((.*)\)$/)){ const v=evalExpr(m[1]); if(Array.isArray(v)||typeof v==='string') return v.length; throw new PyErr('TypeError',`object of type '${typeName(v)}' has no len()`); }
+  if(m=e.match(/^print\((.*)\)$/)){ const a=splitArgs(m[1]).map(evalExpr); out(a.map(show).join(' ')); return undefined; }
+  if(m=e.match(/^([A-Za-z_]\w*)\s*\((.*)\)$/)){ // appel d'un nom : Gun(), gun()…
+    const [,n,args]=m;
+    if(n==='Gun'){ if(args.trim()) throw new PyErr('TypeError','Gun() takes no arguments'); return new Gun(); }
+    if(n.toLowerCase()==='gun'&&!(n in V)) throw new PyErr('NameError',`name '${n}' is not defined`,'Le plan (la classe) s\'écrit avec une majuscule : Gun().');
+    const v=getVar(n); throw new PyErr('TypeError',`'${typeName(v)}' object is not callable`, v instanceof Gun?`« ${n} » est déjà un objet : on ne l\'appelle pas, on appelle ses méthodes, par exemple ${n}.tirer().`:'');
+  }
+  if(m=e.match(/^([A-Za-z_]\w*)\s*\.\s*([A-Za-z_]\w*)\s*\((.*)\)$/)) return callMeth(m[1],m[2],splitArgs(m[3]).map(evalExpr));
+  if(m=e.match(/^([A-Za-z_]\w*)\s*\.\s*([A-Za-z_]\w*)$/)){ // attribut (ou méthode sans parenthèses)
+    const o=getVar(m[1]), a=m[2];
+    if(o instanceof Gun){ if(GUN_ATTR.includes(a)) return o[a]; if(GUN_METH.includes(a)){ tip(`Sans parenthèses, Python ne fait rien : il montre juste la méthode. Écris ${m[1]}.${a}()`); return {bound:a,obj:o}; } }
+    if(Array.isArray(o)&&LIST_METH.includes(a)){ tip(`Il manque les parenthèses : ${m[1]}.${a}(…)`); return {lbound:a}; }
+    throw attrErr(o,a);
+  }
+  if(m=e.match(/^([A-Za-z_]\w*)\s*\[\s*(-?\d+)\s*\]$/)){ const o=getVar(m[1]); if(!Array.isArray(o)) throw new PyErr('TypeError',`'${typeName(o)}' object is not subscriptable`); let i=+m[2]; if(i<0) i+=o.length; if(i<0||i>=o.length) throw new PyErr('IndexError','list index out of range',`La liste n'a que ${o.length} élément(s) : les cases vont de 0 à ${o.length-1}.`); return o[i]; }
+  if(/^[A-Za-z_]\w*$/.test(e)) return getVar(e);
+  throw new PyErr('SyntaxError','invalid syntax','Python ne comprend pas cette ligne. Regarde l\'antisèche.');
+}
+function attrErr(o,a){
+  const sug=o instanceof Gun?[...GUN_ATTR,...GUN_METH]:Array.isArray(o)?LIST_METH:[];
+  const near=sug.find(s=>lev(s,a)<=2);
+  return new PyErr('AttributeError',`'${typeName(o)}' object has no attribute '${a}'`, near?`Tu voulais dire « ${near} » ?`:o instanceof Gun?'Un Gun sait seulement : '+GUN_METH.map(x=>x+'()').join(', '):'');
+}
+function callMeth(n,meth,args){
+  const o=getVar(n);
+  const nargs=(k)=>{ if(args.length!==k) throw new PyErr('TypeError',`${meth}() takes ${k+1} positional argument${k?'s':''} but ${args.length+1} were given`, k?'':`${meth}() s\'utilise avec des parenthèses vides : ${n}.${meth}()`); };
+  if(o instanceof Gun){
+    if(!GUN_METH.includes(meth)){ if(GUN_ATTR.includes(meth)) throw new PyErr('TypeError',`'${typeName(o[meth])}' object is not callable`,`${meth} est un attribut (une donnée), pas une méthode : on écrit ${n}.${meth} sans parenthèses.`); throw attrErr(o,meth); }
+    nargs(0); lastEffect={gun:o,meth};
+    if(meth==='afficher') out(`🔫 Gun n°${o.id} · couleur ${o.couleur} · ${o.munitions} munition${o.munitions>1?'s':''} · ${o.enraye?'ENRAYÉ':'pas enrayé'}`);
+    if(meth==='viser') out(`🎯 ${n} vise…`);
+    if(meth==='reload'){ o.munitions=CAP; out(`🔄 ${n} rechargé : ${CAP} munitions.`); }
+    if(meth==='debloquer'){ o.enraye=false; out(`🔧 ${n} débloqué.`); }
+    if(meth==='tirer'){ if(o.enraye) out(`⚠️ ${n} est enrayé : rien ne sort !`); else if(o.munitions<=0) out(`💨 Clic… ${n} n'a plus de munitions.`); else { o.munitions--; out(`💥 PAN ! (${o.munitions} restante${o.munitions>1?'s':''})`); lastEffect.shot=true; } }
+    flashObj(n); return undefined;
+  }
+  if(Array.isArray(o)){
+    if(!LIST_METH.includes(meth)) throw attrErr(o,meth);
+    lastEffect={list:o,meth};
+    if(meth==='append'){ nargs(1); o.push(args[0]); lastEffect.item=args[0]; flashObj(n); return undefined; }
+    if(meth==='remove'){ nargs(1); const i=o.indexOf(args[0]); if(i<0) throw new PyErr('ValueError','list.remove(x): x not in list',`${repr(args[0])} n'est pas dans la liste. Regarde la mémoire.`); o.splice(i,1); lastEffect.item=args[0]; flashObj(n); return undefined; }
+    if(meth==='pop'){ if(args.length>1) nargs(1); if(!o.length) throw new PyErr('IndexError','pop from empty list','La liste est vide : il n\'y a rien à sortir.'); let i=args.length?args[0]:o.length-1; if(i<0) i+=o.length; if(i<0||i>=o.length) throw new PyErr('IndexError','pop index out of range'); const v=o.splice(i,1)[0]; lastEffect.item=v; flashObj(n); return v; }
+  }
+  if(o===GunClass) throw new PyErr('TypeError',`${meth}() missing 1 required positional argument: 'self'`,'On appelle les méthodes sur un objet (gun), pas sur le plan (Gun).');
+  throw new PyErr('AttributeError',`'${typeName(o)}' object has no attribute '${meth}'`);
+}
+function run(line){
+  lastEffect=null;
+  let s=line.trim(), m;
+  if(/^print\s+[^(]/.test(s)) throw new PyErr('SyntaxError',"Missing parentheses in call to 'print'",'print est une fonction : print(…)');
+  if(m=s.match(/^([A-Za-z_]\w*)\s*\.\s*([A-Za-z_]\w*)\s*=(?!=)\s*(.+)$/)){ // attribut = valeur
+    const o=getVar(m[1]), a=m[2], v=evalExpr(m[3]);
+    if(!(o instanceof Gun)) throw new PyErr('AttributeError',`'${typeName(o)}' object has no attribute '${a}'`);
+    if(GUN_METH.includes(a)) throw new PyErr('Oups','tu viens d\'écraser une méthode !','On ne met pas = après une méthode. Les attributs (données) sont : '+GUN_ATTR.join(', '));
+    if(!GUN_ATTR.includes(a)) throw attrErr(o,a);
+    if(a==='munitions'){ if(typeof v!=='number') throw new PyErr('TypeError','munitions doit être un nombre entier','Sans guillemets : '+m[1]+'.munitions = 6'); if(v<0||v>12) throw new PyErr('ValueError','un chargeur contient de 0 à 12 munitions'); }
+    if(a==='couleur'&&typeof v!=='string') throw new PyErr('TypeError','couleur doit être une chaîne de caractères','Avec des guillemets : '+m[1]+'.couleur = "rouge"');
+    if(a==='enraye'&&typeof v!=='boolean') throw new PyErr('TypeError','enraye vaut True ou False');
+    o[a]=v; lastEffect={gun:o,attr:a}; flashObj(m[1]); return;
+  }
+  if(m=s.match(/^([A-Za-z_]\w*)\s*=(?!=)\s*(.+)$/)){ // variable = valeur
+    const n=m[1];
+    if(['print','len','Gun','list'].includes(n)) throw new PyErr('Oups',`n'appelle pas ta variable « ${n} »`,'Ce nom est déjà pris par Python.');
+    if(/^\d/.test(n)) throw new PyErr('SyntaxError','invalid syntax');
+    const v=evalExpr(m[2]);
+    if(v===GunClass) tip(`Attention : « ${n} » contient maintenant le plan (la classe), pas un objet. Pour fabriquer un objet : ${n} = Gun()`);
+    V[n]=v; lastEffect={assign:n,val:v}; drawMem(); flashObj(n); return;
+  }
+  if(/^[A-Za-z_]\w*\s*==/.test(s)){ const [a,b]=s.split('=='); out(repr(evalExpr(a)===evalExpr(b))); return; }
+  const r=evalExpr(s);
+  if(r!==undefined) out(repr(r)); // comme la console Python
+}
+
+/* ---------- affichage : console, mémoire ---------- */
+function line(cls,t){ const c=$('#cons'); const d=document.createElement('div'); d.className=cls; d.textContent=t; c.appendChild(d); while(c.children.length>30) c.firstChild.remove(); c.scrollTop=c.scrollHeight; }
+const out=t=>line('out',t), tip=t=>line('tip','💡 '+t);
+function drawMem(){
+  const m=$('#mem'); const ks=Object.keys(V);
+  if(!ks.length){ m.innerHTML='<span style="color:var(--mut);font-size:13px">(vide : aucune variable)</span>'; return; }
+  m.innerHTML=ks.map(k=>{ const v=V[k];
+    let box;
+    if(v instanceof Gun){ const same=ks.find(o=>o!==k&&V[o]===v&&ks.indexOf(o)<ks.indexOf(k)); box=same?`<span class="val">→ même objet que ${esc(same)}</span>`:`<div class="obj" data-v="${esc(k)}"><div class="t">Gun n°${v.id}</div>${GUN_ATTR.map(a=>`<div class="r"><span>${a}</span><b>${esc(repr(v[a]))}</b></div>`).join('')}</div>`; }
+    else if(Array.isArray(v)) box=`<div class="obj" data-v="${esc(k)}"><div class="t">list · ${v.length} élément${v.length>1?'s':''}</div><div class="lst">${v.length?v.map((x,i)=>`<div class="c"><i>${i}</i>${esc(repr(x))}</div>`).join(''):'<span class="empty">[ ]</span>'}</div></div>`;
+    else box=`<span class="val">${esc(repr(v))}</span>`;
+    return `<div class="var"><span class="nm">${esc(k)}</span><span class="ar">→</span>${box}</div>`; }).join('');
+}
+function flashObj(n){ drawMem(); const e=document.querySelector(`.obj[data-v="${n}"]`); if(e){ e.classList.remove('flash2'); void e.offsetWidth; e.classList.add('flash2'); } }
+
+/* ---------- normalisation pour comparer avec la réponse attendue ---------- */
+function norm(s){ let o='', q=null; for(const ch of s.trim()){ if(q){ o+=ch==="'"?'"':ch; if(ch===q) q=null; continue; } if(ch==='"'||ch==="'"){ q=ch; o+='"'; continue; } if(!/\s/.test(ch)) o+=ch; } return o; }
+function lev(a,b){ const d=Array.from({length:a.length+1},(_,i)=>[i]); for(let j=1;j<=b.length;j++) d[0][j]=j; for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[a.length][b.length]; }
+
+/* ---------- les vagues ---------- */
+const COLS=['rouge','vert','bleu','noir','rose','doré'];
+const ITEMS=['grenade','bandage','clé','lampe','pizza'];
+const gunNames=()=>Object.keys(V).filter(k=>V[k] instanceof Gun);
+const gn=()=>{ const g=gunNames(); return g.length>1&&Math.random()<.5?g[1]:g[0]||'gun'; };
+const W=[
+  { e:'🔫', t:'Les méthodes', d:'Un objet sait faire des choses : on appelle ses méthodes avec un point et des parenthèses.',
+    setup:[['Fabrique ton arme à partir du plan Gun','gun = Gun()']], n:12, speed:.030, jam:.10, max:2, hintN:5,
+    gen(){ const g='gun'; return pick([
+      ['Affiche gun',`${g}.afficher()`],['Affiche gun',`${g}.afficher()`],
+      ['Vise avec gun',`${g}.viser()`],['Vise avec gun',`${g}.viser()`],
+      ['Tire avec gun',`${g}.tirer()`],['Recharge gun',`${g}.reload()`] ]); } },
+  { e:'🎨', t:'Les attributs', d:'Un objet contient des données (ses attributs). On les lit avec objet.attribut, on les change avec =.',
+    setup:[], n:14, speed:.034, jam:.12, max:3, hintN:4,
+    gen(){ const g='gun', k=randi(0,4); if(k===0){ const n=randi(3,12); return [`Mets ${n} munitions dans gun`,`${g}.munitions = ${n}`]; }
+      if(k===1){ const c=pick(COLS); return [`Peins gun en ${c}`,`${g}.couleur = "${c}"`]; }
+      if(k===2) return ['Affiche les munitions de gun',`print(${g}.munitions)`];
+      if(k===3) return ['Affiche la couleur de gun',`print(${g}.couleur)`];
+      return pick([['Affiche gun',`${g}.afficher()`],['Recharge gun',`${g}.reload()`]]); } },
+  { e:'🎒', t:'Les listes', d:'Une liste range plusieurs valeurs dans des cases numérotées à partir de 0. On ajoute (append), on sort (pop, remove).',
+    setup:[['Crée un sac qui contient une grenade et un bandage','sac = ["grenade", "bandage"]']], n:16, speed:.036, jam:.12, max:3, hintN:4,
+    gen(){ const s=Array.isArray(V.sac)?V.sac:[];
+      const opts=[];
+      const free=ITEMS.filter(x=>!s.includes(x));
+      if(s.length<5&&free.length){ const x=pick(free); opts.push([`Ajoute ${art(x)} au sac`,`sac.append("${x}")`],[`Ajoute ${art(x)} au sac`,`sac.append("${x}")`]); }
+      if(s.length){ const x=pick(s); opts.push([`Sors ${def(x)} du sac`,`sac.remove("${x}")`]); opts.push(['Sors le dernier objet du sac','sac.pop()']); opts.push(['Affiche le premier objet du sac','print(sac[0])']); }
+      if(s.length>=3) opts.push(['Sors le premier objet du sac','sac.pop(0)']);
+      opts.push(['Affiche le sac','print(sac)'],['Affiche la taille du sac','print(len(sac))']);
+      if(Math.random()<.2) opts.push(['Recharge gun','gun.reload()']);
+      return pick(opts); } },
+  { e:'🧟‍♂️', t:'La horde', d:'Deux armes, un sac, des zombies plus rapides. Chaque arme est un objet différent fabriqué avec le même plan.',
+    setup:[['Fabrique une deuxième arme appelée colt','colt = Gun()']], n:20, speed:.042, jam:.15, max:4, hintN:0, boss:1,
+    gen(){ const g=gn(), r=Math.random();
+      if(r<.35) return pick([[`Affiche ${g}`,`${g}.afficher()`],[`Vise avec ${g}`,`${g}.viser()`],[`Tire avec ${g}`,`${g}.tirer()`],[`Recharge ${g}`,`${g}.reload()`]]);
+      if(r<.6){ const c=pick(COLS); return pick([[`Peins ${g} en ${c}`,`${g}.couleur = "${c}"`],[`Affiche les munitions de ${g}`,`print(${g}.munitions)`]]); }
+      return W[2].gen(); } }
+];
+function art(x){ return {grenade:'une grenade',bandage:'un bandage','clé':'une clé',lampe:'une lampe',pizza:'une pizza'}[x]||x; }
+function def(x){ return {grenade:'la grenade',bandage:'le bandage','clé':'la clé',lampe:'la lampe',pizza:'la pizza'}[x]||x; }
+
+/* ---------- le jeu ---------- */
+let G=null;
+function updHud(){
+  $('#h-l').textContent=G?'❤️'.repeat(Math.max(0,G.lives))+'🖤'.repeat(Math.max(0,3-G.lives)):'';
+  $('#h-s').textContent=(G?G.score:0)+' pt';
+  const h=$('#hud'); const gs=gunNames();
+  h.innerHTML=gs.map(n=>{ const g=V[n]; const cls=g.enraye?'jam':g.munitions<=0?'empty':''; return `<span class="gun ${cls}">🔫 ${esc(n)} ${'●'.repeat(Math.min(12,g.munitions))}${g.munitions<CAP?'○'.repeat(CAP-Math.min(CAP,g.munitions)):''} ${g.enraye?'🔧 ENRAYÉ → '+esc(n)+'.debloquer()':g.munitions<=0?'VIDE → '+esc(n)+'.reload()':''}</span>`; }).join('')+(G?`<span class="gun">🧟 ${G.killed} / ${W[G.w].n+(W[G.w].boss?1:0)}</span>`:'');
+}
+function startWave(w){
+  closeOv();
+  V={}; NEXTID=1; $('#cons').innerHTML='';
+  G={w,lives:3,score:0,killed:0,spawned:0,z:[],t:0,next:1,setup:0,errs:{},tries:0,ok:0,start:performance.now(),miss:0};
+  // les vagues suivantes reprennent ce qui a été construit avant
+  const pre=[]; for(let i=0;i<w;i++) pre.push(...W[i].setup);
+  pre.forEach(([,c])=>run(c));
+  if(pre.length){ line('in','# déjà en mémoire :'); pre.forEach(([,c])=>line('in','>>> '+c)); }
+  $('#h-w').textContent=`Vague ${w+1} · ${W[w].t}`;
+  drawMem(); updHud();
+  setupStep();
+  $('#in').focus();
+  last=performance.now(); requestAnimationFrame(loop);
+}
+function setupStep(){
+  const s=W[G.w].setup[G.setup];
+  if(!s){ G.setup=-1; line('good','🧟 Les zombies arrivent ! Tape le code de leur bulle.'); return; }
+  line('tip',`🛠️ ${s[0]} :  ${s[1]}`);
+}
+function spawn(boss){
+  const Wv=W[G.w]; let c, tries=0;
+  do{ c=boss?bossCmd():Wv.gen(); tries++; }while(tries<20&&G.z.some(z=>norm(z.code)===norm(c[1])));
+  const el=document.createElement('div'); el.className='z'+(boss?' boss':'');
+  const showHint=G.spawned<Wv.hintN;
+  el.innerHTML=`<div class="fr">${esc(c[0])}</div>${showHint?`<div class="hint">${esc(c[1])}</div>`:''}<div class="bd">${boss?'🧟‍♀️':pick(['🧟','🧟‍♂️','🧟‍♀️'])}</div>`;
+  const L=[14,38,62,86].map(x=>[x,Math.min(...G.z.map(o=>Math.abs(o.x-x)+(o.y>.45?60:0)),999)]).sort((a,b)=>b[1]-a[1]); const x=L[Math.random()<.7?0:1][0]+rand(-3,3); el.style.left=x+'%'; el.style.top='-90px';
+  $('#ar').appendChild(el);
+  const z={el,fr:c[0],code:c[1],y:-.12,x,boss:!!boss,hp:boss?3:1,miss:0,sp:Wv.speed*(boss?.6:rand(.85,1.15))};
+  G.z.push(z); if(!boss) G.spawned++;
+}
+function bossCmd(){ return ['BOSS : fabrique une arme appelée bazooka','bazooka = Gun()']; }
+let last=0;
+function loop(now){
+  if(!G||G.over) return;
+  const dt=Math.min(.1,(now-last)/1000); last=now;
+  if(G.setup===-1&&!G.pause){
+    const Wv=W[G.w];
+    G.next-=dt;
+    if(G.next<=0&&G.z.length<Wv.max&&G.spawned<Wv.n){ spawn(); G.next=rand(2.5,4.5)*(1-G.w*.08); }
+    if(Wv.boss&&G.spawned>=Wv.n&&!G.bossDone&&!G.z.length){ G.bossDone=1; spawn(1); }
+    const H=$('#ar').clientHeight;
+    for(const z of [...G.z]){
+      z.y+=z.sp*dt;
+      z.el.style.top=(z.y*(H-60)-60)+'px';
+      if(z.y*(H-60)-60>H-110){ hurt(z); }
+    }
+    const tgt=nearest(); G.z.forEach(z=>z.el.classList.toggle('target',z===tgt));
+    if(G.killed>=Wv.n+(Wv.boss?1:0)) return win();
+  }
+  requestAnimationFrame(loop);
+}
+const nearest=()=>G.z.reduce((a,z)=>!a||z.y>a.y?z:a,null);
+function hurt(z){
+  removeZ(z); G.lives--; const f=document.createElement('div'); f.className='flash'; $('#ar').appendChild(f); setTimeout(()=>f.remove(),400);
+  line('err',`🩸 Un zombie t'a mordu ! « ${z.fr} » s'écrivait :  ${z.code}`);
+  if(!z.boss) G.killed++; else { G.killed++; }
+  updHud();
+  if(G.lives<=0) lose();
+}
+function removeZ(z){ G.z=G.z.filter(x=>x!==z); z.el.classList.add('dead'); setTimeout(()=>z.el.remove(),300); }
+function shoot(z){
+  const ar=$('#ar').getBoundingClientRect(), r=z.el.querySelector('.bd').getBoundingClientRect();
+  const x0=ar.width/2, y0=ar.height-30, x1=r.left-ar.left+r.width/2, y1=r.top-ar.top+r.height/2;
+  const s=document.createElement('div'); s.className='shot'; s.style.left=x0+'px'; s.style.top=y0+'px'; s.style.width=Math.hypot(x1-x0,y1-y0)+'px'; s.style.transform=`rotate(${Math.atan2(y1-y0,x1-x0)}rad)`; $('#ar').appendChild(s); setTimeout(()=>s.remove(),260);
+  boom(x1,y1,'💥');
+}
+function boom(x,y,e){ const b=document.createElement('div'); b.className='boom'; b.textContent=e; b.style.left=x+'px'; b.style.top=y+'px'; $('#ar').appendChild(b); setTimeout(()=>b.remove(),600); }
+
+function submit(){
+  const inp=$('#in'), src=inp.value; if(!src.trim()) return;
+  inp.value=''; line('in','>>> '+src);
+  if(!G){ try{ run(src); }catch(e){ showErr(e); } updHud(); return; }
+  G.tries++;
+  // la phase de construction (setup)
+  if(G.setup>=0){
+    const s=W[G.w].setup[G.setup];
+    try{ run(src); }catch(e){ showErr(e); return; }
+    if(norm(src)===norm(s[1])){ G.ok++; line('good','✅ Objet créé : regarde la mémoire de Python, à droite.'); G.setup++; setupStep(); }
+    else line('tip',`Ce n'est pas ce qui était demandé. Recopie :  ${s[1]}`);
+    updHud(); return;
+  }
+  const n=norm(src);
+  const z=G.z.filter(z=>norm(z.code)===n).sort((a,b)=>b.y-a.y)[0];
+  try{ run(src); }catch(e){ showErr(e); missFor(n); updHud(); return; }
+  if(!z){ missFor(n); line('tip','Aucun zombie n\'attendait cette commande.'); updHud(); return; }
+  // l'arme qui tire : celle de la commande, sinon gun
+  const nm=(src.match(/^\s*([A-Za-z_]\w*)/)||[])[1];
+  const g=V[nm] instanceof Gun?V[nm]:V.gun instanceof Gun?V.gun:null;
+  if(z.boss){ G.ok++; z.hp=0; }
+  else if(g&&g.enraye){ line('err',`⚠️ La commande est juste, mais ${nameOf(g)} est enrayé : tape ${nameOf(g)}.debloquer() puis recommence.`); z.el.classList.add('wiggle'); setTimeout(()=>z.el.classList.remove('wiggle'),500); updHud(); return; }
+  else if(g&&g.munitions<=0&&!(lastEffect&&lastEffect.shot)){ line('err',`💨 Clic ! La commande est juste, mais ${nameOf(g)} est vide : tape ${nameOf(g)}.reload() puis recommence.`); updHud(); return; }
+  if(g&&!z.boss&&!(lastEffect&&lastEffect.shot)) g.munitions--;
+  G.ok++;
+  shoot(z); removeZ(z); G.killed++;
+  const pts=z.boss?50:10+Math.round((1-Math.max(0,z.y))*10); G.score+=pts;
+  // effets des objets du sac
+  if(lastEffect&&lastEffect.list&&lastEffect.meth!=='append'){
+    if(lastEffect.item==='grenade'){ const ar=$('#ar').getBoundingClientRect(); boom(ar.width/2,ar.height/2,'💣'); line('good','💣 La grenade sort du sac et souffle tous les zombies !'); G.z.filter(x=>!x.boss).forEach(x=>{ removeZ(x); G.killed++; G.score+=5; }); }
+    if(lastEffect.item==='bandage'&&G.lives<3){ G.lives++; line('good','🩹 Bandage : +1 vie.'); }
+  }
+  if(z.boss){ line('good','🏆 Le boss est vaincu : un 3ᵉ objet Gun vient de naître. Même plan, objet différent !'); }
+  // l'arme peut s'enrayer
+  if(g&&!z.boss&&Math.random()<W[G.w].jam&&G.ok>2){ g.enraye=true; line('err',`🔧 ${nameOf(g)} s'est enrayé ! Tape ${nameOf(g)}.debloquer()`); }
+  drawMem(); updHud();
+}
+const nameOf=g=>Object.keys(V).find(k=>V[k]===g)||'gun';
+function missFor(n){
+  G.miss++;
+  const z=G.z.length?G.z.map(z=>[z,lev(norm(z.code),n)]).sort((a,b)=>a[1]-b[1])[0]:null;
+  if(z&&z[1]<=Math.max(3,norm(z[0].code).length*.35)){ z[0].miss++; if(z[0].miss>=2||W[G.w].hintN) line('tip',`Presque ! « ${z[0].fr} » s'écrit :  ${z[0].code}`); else line('tip','Presque… regarde bien les points, les parenthèses et les guillemets.'); }
+}
+function showErr(e){
+  if(e instanceof PyErr){ line('err',`${e.type}: ${e.message}`); if(e.tip) tip(e.tip); if(G) G.errs[e.type]=(G.errs[e.type]||0)+1; }
+  else { line('err','Erreur : '+e.message); console.error(e); }
+}
+
+/* ---------- fin de vague ---------- */
+function stars(){ const acc=G.ok/Math.max(1,G.tries); return 1+(G.lives>=2?1:0)+(acc>=.8?1:0); }
+function win(){
+  G.over=1; const st=stars(), w=G.w, acc=Math.round(100*G.ok/Math.max(1,G.tries));
+  D.stars[w]=Math.max(D.stars[w]||0,st); D.best[w]=Math.max(D.best[w]||0,G.score); save();
+  const errs=Object.entries(G.errs).sort((a,b)=>b[1]-a[1]);
+  ov(`<h2>✅ Vague ${w+1} nettoyée !</h2>
+    <p style="font-size:22px;color:var(--warn)">${'★'.repeat(st)}${'☆'.repeat(3-st)}</p>
+    <p>${G.score} points · ${acc} % de lignes justes · ${G.lives} vie${G.lives>1?'s':''} restante${G.lives>1?'s':''}</p>
+    ${errs.length?`<p>Tes erreurs Python :</p><table class="tbl">${errs.map(([t,n])=>`<tr><td>${ERRDOC[t]||''}</td><td>${t} × ${n}</td></tr>`).join('')}</table>`:'<p>Aucune erreur Python : propre !</p>'}
+    <p>${LESSON[w]}</p>
+    <div class="row">${w+1<W.length?`<button class="btn ok" data-w="${w+1}">Vague ${w+2} ▶</button>`:'<button class="btn ok" id="fin">Le bilan ▶</button>'}<button class="btn" data-w="${w}">Rejouer</button><button class="btn" id="m">Menu</button></div>`);
+  const f=$('#fin'); if(f) f.onclick=finale;
+}
+function lose(){
+  G.over=1; G.z.forEach(z=>z.el.remove());
+  ov(`<h2 style="color:var(--bad)">🧟 Dévoré !</h2><p>Tu as nettoyé ${G.killed} zombie${G.killed>1?'s':''} sur ${W[G.w].n}.</p><p>Astuce : regarde l'antisèche 📜 et la mémoire de Python avant de taper.</p><div class="row"><button class="btn ok" data-w="${G.w}">Recommencer</button><button class="btn" id="m">Menu</button></div>`);
+}
+const ERRDOC={NameError:'Variable inconnue (pas créée, ou mal écrite, ou mauvaise majuscule)',AttributeError:'Cet objet n\'a pas cet attribut ou cette méthode',TypeError:'Mauvais usage : appel sans objet, mauvais nombre d\'arguments, mauvais type',SyntaxError:'Python ne comprend pas la phrase (parenthèse, guillemet…)',ValueError:'Valeur absente ou interdite',IndexError:'Case de liste qui n\'existe pas',Oups:'Écrasement d\'un nom important'};
+const LESSON=[
+  '🧠 <b>À retenir</b> : <code>gun = Gun()</code> fabrique un <b>objet</b> à partir du <b>plan</b> (la classe). <code>gun.reload()</code> appelle une <b>méthode</b> : le point veut dire « de gun », les parenthèses veulent dire « fais-le ».',
+  '🧠 <b>À retenir</b> : un attribut est une donnée rangée dans l\'objet. On la lit avec <code>gun.munitions</code>, on la change avec <code>gun.munitions = 10</code>. Un nombre sans guillemets, un texte avec guillemets.',
+  '🧠 <b>À retenir</b> : une liste range des valeurs dans des cases numérotées <b>à partir de 0</b>. <code>append</code> ajoute à la fin, <code>pop()</code> sort la dernière, <code>remove("x")</code> sort la valeur x.',
+  '🧠 <b>À retenir</b> : <code>gun</code> et <code>colt</code> viennent du même plan <code>Gun</code> mais ce sont deux objets différents, chacun avec ses propres munitions.'
+];
+function finale(){
+  const tot=W.reduce((s,_,i)=>s+(D.stars[i]||0),0);
+  ov(`<h2>🏆 Survivant de Python</h2><p style="font-size:22px;color:var(--warn)">${tot} ★ sur ${W.length*3}</p>
+    <table class="tbl">
+      <tr><td>Fabriquer un objet à partir d'une classe</td><td>gun = Gun()</td></tr>
+      <tr><td>Appeler une méthode</td><td>gun.reload()</td></tr>
+      <tr><td>Lire un attribut</td><td>print(gun.munitions)</td></tr>
+      <tr><td>Changer un attribut</td><td>gun.couleur = "rouge"</td></tr>
+      <tr><td>Créer une liste</td><td>sac = ["grenade", "bandage"]</td></tr>
+      <tr><td>Ajouter / sortir</td><td>sac.append("clé") · sac.pop() · sac.remove("clé")</td></tr>
+      <tr><td>Lire une case (à partir de 0)</td><td>sac[0] · len(sac)</td></tr>
+    </table>
+    <p>En Python, <b>tout est objet</b> : une liste aussi est un objet, et <code>append</code> est une de ses méthodes.</p>
+    <div class="row"><button class="btn ok" id="m">Menu</button></div>`);
+}
+
+/* ---------- écrans ---------- */
+function ov(html){ closeOv(); const o=document.createElement('div'); o.className='ov'; o.innerHTML=`<div class="card">${html}</div>`; document.body.appendChild(o);
+  o.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>startWave(+b.dataset.w)); const m=o.querySelector('#m'); if(m) m.onclick=menu; const c=o.querySelector('#x'); if(c) c.onclick=()=>{ closeOv(); if(G) { G.pause=0; last=performance.now(); } $('#in').focus(); }; return o; }
+function closeOv(){ document.querySelectorAll('.ov').forEach(o=>o.remove()); }
+const CLASS_HTML=`<pre class="py"><span class="k">class</span> <span class="f">Gun</span>:                  <span class="cm"># le plan d'une arme</span>
+    <span class="k">def</span> <span class="f">__init__</span>(self):
+        self.munitions = 6      <span class="cm"># attributs : les données</span>
+        self.couleur = <span class="s">"gris"</span>
+        self.enraye = False
+
+    <span class="k">def</span> <span class="f">afficher</span>(self): ...   <span class="cm"># méthodes : ce que l'objet sait faire</span>
+    <span class="k">def</span> <span class="f">viser</span>(self): ...
+    <span class="k">def</span> <span class="f">tirer</span>(self): ...      <span class="cm"># munitions - 1</span>
+    <span class="k">def</span> <span class="f">reload</span>(self): ...     <span class="cm"># munitions = 6</span>
+    <span class="k">def</span> <span class="f">debloquer</span>(self): ...  <span class="cm"># enraye = False</span></pre>`;
+const CHEAT=`<h2>📜 Antisèche</h2>${CLASS_HTML}
+  <table class="tbl">
+    <tr><td>Fabriquer un objet</td><td>gun = Gun()</td></tr>
+    <tr><td>Appeler une méthode</td><td>gun.tirer()</td></tr>
+    <tr><td>Lire un attribut</td><td>print(gun.munitions)</td></tr>
+    <tr><td>Changer un attribut</td><td>gun.munitions = 8</td></tr>
+    <tr><td>Texte = entre guillemets</td><td>gun.couleur = "rouge"</td></tr>
+    <tr><td>Créer une liste</td><td>sac = ["grenade", "bandage"]</td></tr>
+    <tr><td>Ajouter à la fin</td><td>sac.append("clé")</td></tr>
+    <tr><td>Sortir le dernier / la case 0</td><td>sac.pop() · sac.pop(0)</td></tr>
+    <tr><td>Sortir une valeur précise</td><td>sac.remove("bandage")</td></tr>
+    <tr><td>Lire la 1ʳᵉ case / la taille</td><td>sac[0] · len(sac)</td></tr>
+  </table>
+  <p style="color:var(--mut);font-size:13px">🔧 Une arme enrayée ou vide ne tue plus : débloque-la ou recharge-la. 💣 Sortir la grenade du sac souffle les zombies, 🩹 le bandage rend une vie.</p>
+  <div class="row"><button class="btn ok" id="x">Reprendre</button></div>`;
+function menu(){
+  if(G){ G.over=1; G.z.forEach(z=>z.el.remove()); } G=null; V={}; drawMem(); updHud(); $('#h-w').textContent='Menu';
+  const o=ov(`<h2>🧟 Python of the Dead</h2>
+    <p>Les zombies arrivent avec un ordre en français. Pour les abattre, tape la ligne de <b>Python</b> qui fait exactement cela. Voici le <b>plan</b> de ton arme, la classe <code>Gun</code> :</p>
+    ${CLASS_HTML}
+    <p>Un <b>objet</b> est fabriqué à partir de ce plan : il garde ses <b>attributs</b> (données) et sait faire ses <b>méthodes</b>. Regarde la <b>mémoire de Python</b> changer à chaque ligne.</p>
+    <div class="waves">${W.map((w,i)=>{ const lock=i>0&&!(D.stars[i-1]); return `<button class="wv" data-w="${i}" ${lock?'disabled':''}><span class="e">${lock?'🔒':w.e}</span><span><b>Vague ${i+1} · ${w.t}</b><small>${w.d}</small></span><span class="stars">${'★'.repeat(D.stars[i]||0)}${'☆'.repeat(3-(D.stars[i]||0))}</span></button>`; }).join('')}</div>
+    <p style="color:var(--mut);font-size:13px">Entraînement hors cours · aucune note. Code prof pour tout débloquer : tape <code>prof</code> dans la console.</p>`);
+}
+// barre de symboles (utile sur téléphone)
+const SYM=['.','(',')','=','"','[',']','_','gun','sac','print(',];
+$('#sym').innerHTML=SYM.map(s=>`<button data-s="${esc(s)}">${esc(s)}</button>`).join('');
+$('#sym').querySelectorAll('button').forEach(b=>b.onpointerdown=e=>{ e.preventDefault(); const i=$('#in'), a=i.selectionStart??i.value.length, z=i.selectionEnd??a; i.value=i.value.slice(0,a)+b.dataset.s+i.value.slice(z); i.setSelectionRange(a+b.dataset.s.length,a+b.dataset.s.length); i.focus(); });
+$('#in').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); if($('#in').value.trim()==='prof'&&!G){ $('#in').value=''; W.forEach((_,i)=>D.stars[i]=Math.max(1,D.stars[i]||0)); save(); menu(); return; } submit(); } });
+$('#go').onclick=()=>{ submit(); $('#in').focus(); };
+$('#b-cheat').onclick=()=>{ if(G) G.pause=1; ov(CHEAT); };
+$('#b-menu').onclick=menu;
+drawMem(); menu();
+</script>
+
+</body></html>
