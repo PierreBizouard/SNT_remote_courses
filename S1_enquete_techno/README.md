@@ -5,7 +5,7 @@ Séance d'introduction SNT en version ultra-ludique : les élèves font les déc
 | Jeu | Découverte visée |
 | --- | --- |
 | 🧟 Zombies du temps | Chaque vague est une famille d'inventions (écrire, énergie et transport, communiquer, calculer…) à abattre de la plus ancienne à la plus récente (un mauvais tir blesse et révèle la date), frise à l'échelle qui montre l'accélération, puis courbe recopiée à la main 4 fois (l'écart grandit) contre copie en nombres (écart nul) |
-| 🐙 La pieuvre laser | Routage : un routeur lit l'adresse du paquet ; les règles se devinent à partir des erreurs |
+| 🐙 La pieuvre laser | Défense : chaque paquet livré à la bonne tourelle (adresse IPv4 complète) lance un missile ; flèches cliquables aux embranchements ; 5 topologies (arbre, étoile, anneau, maillé, sous-réseaux avec routeurs /24) ; lasers qui coupent des câbles |
 | ⬛ La boîte noire | Comprendre une machine fermée : essais, hypothèse, prédiction (démarche scientifique) |
 | 📱 Le fil d'actu | Les émotions fortes se propagent plus loin : économie de l'attention |
 | 🫧 La bulle | Boucle de rétroaction des likes, bulle de filtres, mission « sortir de sa bulle » |
