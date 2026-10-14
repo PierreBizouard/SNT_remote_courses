@@ -66,7 +66,10 @@ body.paused .stage{filter:blur(14px)}
 .z .zb{position:absolute;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#d0001f 0 50%,#7a0010 52% 60%,transparent 62%);pointer-events:none}
 .z .dt{display:block;margin-top:2px;font:700 12px var(--f-mono);color:#b3001b}
 .z .dt:empty{display:none}
-.zfr{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:40px}
+.zfr{display:grid;gap:6px;margin-top:8px;min-height:40px}
+.zrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.zrow>b{width:100%;font-size:13px;color:var(--amber)}
+.zrow>i{color:var(--muted);font-style:normal}
 .zc{padding:4px 8px;background:#18382d;border:1px solid var(--good);border-radius:8px;font:700 13px var(--f-body)}
 .zc.miss{background:#3a1a24;border-color:var(--bad)}
 .zc small{display:block;font:400 11px var(--f-mono);color:var(--muted)}
@@ -315,41 +318,39 @@ function endCard(title,body,again,disc){
    1 · ZOMBIES DU TEMPS : abattre les inventions de la plus ancienne à la plus récente,
        voir la frise s'accélérer, puis recopier une courbe à la main
    ========================================================= */
-const INV=[
-  ['🪨','Outil en pierre taillée',-3300000], ['🔥','Maîtrise du feu',-400000], ['🦬','Peintures dans les grottes',-36000],
-  ['🌾','Agriculture',-10000], ['🛞','Roue',-3500], ['✍️','Écriture',-3300], ['🪙','Pièces de monnaie',-600],
-  ['📜','Papier',105], ['🧭','Boussole',1100], ['📖','Imprimerie',1450], ['🔭','Lunette astronomique',1609],
-  ['🧮','Machine à calculer',1642], ['0️⃣','Calcul en binaire',1703], ['🚂','Machine à vapeur',1769], ['🧵','Métier à tisser à cartes perforées',1801],
-  ['📷','Photographie',1826], ['⚡','Télégraphe électrique',1837], ['☎️','Téléphone',1876], ['💡','Ampoule électrique',1879],
-  ['🎞️','Cinéma',1895], ['📻','Radio',1895], ['✈️','Avion',1903], ['📺','Télévision',1926], ['🖥️','Premier ordinateur',1945],
-  ['🔌','Transistor',1947], ['🌐','Internet',1969], ['🔲','Microprocesseur',1971], ['🕸️','Web',1989],
-  ['📚','Wikipédia',2001], ['📱','Smartphone',2007], ['🤖','ChatGPT',2022]
+// des familles d'inventions : chaque vague est une lignée à remettre dans l'ordre
+const FAM=[
+  { e:'✍️', t:'Écrire et diffuser', items:[['✍️','Écriture',-3300],['📖','Imprimerie',1450],['⌨️','Machine à écrire',1868],['🕸️','Web',1989],['📱','Smartphone',2007]] },
+  { e:'🔥', t:'Énergie et transport', items:[['🔥','Maîtrise du feu',-400000],['🛞','Roue',-3500],['🚂','Machine à vapeur',1769],['🚆','Train à vapeur',1804],['🚗','Voiture à moteur à explosion',1886]] },
+  { e:'📡', t:'Communiquer à distance', items:[['🗼','Télégraphe à bras (Chappe)',1794],['⚡','Télégraphe électrique',1837],['☎️','Téléphone',1876],['📻','Radio',1895],['🌐','Internet',1969]] },
+  { e:'🧮', t:'Calculer', items:[['🧮','Machine à calculer de Pascal',1642],['0️⃣','Calcul en binaire',1703],['🧵','Cartes perforées (métier Jacquard)',1801],['🖥️','Premier ordinateur',1945],['🔲','Microprocesseur',1971]] },
+  { e:'📷', t:'Images et sons', items:[['🦬','Peintures dans les grottes',-36000],['📷','Photographie',1826],['🎙️','Phonographe',1877],['🎞️','Cinéma',1895],['📺','Télévision',1926]] },
+  { e:'🤖', t:'Machines qui « pensent »', items:[['♞','Automate joueur d\'échecs (truqué !)',1770],['🖥️','Premier ordinateur',1945],['♟️','Ordinateur champion d\'échecs',1997],['🗣️','Assistant vocal',2011],['🤖','ChatGPT',2022]] }
 ];
+const INV=FAM.flatMap(f=>f.items);
 function fmtY(y){
   if(y<=-1e6) return `il y a ${(-y/1e6).toLocaleString('fr-FR',{maximumFractionDigits:1})} millions d'années`;
   if(y<=-10000) return `il y a ${(-y).toLocaleString('fr-FR')} ans`;
   return y<0?`${-y} av. J.-C.`:String(y);
 }
 function gZombie(){
-  head('🧟','Zombies du temps','Chaque zombie porte une invention. <b>Abats d\'abord la plus ANCIENNE</b>, puis la suivante… Un mauvais tir touche le zombie mais ne l\'arrête pas : il révèle sa date et devient plus rapide.');
+  head('🧟','Zombies du temps','Chaque vague est une famille d\'inventions (écrire, se déplacer, calculer…). <b>Abats d\'abord la plus ANCIENNE</b>, puis la suivante : tu reconstruis la lignée. Un mauvais tir touche le zombie mais ne l\'arrête pas : il révèle sa date et devient plus rapide.');
   mk('div','hud','<span class="lives" id="zl"></span><span id="zn"></span>',main);
   const qb=mk('div','qbar',null,main);
   const st=mk('div','stage zst','<div class="barricade"></div><div class="turret">🔫</div>',main);
   const fr=mk('div','zfr',null,main);
-  const NW=5, PER=4;
-  // des vagues qui mélangent les époques : une invention de chaque quart de la liste triée
-  const pool=shuffle(INV.slice()).slice(0,NW*PER).sort((a,b)=>a[2]-b[2]);
-  const W=[...Array(NW)].map(()=>[]);
-  for(let q=0;q<PER;q++){ const part=shuffle(pool.slice(q*NW,(q+1)*NW)); part.forEach((it,i)=>W[i].push(it)); }
+  // 5 familles au hasard, 4 inventions de chaque (on garde toujours la plus ancienne et la plus récente)
+  const FS=shuffle(FAM.slice()).slice(0,5), NW=FS.length;
+  const W=FS.map(f=>{ const it=f.items.slice(); const mid=shuffle(it.slice(1,-1)).slice(0,2); return it.filter(x=>x===it[0]||x===it[it.length-1]||mid.includes(x)); });
   const S={ w:-1, lives:3, ok:0, err:0, zs:[], wait:0, over:false, W:0, H:0, got:[] };
   const g={ over:false };
   const measure=()=>{ S.W=st.clientWidth; S.H=st.clientHeight; };
   const hudUp=()=>{ $('#zl').textContent='♥'.repeat(Math.max(0,S.lives))+'♡'.repeat(3-Math.max(0,S.lives)); $('#zn').textContent=`Vague ${Math.min(S.w+1,NW)} / ${NW} · ${S.ok} abattus · ${S.err} tirs ratés`; };
-  const frUp=()=>{ fr.innerHTML=S.got.slice().sort((a,b)=>a.it[2]-b.it[2]).map(o=>`<span class="zc ${o.ok?'':'miss'}">${o.it[0]} ${esc(o.it[1])}<small>${fmtY(o.it[2])}</small></span>`).join('')||'<span class="lead">Ta frise des inventions se remplit ici.</span>'; };
+  const frUp=()=>{ fr.innerHTML=FS.map((f,i)=>{ const L=S.got.filter(o=>o.w===i).sort((a,b)=>a.it[2]-b.it[2]); return L.length?`<div class="zrow"><b>${f.e} ${f.t}</b>${L.map(o=>`<span class="zc ${o.ok?'':'miss'}">${o.it[0]} ${esc(o.it[1])}<small>${fmtY(o.it[2])}</small></span>`).join('<i>→</i>')}</div>`:''; }).join('')||'<span class="lead">Tes lignées d\'inventions se remplissent ici.</span>'; };
   function wave(){
     S.zs.forEach(z=>z.el.remove()); S.zs=[]; S.w++;
     if(S.w>=NW) return finish();
-    qb.innerHTML='Abats les inventions <b>de la plus ancienne à la plus récente</b>'; hudUp();
+    qb.innerHTML=`${FS[S.w].e} Famille « ${FS[S.w].t} » : abats-les <b>de la plus ancienne à la plus récente</b>`; hudUp();
     const items=shuffle(W[S.w].slice()), n=items.length;
     items.forEach((it,i)=>{
       const el=mk('div','z',`<span class="em">🧟</span><span class="lab">${it[0]} ${esc(it[1])}<span class="dt"></span></span>`,st);
@@ -367,7 +368,7 @@ function gZombie(){
       S.ok++; addPts(10,zx,zy-30,st);
       const sp=mk('div','splat',null,st); place(sp,zx,zy+10); setTimeout(()=>sp.remove(),1500);
       z.el.classList.add('dead'); S.zs=S.zs.filter(o=>o!==z); setTimeout(()=>z.el.remove(),500);
-      S.got.push({it:z.it,ok:1}); frUp();
+      S.got.push({it:z.it,ok:1,w:S.w}); frUp(); hudUp();
       if(!S.zs.length) S.wait=1.1;
     } else {
       // touché, mais ce n'est pas le plus ancien : il saigne, recule, montre sa date et accélère
@@ -385,8 +386,8 @@ function gZombie(){
     setTimeout(()=>b.remove(),2300);
     floatTxt(st,S.W/2,S.H/2,`Mordu ! ${z.it[1]} : ${fmtY(z.it[2])}`,'#ffd0d0');
     z.el.classList.add('flee'); S.zs=S.zs.filter(o=>o!==z); setTimeout(()=>z.el.remove(),500);
-    S.got.push({it:z.it,ok:0}); frUp(); hudUp();
-    if(S.lives<=0){ S.zs.forEach(o=>{ S.got.push({it:o.it,ok:0}); o.el.classList.add('flee'); }); S.zs=[]; frUp(); return finish(true); }
+    S.got.push({it:z.it,ok:0,w:S.w}); frUp(); hudUp();
+    if(S.lives<=0){ S.zs.forEach(o=>{ S.got.push({it:o.it,ok:0,w:S.w}); o.el.classList.add('flee'); }); S.zs=[]; frUp(); return finish(true); }
     if(!S.zs.length) S.wait=1.4;
   }
   function finish(dead){
@@ -418,7 +419,7 @@ function zFrise(items){
   head('📏','La frise à la bonne échelle','Voici tes inventions placées à leur vraie date. Change le zoom : que remarques-tu ?');
   const now=2025, Z=[['Toute l\'histoire',-3400000],['10 000 dernières années',now-10000],['1 000 dernières années',now-1000],['500 dernières années',now-500]];
   const c=mk('div','card',`<div class="row" id="zf-z">${Z.map(([t],i)=>`<button class="btn${i?'':' ok'}" data-i="${i}">${t}</button>`).join('')}</div><div class="zfw"><svg id="zf" viewBox="0 0 1000 260" aria-label="Frise chronologique des inventions"></svg></div><p id="zf-n" class="lead" style="margin:6px 0 0"></p>`,main);
-  const sorted=items.slice().sort((a,b)=>a[2]-b[2]);
+  const sorted=[...new Set(items)].sort((a,b)=>a[2]-b[2]);
   function draw(i){
     const a=Z[i][1], X=y=>40+(y-a)/(now-a)*920;
     const vis=sorted.filter(it=>it[2]>=a);
