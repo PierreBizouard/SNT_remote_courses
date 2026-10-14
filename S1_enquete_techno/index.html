@@ -193,6 +193,38 @@ table.hist th{color:var(--muted);font-weight:500}
 .hlist{display:grid;gap:3px;font:500 13px var(--f-mono)}
 .hlist div{display:grid;grid-template-columns:2.2em 1fr 3.4em;gap:6px;align-items:center}
 .hlist i{display:block;height:10px;border-radius:4px;background:var(--pink)}
+/* le réseau */
+.rswrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:12px}
+.rspost{position:relative;background:#f6f4ff;color:#1b1838;border-radius:14px;overflow:hidden;min-height:200px}
+.rsimg{position:relative;aspect-ratio:16/9;overflow:hidden;background:#111}
+.rsimg svg{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);filter:blur(var(--bl,0px));transition:filter .6s}
+.rsov{position:absolute;left:8px;right:8px;top:8px;text-align:center;font:900 clamp(16px,4.6vw,24px)/1.1 Impact,'Arial Black',var(--f-body);color:#fff;text-transform:uppercase;-webkit-text-stroke:1.5px #000;paint-order:stroke fill;text-shadow:0 2px 4px #000}
+.rsday{position:absolute;right:8px;bottom:6px;padding:1px 8px;border-radius:8px;background:#000a;color:#fff;font:700 12px var(--f-mono)}
+.rsbody{padding:10px 14px 12px}
+.rsbody .src{display:flex;align-items:center;gap:8px;font:700 13px var(--f-body);color:#5a5580}
+.rsbody .src .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#ddd8ff;font-size:15px}
+.rsbody .meta{font:500 12px var(--f-mono);color:#6d688f}
+.rsbody h3{margin:6px 0;font:700 clamp(15px,4vw,18px)/1.3 var(--f-body)}
+.rstags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.rstags .tag{display:inline-block;padding:2px 8px;border-radius:10px;font:700 12px var(--f-body)}
+.rstags .tg2{background:#e6e2ff;color:#4a4580}
+.rstags .vp{background:#d8f8e6;color:#0d4a2a} .rstags .vm{background:#ffdbe2;color:#7a0016}
+.rsnet{height:260px}
+.rsleg{position:absolute;left:6px;bottom:4px;right:6px;display:flex;flex-wrap:wrap;gap:2px 10px;font:500 11px var(--f-body);color:var(--muted)}
+.rsleg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.rsheart{position:absolute;top:-30px;z-index:20;width:44px;height:44px;padding:0;border:0;background:none;font-size:30px;line-height:1;animation:hfall 2s linear forwards;touch-action:manipulation}
+.rsheart.got{transform:scale(1.6)}
+@keyframes hfall{to{top:calc(100% + 10px)}}
+.rsmap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rsmap small{display:block;font-size:11px;line-height:1.25;color:#4a4580;margin-top:2px}
+.rsmap .unk{opacity:.55}
+.rsmap .unk small{color:#888}
+.rsrev{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.rsmini{border-top:1px solid #ddd;padding:6px 0;font-size:13px}
+@media (min-width:900px){ .rsmap{grid-template-columns:repeat(5,1fr)} }
+@media (max-width:640px){ .rsrev{grid-template-columns:1fr} }
+.rsimg.mini{border-radius:8px}
+@media (max-width:640px){ .rswrap{grid-template-columns:1fr} .rsmap{grid-template-columns:repeat(2,1fr)} }
 textarea{width:100%;min-height:64px;padding:10px;background:var(--deep);color:var(--fg);border:1px solid var(--line);border-radius:10px;font:15px var(--f-body);resize:vertical}
 .disc{margin-top:16px;border-color:var(--cyan)}
 .disc h3{margin:0 0 6px;font:700 15px var(--f-display);color:var(--cyan)}
@@ -955,6 +987,614 @@ Le sujet, l'heure, les hashtags : AUCUN effet.</div>
   hud(); chipsel();
 }
 
+/* =========================================================
+   7 · LE RÉSEAU : émotions, valeurs et propagation dans un réseau simulé
+   Les événements et les comptes sont inventés (ville fictive de Villeneuve),
+   mais construits sur des situations étudiantes typiques.
+   ========================================================= */
+const VK=['hum','ega','lib','ord','reu','vie'];
+const VAL={ hum:['🤝','Humanisme'], ega:['⚖️','Égalité'], lib:['🕊️','Liberté'], ord:['🛡️','Ordre'], reu:['🏆','Réussite'], vie:['🌱','Vie'] };
+// émotions : emoji, nom, couleur, « activation » (une émotion forte donne envie d'agir, donc de partager)
+const EM={ col:['😠','Colère','#ff5a5a',.95], peur:['😨','Peur','#b69cff',.85], deg:['🤢','Dégoût','#9bd34a',.8], joie:['😄','Joie','#ffb547',.75], tri:['😢','Tristesse','#5c9ce6',.3] };
+const MOODOF={ col:'irritation', peur:'anxiété', deg:'écœurement', joie:'enthousiasme', tri:'abattement' };
+const EVT2 = [
+{
+  id: "logement",
+  t: "Fermeture de la résidence étudiante des Tilleuls",
+  day: 3,
+  go: "Un rassemblement a lieu devant la résidence des Tilleuls ce soir. Tu y vas ?",
+  truth: "La résidence des Tilleuls a été fermée en urgence après la découverte de moisissures et d'un problème électrique dans un bâtiment. Les 64 étudiants concernés ont été relogés provisoirement, mais certains à plus d'une heure du campus. Aucun projet de vente du terrain n'a été annoncé. Les travaux doivent durer au moins trois mois.",
+  posts: [
+    { src: ["Université de Villeneuve", "officiel", 32000], t: "La résidence des Tilleuls est fermée pour raisons de sécurité : les 64 résidents ont tous reçu une solution de relogement provisoire.", ov: "RÉSIDENCE FERMÉE", e: { peur: 0.2 }, mood: "méfiance", dyn: "solidarité", v: { ord: 0.6, vie: 0.4 }, out: 0, tr: "vrai", sc: ["immeuble", "panneau"] },
+    { src: ["@SyndicEtudiantVilleneuve", "militant", 8400], t: "On nous jette dehors en pleine année et on nous envoie à 1 h de bus du campus 😡 Ils laissent pourrir les bâtiments depuis des années !", ov: "ON VEUT UN TOIT !", e: { col: 0.8, tri: 0.3 }, mood: "irritation", dyn: "mobilisation", v: { ega: 0.8, hum: 0.5 }, out: 1, tr: "vrai", sc: ["manif", "immeuble"] },
+    { src: ["@VeriteCachee_VLN", "anonyme", 14000], t: "Fermeture « sanitaire » ? Le terrain va être vendu à un promoteur, tout était prévu depuis le début 🤫", ov: "TERRAIN DÉJÀ VENDU ?", e: { deg: 0.6, col: 0.5 }, mood: "méfiance", dyn: "indignation", v: { ega: 0.5 }, out: 1, tr: "faux", sc: ["argent", "immeuble"] },
+    { src: ["@ines_l2bio", "temoin", 410], t: "Ma voisine de couloir m'héberge sur son canapé en attendant, franchement merci à elle 🙏", ov: "MERCI LA VOISINE", e: { joie: 0.5, tri: 0.4 }, mood: "espoir", dyn: "solidarité", v: { hum: 0.8 }, out: 0, tr: "vrai", sc: ["coeur", "immeuble"] }
+  ]
+},
+{
+  id: "bourses",
+  t: "Bourses étudiantes versées en retard",
+  day: 9,
+  go: null,
+  truth: "Le versement de la bourse d'octobre a eu trois semaines de retard pour environ 1 200 étudiants de Villeneuve, à cause d'un changement de logiciel au service des bourses. Les sommes ont été versées le 12 du mois. Une aide d'urgence existait, mais peu d'étudiants la connaissaient. Les bourses n'ont pas été réduites.",
+  posts: [
+    { src: ["Le Villeneuvois", "media", 46000], t: "Bourses : un changement de logiciel retarde le versement pour 1 200 étudiants, paiement annoncé pour le 12.", ov: "BOURSES EN RETARD", e: { peur: 0.2 }, mood: "méfiance", dyn: "indignation", v: {}, out: 0, tr: "vrai", sc: ["argent", "ecran"] },
+    { src: ["@tom_eco_vln", "temoin", 230], t: "Plus que 11 € sur mon compte et le loyer tombe lundi… je mange des pâtes depuis dix jours 😔", ov: "11 € POUR LE MOIS", e: { tri: 0.8, peur: 0.5 }, mood: "abattement", dyn: "deuil", v: { ega: 0.5, vie: 0.3 }, out: 0, tr: "vrai", sc: ["argent", "repas"] },
+    { src: ["@LaVoixDesBoursiers", "militant", 6200], t: "Ils baissent les bourses en douce et appellent ça un « bug » ! Les boursiers, toujours les derniers servis 💢", ov: "BOURSES RABOTÉES ?!", e: { col: 0.9 }, mood: "irritation", dyn: "indignation", v: { ega: 0.9 }, out: 1, tr: "trompeur", sc: ["argent", "manif"] },
+    { src: ["Université de Villeneuve", "officiel", 32000], t: "Rappel : une aide d'urgence de 150 € est disponible en 48 h au service social, n'hésitez pas à la demander.", ov: "AIDE D'URGENCE 150 €", e: { joie: 0.2 }, mood: "espoir", dyn: "solidarité", v: { hum: 0.6, ega: 0.4 }, out: 0, tr: "vrai", sc: ["panneau", "argent"] }
+  ]
+},
+{
+  id: "bus",
+  t: "Suppression de deux lignes de bus scolaires",
+  day: 12,
+  go: null,
+  truth: "Le réseau de transport a supprimé deux lignes de bus scolaires desservant les hameaux de l'est de Villeneuve, faute de conducteurs. Une centaine d'élèves doivent désormais marcher jusqu'à 2 km pour rejoindre un autre arrêt. La mairie a obtenu le retour d'une ligne à partir du mois prochain. Aucun accident lié à cette suppression n'a eu lieu.",
+  posts: [
+    { src: ["Mairie de Villeneuve", "officiel", 28000], t: "Faute de conducteurs, les lignes 14 et 15 sont suspendues ; la ligne 14 reprendra le mois prochain.", ov: "LIGNES SUSPENDUES", e: { tri: 0.2 }, mood: "méfiance", dyn: "espoir", v: { ord: 0.4 }, out: 0, tr: "vrai", sc: ["bus", "panneau"] },
+    { src: ["@ParentsEnColere_VLN", "militant", 3900], t: "Nos enfants marchent dans le noir au bord de la départementale, il faudra un mort pour qu'ils réagissent ? 😱", ov: "DANGER SUR LA ROUTE", e: { peur: 0.8, col: 0.6 }, mood: "anxiété", dyn: "mobilisation", v: { vie: 0.9, ord: 0.4 }, out: 1, tr: "trompeur", sc: ["route", "lune"] },
+    { src: ["@noa_2nde", "temoin", 180], t: "On a fait un groupe de covoiturage entre parents du hameau, on part à 7 h 10 ensemble 🚗", ov: "COVOIT' ENTRE VOISINS", e: { joie: 0.5 }, mood: "fierté", dyn: "solidarité", v: { hum: 0.7 }, out: 0, tr: "vrai", sc: ["route", "coeur"] },
+    { src: ["@InfoVilleneuveDirect", "anonyme", 9800], t: "Les bus des quartiers est supprimés pour financer la nouvelle fontaine du centre-ville 💸", ov: "BUS CONTRE FONTAINE", e: { col: 0.7, deg: 0.4 }, mood: "écœurement", dyn: "indignation", v: { ega: 0.7 }, out: 1, tr: "faux", sc: ["bus", "argent"] }
+  ]
+},
+{
+  id: "telephone",
+  t: "Téléphone interdit toute la journée au lycée Condorcet",
+  day: 6,
+  go: null,
+  truth: "Le lycée Condorcet de Villeneuve teste depuis la rentrée une pochette fermée où les élèves rangent leur téléphone pendant toute la journée. Les premiers chiffres internes montrent moins de conflits pendant les pauses. Certains élèves et parents regrettent de ne pas pouvoir se joindre, mais le téléphone fixe de la vie scolaire reste disponible. La mesure n'est pas décidée par le ministère pour tous les lycées.",
+  posts: [
+    { src: ["Le Villeneuvois", "media", 46000], t: "Au lycée Condorcet, les téléphones dorment dans des pochettes : moins d'incidents aux pauses selon la direction.", ov: "LYCÉE SANS ÉCRAN", e: { joie: 0.2 }, mood: "espoir", dyn: "espoir", v: { ord: 0.5 }, out: 0, tr: "vrai", sc: ["phone", "panneau"] },
+    { src: ["@zoe.tl", "influ", 85000], t: "On nous traite comme des prisonniers 🔒 bientôt ils vont lire nos pensées ?! Liberté pour nos phones !", ov: "LIBÉREZ NOS PHONES", e: { col: 0.8 }, mood: "irritation", dyn: "mobilisation", v: { lib: 0.9 }, out: 1, tr: "trompeur", sc: ["phone", "manif"] },
+    { src: ["@Rumeurs_Lycées", "anonyme", 7200], t: "Le ministère va interdire le téléphone dans TOUS les lycées dès janvier, c'est officiel 📢", ov: "INTERDIT PARTOUT ?", e: { peur: 0.6, col: 0.4 }, mood: "anxiété", dyn: "panique", v: { lib: 0.6 }, out: 0, tr: "faux", sc: ["phone", "micro"] },
+    { src: ["@hugo_1ereG", "temoin", 320], t: "Bizarrement, on rejoue aux cartes au foyer et on parle plus entre nous 😄", ov: "ON SE PARLE ENFIN", e: { joie: 0.7 }, mood: "enthousiasme", dyn: "réconciliation", v: { hum: 0.6, vie: 0.3 }, out: 0, tr: "vrai", sc: ["fete", "phone"] }
+  ]
+},
+{
+  id: "uniforme",
+  t: "Un lycée teste l'uniforme",
+  day: 11,
+  go: null,
+  truth: "Le lycée Jean-Moulin de Villeneuve teste pendant un trimestre une tenue commune (polo et sweat) votée par le conseil d'administration. La tenue est fournie gratuitement aux élèves, financée par la région. Une partie des élèves y est opposée et une pétition a recueilli 400 signatures. Aucun élève n'a été exclu pour ne pas l'avoir portée.",
+  posts: [
+    { src: ["Rectorat", "officiel", 21000], t: "Le lycée Jean-Moulin expérimente une tenue commune, fournie gratuitement, jusqu'en décembre.", ov: "TENUE COMMUNE TESTÉE", e: { peur: 0.1 }, mood: "méfiance", dyn: "espoir", v: { ord: 0.5, ega: 0.3 }, out: 0, tr: "vrai", sc: ["panneau", "immeuble"] },
+    { src: ["@LibreDeMeSaper", "militant", 5100], t: "Des élèves renvoyés chez eux parce qu'ils n'avaient pas le polo ! C'est ça l'école de la liberté ? 😤", ov: "EXCLUS POUR UN POLO", e: { col: 0.8, deg: 0.3 }, mood: "irritation", dyn: "indignation", v: { lib: 0.9 }, out: 1, tr: "faux", sc: ["manif", "panneau"] },
+    { src: ["@maelys_2nde", "temoin", 260], t: "Perso je respire : plus personne ne se moque de mes fringues pas chères 💙", ov: "PLUS DE MOQUERIES", e: { joie: 0.6, tri: 0.2 }, mood: "espoir", dyn: "réconciliation", v: { ega: 0.8, hum: 0.4 }, out: 0, tr: "vrai", sc: ["coeur"] },
+    { src: ["@OrdreEtValeurs_VLN", "militant", 12000], t: "Enfin un peu de tenue ! Ces jeunes ont besoin de règles, pas de caprices 👔", ov: "ENFIN DE LA DISCIPLINE", e: { col: 0.4, joie: 0.3 }, mood: "fierté", dyn: "rivalité", v: { ord: 0.9, lib: -0.5 }, out: 1, tr: "trompeur", sc: ["panneau", "trophee"] }
+  ]
+},
+{
+  id: "harcelement",
+  t: "Harcèlement sur un groupe de discussion de 3e",
+  day: 5,
+  go: null,
+  truth: "Une élève de 3e du collège voisin du lycée Condorcet a été ciblée pendant plusieurs semaines sur un groupe de discussion privé de sa classe. Sa mère a porté plainte et cinq élèves ont été convoqués par la direction. L'élève est soutenue par l'équipe éducative et a repris les cours. Les noms qui circulent en ligne comme « coupables » ne correspondent pas tous aux élèves concernés.",
+  posts: [
+    { src: ["Le Villeneuvois", "media", 46000], t: "Harcèlement en ligne au collège : une plainte déposée, cinq élèves convoqués par la direction.", ov: "PLAINTE DÉPOSÉE", e: { tri: 0.3 }, mood: "abattement", dyn: "indignation", v: { hum: 0.5, ord: 0.4 }, out: 0, tr: "vrai", sc: ["phone", "panneau"] },
+    { src: ["@JusticePourElle", "anonyme", 18000], t: "Voici les noms des harceleurs, partagez un max qu'ils n'osent plus sortir de chez eux 🔥", ov: "LES NOMS ICI", e: { col: 0.9, deg: 0.6 }, mood: "écœurement", dyn: "indignation", v: { hum: 0.4, ord: -0.5 }, out: 1, tr: "faux", sc: ["phone", "feu"] },
+    { src: ["@lea_3eme", "temoin", 140], t: "On a fait une carte géante pour elle avec toute la classe, elle a souri pour la première fois depuis longtemps 💌", ov: "TU N'ES PAS SEULE", e: { joie: 0.5, tri: 0.4 }, mood: "espoir", dyn: "solidarité", v: { hum: 0.9 }, out: 0, tr: "vrai", sc: ["coeur"] },
+    { src: ["@CollectifStopHarcelement", "militant", 9300], t: "Ce n'est pas « une histoire de gamins » : un élève sur dix vit ça, parlez-en à un adulte 📞", ov: "PARLE, ON T'ÉCOUTE", e: { tri: 0.5, peur: 0.3 }, mood: "anxiété", dyn: "mobilisation", v: { hum: 0.7, vie: 0.5 }, out: 0, tr: "vrai", sc: ["phone", "coeur"] }
+  ]
+},
+{
+  id: "defi",
+  t: "Un défi dangereux venu d'une appli",
+  day: 4,
+  go: null,
+  truth: "Un défi consistant à retenir sa respiration le plus longtemps possible circule sur une application de vidéos courtes. Un élève de seconde de Villeneuve a fait un malaise en classe et a été pris en charge par l'infirmière ; il va bien. Aucun autre cas n'a été signalé dans la ville. Le rectorat a envoyé un message de prévention aux familles.",
+  posts: [
+    { src: ["Rectorat", "officiel", 21000], t: "Un élève a fait un malaise lié à un défi en ligne ; il est hors de danger. Parents, parlez-en avec vos enfants.", ov: "PRÉVENTION DÉFI", e: { peur: 0.3 }, mood: "anxiété", dyn: "mobilisation", v: { vie: 0.7 }, out: 0, tr: "vrai", sc: ["hopital", "phone"] },
+    { src: ["@MamanVigilante_VLN", "influ", 42000], t: "ALERTE 🚨 Des dizaines d'élèves hospitalisés à Villeneuve à cause de ce défi, partagez à tous les parents !!", ov: "DES DIZAINES À L'HÔPITAL", e: { peur: 0.9 }, mood: "anxiété", dyn: "panique", v: { vie: 0.9 }, out: 0, tr: "faux", sc: ["hopital", "phone"] },
+    { src: ["@MonsieurAvis", "influ", 120000], t: "Une génération entière abrutie par les écrans, faut pas s'étonner 🙄", ov: "GÉNÉRATION ÉCRAN", e: { deg: 0.6, col: 0.4 }, mood: "écœurement", dyn: "rivalité", v: { ord: 0.5, reu: 0.3 }, out: 1, tr: "trompeur", sc: ["ecran", "phone"] },
+    { src: ["@infirmiere_lycee_vln", "temoin", 900], t: "Merci aux élèves qui m'ont appelée tout de suite : grâce à eux, tout s'est bien fini 🙏", ov: "BON RÉFLEXE !", e: { joie: 0.5, peur: 0.2 }, mood: "fierté", dyn: "solidarité", v: { vie: 0.7, hum: 0.5 }, out: 0, tr: "vrai", sc: ["coeur", "hopital"] }
+  ]
+},
+{
+  id: "inondation",
+  t: "Le campus des Prés inondé après un orage",
+  day: 8,
+  go: null,
+  truth: "Un violent orage a inondé le sous-sol et le rez-de-chaussée de deux bâtiments du campus des Prés. Les cours ont été déplacés en ligne pendant trois jours et une centaine d'ordinateurs ont été endommagés. Personne n'a été blessé. Des experts indiquent que le campus est construit sur une zone humide, ce qui aggrave les risques.",
+  posts: [
+    { src: ["Université de Villeneuve", "officiel", 32000], t: "Suite à l'orage, les bâtiments B et C sont fermés ; les cours ont lieu en ligne jusqu'à jeudi.", ov: "CAMPUS FERMÉ", e: { peur: 0.2 }, mood: "méfiance", dyn: "solidarité", v: { ord: 0.5 }, out: 0, tr: "vrai", sc: ["pluie", "immeuble"] },
+    { src: ["@ClimatJeunesVLN", "militant", 15000], t: "Construire une fac sur une zone humide, quelle idée ! Le climat change, nos campus doivent changer aussi 🌧️", ov: "LA NATURE PRÉVIENT", e: { col: 0.5, peur: 0.4 }, mood: "anxiété", dyn: "mobilisation", v: { vie: 0.9 }, out: 0, tr: "vrai", sc: ["pluie", "arbre"] },
+    { src: ["@sacha_info", "temoin", 600], t: "On a sorti les PC du labo en chaîne humaine sous la pluie, profs et étudiants ensemble 💪", ov: "CHAÎNE HUMAINE", e: { joie: 0.6 }, mood: "fierté", dyn: "solidarité", v: { hum: 0.8 }, out: 0, tr: "vrai", sc: ["pluie", "coeur"] },
+    { src: ["@VeriteCachee_VLN", "anonyme", 14000], t: "Le barrage en amont a été ouvert exprès pour noyer la fac, on vous cache tout 🌊", ov: "BARRAGE OUVERT EXPRÈS", e: { peur: 0.6, col: 0.5 }, mood: "méfiance", dyn: "panique", v: { ord: 0.4 }, out: 1, tr: "faux", sc: ["pluie", "route"] }
+  ]
+},
+{
+  id: "climat",
+  t: "Marche des lycéens pour le climat",
+  day: 2,
+  go: "Une marche pour le climat part du lycée Condorcet cet après-midi. Tu y vas ?",
+  truth: "Environ 1 500 lycéens et étudiants ont défilé dans le calme à Villeneuve pour demander plus d'arbres et de pistes cyclables. Une vitrine a été taguée en fin de cortège par quelques personnes. La police n'a procédé à aucune interpellation. La mairie a accepté de recevoir une délégation la semaine prochaine.",
+  posts: [
+    { src: ["Le Villeneuvois", "media", 46000], t: "1 500 jeunes ont marché pour le climat ; une délégation sera reçue en mairie mardi.", ov: "1 500 POUR LE CLIMAT", e: { joie: 0.3 }, mood: "espoir", dyn: "mobilisation", v: { vie: 0.5 }, out: 0, tr: "vrai", sc: ["manif", "arbre"] },
+    { src: ["@ClimatJeunesVLN", "militant", 15000], t: "Quelle énergie !!! 🌍💚 La planète n'a pas de plan B, et nous on ne lâchera rien !", ov: "PAS DE PLANÈTE B", e: { joie: 0.8 }, mood: "enthousiasme", dyn: "mobilisation", v: { vie: 0.9, hum: 0.3 }, out: 0, tr: "vrai", sc: ["manif", "arbre", "fete"] },
+    { src: ["@CommercantsVLN", "militant", 4100], t: "Encore des casseurs ! Les commerçants paient les caprices de gamins qui sèchent les cours 😡", ov: "LES CASSEURS ENCORE", e: { col: 0.8 }, mood: "irritation", dyn: "indignation", v: { ord: 0.8, reu: 0.4 }, out: 1, tr: "trompeur", sc: ["manif", "police"] },
+    { src: ["@papi_jardinier", "temoin", 95], t: "En voyant passer ces jeunes avec leurs pancartes, j'ai eu les larmes aux yeux. Merci les enfants 🌳", ov: "MERCI LES JEUNES", e: { joie: 0.6, tri: 0.3 }, mood: "espoir", dyn: "réconciliation", v: { vie: 0.6, hum: 0.5 }, out: 0, tr: "vrai", sc: ["arbre", "coeur"] }
+  ]
+},
+{
+  id: "foot",
+  t: "Le club de foot universitaire champion régional",
+  day: 1,
+  go: "Les joueurs fêtent leur titre ce soir au stade universitaire. Tu y vas ?",
+  truth: "L'équipe de football de l'université de Villeneuve a remporté le championnat régional universitaire 2 à 1 contre l'équipe de la ville voisine. Le match s'est terminé par quelques bousculades entre supporters, sans blessé. L'arbitrage a été contesté par le camp adverse, mais aucune réclamation officielle n'a été déposée. L'équipe ira aux finales nationales.",
+  posts: [
+    { src: ["Université de Villeneuve", "officiel", 32000], t: "🏆 Champions régionaux ! Bravo à nos étudiants-joueurs qui s'imposent 2-1 et filent en finale nationale.", ov: "CHAMPIONS !", e: { joie: 0.9 }, mood: "fierté", dyn: "fête", v: { reu: 0.8 }, out: 0, tr: "vrai", sc: ["trophee", "sport"] },
+    { src: ["@UltrasRivesNord", "militant", 7600], t: "Match volé ! L'arbitre était un prof de Villeneuve, tout était arrangé 🤬", ov: "MATCH VOLÉ", e: { col: 0.8, deg: 0.4 }, mood: "irritation", dyn: "rivalité", v: { ega: 0.4 }, out: 1, tr: "faux", sc: ["sport", "micro"] },
+    { src: ["@SportVilleneuve", "media", 24000], t: "Victoire 2-1, quelques bousculades en tribune sans gravité après le coup de sifflet final.", ov: "VICTOIRE 2-1", e: { joie: 0.4 }, mood: "enthousiasme", dyn: "fête", v: { reu: 0.4, ord: 0.2 }, out: 0, tr: "vrai", sc: ["sport", "trophee"] },
+    { src: ["@yanis_gardien", "temoin", 1800], t: "Il y a un an je pensais arrêter la fac. Ce soir je suis champion avec mes frères ❤️", ov: "DE L'ABANDON AU TITRE", e: { joie: 0.9, tri: 0.2 }, mood: "fierté", dyn: "fête", v: { reu: 0.7, hum: 0.4 }, out: 0, tr: "vrai", sc: ["trophee", "coeur"] }
+  ]
+},
+{
+  id: "concert",
+  t: "Concert gratuit sur le campus",
+  day: 7,
+  go: "Un concert gratuit a lieu ce soir sur la pelouse du campus. Tu y vas ?",
+  truth: "L'association étudiante a organisé un concert gratuit qui a réuni près de 3 000 personnes sur la pelouse du campus. La soirée s'est déroulée sans incident majeur ; deux personnes ont fait un malaise et ont été prises en charge par les secouristes bénévoles. Des riverains se sont plaints du bruit jusqu'à minuit, heure prévue de fin. Le concert a été financé par la contribution de vie étudiante, pas par la mairie.",
+  posts: [
+    { src: ["@AssoCampusVLN", "militant", 11000], t: "3 000 personnes, des étoiles plein les yeux ✨ Merci à tous les bénévoles, on remet ça au printemps !", ov: "3 000 SOUS LES ÉTOILES", e: { joie: 0.9 }, mood: "enthousiasme", dyn: "fête", v: { hum: 0.5, lib: 0.4 }, out: 0, tr: "vrai", sc: ["fete", "lune", "micro"] },
+    { src: ["@RiverainsDuCampus", "militant", 2300], t: "Musique à fond jusqu'à 3 h du matin, et c'est nos impôts qui paient leur fête 😤", ov: "NOS IMPÔTS, LEUR FÊTE", e: { col: 0.7 }, mood: "irritation", dyn: "rivalité", v: { ord: 0.7 }, out: 1, tr: "faux", sc: ["fete", "argent"] },
+    { src: ["Le Villeneuvois", "media", 46000], t: "Concert du campus : 3 000 spectateurs, deux malaises pris en charge, fin à minuit comme prévu.", ov: "BILAN DU CONCERT", e: { peur: 0.1 }, mood: "méfiance", dyn: "fête", v: {}, out: 0, tr: "vrai", sc: ["fete", "micro"] },
+    { src: ["@lou_secouriste", "temoin", 520], t: "Première soirée comme secouriste bénévole : on a aidé deux personnes et elles vont bien 🚑", ov: "SECOURISTE D'UN SOIR", e: { joie: 0.5, peur: 0.2 }, mood: "fierté", dyn: "solidarité", v: { vie: 0.6, hum: 0.6 }, out: 0, tr: "vrai", sc: ["coeur", "hopital"] }
+  ]
+},
+{
+  id: "psy",
+  t: "Trois mois d'attente pour voir le psy de la fac",
+  day: 10,
+  go: null,
+  truth: "Le service de santé de l'université de Villeneuve n'a qu'un psychologue pour 18 000 étudiants, et le délai d'attente atteint trois mois. L'université a annoncé le recrutement d'un second psychologue en janvier. Une ligne d'écoute gratuite et anonyme fonctionne déjà tous les soirs. Le nombre de demandes a augmenté d'environ 40 % en deux ans.",
+  posts: [
+    { src: ["@camille_psycho_L3", "temoin", 700], t: "J'ai demandé de l'aide en septembre, on m'a donné rendez-vous en décembre. Je me sens tellement seule 😞", ov: "RDV EN DÉCEMBRE…", e: { tri: 0.9 }, mood: "abattement", dyn: "deuil", v: { vie: 0.6, hum: 0.4 }, out: 0, tr: "vrai", sc: ["file", "pluie"] },
+    { src: ["Université de Villeneuve", "officiel", 32000], t: "La santé mentale de nos étudiants est notre priorité : tous les étudiants sont reçus rapidement. 💙", ov: "VOTRE SANTÉ D'ABORD", e: { joie: 0.3 }, mood: "espoir", dyn: "espoir", v: { vie: 0.5 }, out: 0, tr: "trompeur", sc: ["coeur", "panneau"] },
+    { src: ["Le Villeneuvois", "media", 46000], t: "Un psychologue pour 18 000 étudiants : un second poste annoncé en janvier, une ligne d'écoute déjà ouverte le soir.", ov: "1 PSY / 18 000", e: { tri: 0.3 }, mood: "méfiance", dyn: "mobilisation", v: { vie: 0.4 }, out: 0, tr: "vrai", sc: ["file", "hopital"] },
+    { src: ["@MonsieurAvis", "influ", 120000], t: "De mon temps, on n'allait pas pleurer chez le psy à la moindre note ratée, génération fragile 🙄", ov: "GÉNÉRATION FRAGILE ?", e: { deg: 0.5, col: 0.3 }, mood: "écœurement", dyn: "rivalité", v: { reu: 0.5, hum: -0.6 }, out: 1, tr: "trompeur", sc: ["micro", "ecran"] }
+  ]
+},
+{
+  id: "livreurs",
+  t: "Les livreurs à vélo étudiants manifestent",
+  day: 6,
+  go: "Les livreurs étudiants se rassemblent place de la Gare à midi. Tu y vas ?",
+  truth: "Une cinquantaine de livreurs à vélo, en majorité étudiants, ont manifesté après la baisse du tarif par course décidée par la plateforme de livraison locale. Selon leurs relevés, la rémunération moyenne est passée d'environ 4 € à 3 € par course. La plateforme affirme que les bonus du soir compensent la baisse, ce qui n'est vrai que pour une minorité. La manifestation a bloqué la place de la Gare une heure sans incident.",
+  posts: [
+    { src: ["@CollectifLivreursVLN", "militant", 5600], t: "3 € la course sous la pluie, sans assurance digne de ce nom : on n'est pas des machines ! 🚲✊", ov: "3 € LA COURSE", e: { col: 0.8 }, mood: "irritation", dyn: "mobilisation", v: { ega: 0.9, hum: 0.4 }, out: 1, tr: "vrai", sc: ["manif", "pluie", "argent"] },
+    { src: ["@FilaLivraison_officiel", "officiel", 18000], t: "Grâce aux bonus du soir, nos livreurs gagnent plus qu'avant. Liberté, flexibilité 🚀", ov: "PLUS DE BONUS !", e: { joie: 0.5 }, mood: "enthousiasme", dyn: "espoir", v: { lib: 0.8, reu: 0.7 }, out: 0, tr: "trompeur", sc: ["phone", "argent"] },
+    { src: ["Le Villeneuvois", "media", 46000], t: "Livreurs : place de la Gare bloquée une heure, dans le calme, contre la baisse des tarifs.", ov: "PLACE DE LA GARE BLOQUÉE", e: { peur: 0.1 }, mood: "méfiance", dyn: "mobilisation", v: {}, out: 0, tr: "vrai", sc: ["manif", "route"] },
+    { src: ["@karim_livre", "temoin", 310], t: "Hier, une dame m'a offert un thé chaud quand je suis arrivé trempé. Ça m'a sauvé la soirée ☕", ov: "UN THÉ CHAUD", e: { joie: 0.6, tri: 0.3 }, mood: "espoir", dyn: "solidarité", v: { hum: 0.8 }, out: 0, tr: "vrai", sc: ["pluie", "coeur"] }
+  ]
+},
+{
+  id: "bibliotheque",
+  t: "La bibliothèque universitaire ferme à 18 h",
+  day: 13,
+  go: "Un sit-in de révision est organisé ce soir devant la bibliothèque. Tu y vas ?",
+  truth: "Faute de budget pour payer les vacataires, la bibliothèque universitaire de Villeneuve ferme désormais à 18 h au lieu de 22 h. Les étudiants qui travaillent la journée sont les plus pénalisés. Un sit-in pacifique de révision a réuni 200 étudiants devant le bâtiment. L'université étudie une réouverture partielle le soir pendant les examens.",
+  posts: [
+    { src: ["Université de Villeneuve", "officiel", 32000], t: "Pour des raisons budgétaires, la BU ferme à 18 h ; une ouverture tardive est étudiée pour la période d'examens.", ov: "BU : FERMETURE À 18 H", e: { tri: 0.2 }, mood: "méfiance", dyn: "espoir", v: { ord: 0.3 }, out: 0, tr: "vrai", sc: ["panneau", "lune"] },
+    { src: ["@lina_droit_job", "temoin", 450], t: "Je bosse en caisse jusqu'à 17 h 30. Fermer la BU à 18 h, c'est me fermer la porte des études 😢", ov: "LA BU, MA SEULE CHANCE", e: { tri: 0.8, col: 0.3 }, mood: "abattement", dyn: "deuil", v: { ega: 0.8, reu: 0.5 }, out: 0, tr: "vrai", sc: ["exam", "lune"] },
+    { src: ["@SyndicEtudiantVilleneuve", "militant", 8400], t: "Révisions géantes à la lampe frontale devant la BU 🔦📚 Venez nombreux, dans le calme !", ov: "SIT-IN DE RÉVISION", e: { joie: 0.6, col: 0.3 }, mood: "enthousiasme", dyn: "mobilisation", v: { ega: 0.6, reu: 0.4 }, out: 0, tr: "vrai", sc: ["exam", "manif", "lune"] },
+    { src: ["@Rumeurs_Fac", "anonyme", 6100], t: "La BU va être transformée en salle de réception pour les dirigeants, les livres partent à la benne 🗑️", ov: "LIVRES À LA BENNE", e: { deg: 0.7, col: 0.6 }, mood: "écœurement", dyn: "indignation", v: { ega: 0.5 }, out: 1, tr: "faux", sc: ["poubelle", "fete"] }
+  ]
+},
+{
+  id: "rixe",
+  t: "Rixe entre élèves de deux lycées",
+  day: 4,
+  go: null,
+  truth: "Une bagarre a opposé une quinzaine d'élèves des lycées Condorcet et Jean-Moulin près de la gare routière, après des insultes échangées en ligne. Un élève a été légèrement blessé au bras et soigné sur place. Trois mineurs ont été entendus par la police puis relâchés. Les deux lycées organisent ensemble un tournoi sportif pour apaiser les tensions.",
+  posts: [
+    { src: ["Préfecture de Villeneuve", "officiel", 19000], t: "Rixe près de la gare routière : un blessé léger, trois mineurs entendus. Présence policière renforcée aux heures de sortie.", ov: "RIXE À LA GARE", e: { peur: 0.3 }, mood: "méfiance", dyn: "indignation", v: { ord: 0.8 }, out: 0, tr: "vrai", sc: ["police", "bus"] },
+    { src: ["@Villeneuve_Securite", "anonyme", 22000], t: "Guerre des gangs à Villeneuve 🔪 nos rues ne sont plus sûres, ces jeunes sont incontrôlables !", ov: "GUERRE DES GANGS ?!", e: { peur: 0.8, col: 0.6 }, mood: "anxiété", dyn: "panique", v: { ord: 0.9 }, out: 1, tr: "faux", sc: ["police", "route"] },
+    { src: ["@enzo_condorcet", "temoin", 600], t: "Tout est parti d'une story idiote, franchement on se connaît tous depuis le collège… 😔", ov: "TOUT ÇA POUR UNE STORY", e: { tri: 0.6 }, mood: "abattement", dyn: "deuil", v: { hum: 0.5 }, out: 0, tr: "vrai", sc: ["phone"] },
+    { src: ["Le Villeneuvois", "media", 46000], t: "Après la bagarre, Condorcet et Jean-Moulin organisent un tournoi commun pour recoller les morceaux 🤝", ov: "UN TOURNOI POUR LA PAIX", e: { joie: 0.5 }, mood: "espoir", dyn: "réconciliation", v: { hum: 0.6, ord: 0.3 }, out: 0, tr: "vrai", sc: ["sport", "coeur"] }
+  ]
+},
+{
+  id: "heros",
+  t: "Un lycéen sauve un homme dans la rivière",
+  day: 14,
+  go: null,
+  truth: "Un lycéen de première, sauveteur diplômé, a aidé un homme âgé tombé dans la rivière à rejoindre la berge en lui lançant une bouée et en le guidant. Un passant a appelé les secours, qui ont pris en charge l'homme, en légère hypothermie. Le lycéen n'a pas plongé lui-même, contrairement à ce qu'affirment certaines vidéos. La mairie doit le décorer de la médaille de la ville.",
+  posts: [
+    { src: ["Mairie de Villeneuve", "officiel", 28000], t: "Bravo à Adam, 16 ans, qui a aidé un homme tombé dans la rivière : il recevra la médaille de la ville 🏅", ov: "BRAVO ADAM !", e: { joie: 0.8 }, mood: "fierté", dyn: "fête", v: { hum: 0.7, reu: 0.5 }, out: 0, tr: "vrai", sc: ["trophee", "coeur"] },
+    { src: ["@BuzzVilleneuve", "influ", 210000], t: "Il plonge dans l'eau glacée et ramène l'homme sur son dos 😱 un vrai super-héros !!!", ov: "UN SUPER-HÉROS !", e: { joie: 0.7, peur: 0.4 }, mood: "enthousiasme", dyn: "fête", v: { hum: 0.6, reu: 0.6 }, out: 0, tr: "trompeur", sc: ["pluie", "trophee"] },
+    { src: ["@MonsieurAvis", "influ", 120000], t: "Et pendant ce temps, les autres jeunes filmaient au lieu d'aider, typique 📱", ov: "ILS FILMAIENT…", e: { deg: 0.6 }, mood: "écœurement", dyn: "rivalité", v: { hum: 0.5, ord: 0.3 }, out: 1, tr: "faux", sc: ["phone", "ecran"] },
+    { src: ["@adam_sauveteur", "temoin", 1200], t: "J'ai juste appliqué ce qu'on apprend au club de sauvetage : bouée, rester calme, appeler le 112. Apprenez les gestes ! 🛟", ov: "APPRENEZ LES GESTES", e: { joie: 0.4 }, mood: "espoir", dyn: "solidarité", v: { vie: 0.8, hum: 0.5 }, out: 0, tr: "vrai", sc: ["coeur", "arbre"] }
+  ]
+},
+{
+  id: "robotique",
+  t: "Une lycéenne gagne un concours national de robotique",
+  day: 3,
+  go: "Le lycée organise une fête pour accueillir Nour et son robot ce soir. Tu y vas ?",
+  truth: "Nour, élève de terminale au lycée Jean-Moulin, a remporté avec deux camarades le premier prix d'un concours national de robotique pour un robot qui trie les déchets. Le projet a été réalisé au club du lycée avec du matériel en partie récupéré. Il n'est pas vrai que le robot a été entièrement conçu par un professeur. Aucune entreprise n'a fait d'offre de rachat, contrairement à une rumeur.",
+  posts: [
+    { src: ["Le Villeneuvois", "media", 46000], t: "Une équipe du lycée Jean-Moulin, menée par Nour, remporte le concours national de robotique avec un robot trieur de déchets.", ov: "1ER PRIX NATIONAL", e: { joie: 0.5 }, mood: "fierté", dyn: "fête", v: { reu: 0.6, vie: 0.3 }, out: 0, tr: "vrai", sc: ["robot", "trophee"] },
+    { src: ["@nour.robotix", "temoin", 2400], t: "Six mois de soudures ratées et de pizzas froides… et on gagne 😭🤖 Les filles, la robotique c'est pour nous aussi !", ov: "LES FILLES AUSSI !", e: { joie: 0.9, tri: 0.2 }, mood: "fierté", dyn: "fête", v: { ega: 0.7, reu: 0.7 }, out: 0, tr: "vrai", sc: ["robot", "trophee", "fete"] },
+    { src: ["@Rumeurs_Lycées", "anonyme", 7200], t: "Tout le monde sait que c'est le prof qui a tout fait, les élèves ont juste posé pour la photo 😏", ov: "C'EST LE PROF ?", e: { deg: 0.5 }, mood: "méfiance", dyn: "rivalité", v: { reu: -0.5 }, out: 1, tr: "faux", sc: ["robot", "ecran"] },
+    { src: ["@TechInvest_Jo", "influ", 64000], t: "Une start-up veut déjà racheter le robot 1 million € 💰 la réussite n'attend pas !", ov: "RACHETÉ 1 MILLION ?", e: { joie: 0.6 }, mood: "enthousiasme", dyn: "espoir", v: { reu: 0.9 }, out: 0, tr: "faux", sc: ["argent", "robot"] }
+  ]
+},
+{
+  id: "surveillants",
+  t: "Grève des surveillants au lycée Condorcet",
+  day: 5,
+  go: "Les surveillants tiennent un piquet de grève devant le lycée ce matin. Tu y vas ?",
+  truth: "Les douze surveillants du lycée Condorcet ont fait grève deux jours pour réclamer des postes supplémentaires, car ils ne sont que deux par étage pour 1 400 élèves. Les cours ont été maintenus mais la cantine et les permanences ont été perturbées. Le rectorat a proposé un poste de plus pour janvier. Les élèves n'ont pas été « laissés sans surveillance », les professeurs et la direction ayant pris le relais.",
+  posts: [
+    { src: ["@AED_Condorcet", "militant", 1400], t: "Deux surveillants pour 400 élèves à la cantine, on ne peut plus assurer votre sécurité correctement 🙏 Soutenez-nous !", ov: "ON EST TROP PEU", e: { tri: 0.5, col: 0.4 }, mood: "abattement", dyn: "mobilisation", v: { ord: 0.6, ega: 0.5 }, out: 0, tr: "vrai", sc: ["manif", "repas"] },
+    { src: ["@ParentsEnColere_VLN", "militant", 3900], t: "Nos enfants livrés à eux-mêmes toute la journée à cause d'une grève ! Inadmissible 😡", ov: "ENFANTS ABANDONNÉS ?", e: { col: 0.8, peur: 0.4 }, mood: "irritation", dyn: "indignation", v: { ord: 0.8 }, out: 1, tr: "trompeur", sc: ["panneau", "manif"] },
+    { src: ["Rectorat", "officiel", 21000], t: "Un poste de surveillant supplémentaire sera créé au lycée Condorcet en janvier.", ov: "+1 SURVEILLANT", e: { peur: 0.1 }, mood: "méfiance", dyn: "réconciliation", v: { ord: 0.4 }, out: 0, tr: "vrai", sc: ["panneau"] },
+    { src: ["@ambre_terminale", "temoin", 380], t: "On leur a apporté des croissants au piquet de grève, ils sont toujours là pour nous alors on est là pour eux 🥐", ov: "CROISSANTS SOLIDAIRES", e: { joie: 0.7 }, mood: "enthousiasme", dyn: "solidarité", v: { hum: 0.8 }, out: 0, tr: "vrai", sc: ["repas", "coeur"] }
+  ]
+},
+{
+  id: "alerte",
+  t: "Fausse alerte à la bombe au lycée Jean-Moulin",
+  day: 9,
+  go: null,
+  truth: "Un appel anonyme signalant une bombe a entraîné l'évacuation du lycée Jean-Moulin pendant trois heures. Les démineurs n'ont rien trouvé et l'alerte était fausse. L'évacuation s'est faite dans le calme, conformément aux exercices. L'auteur de l'appel n'est pas encore identifié ; ce type de canular est puni par la loi.",
+  posts: [
+    { src: ["Préfecture de Villeneuve", "officiel", 19000], t: "Lycée Jean-Moulin : levée du dispositif, aucun objet suspect trouvé. Une enquête est ouverte pour fausse alerte.", ov: "FAUSSE ALERTE", e: { peur: 0.2 }, mood: "méfiance", dyn: "réconciliation", v: { ord: 0.8 }, out: 0, tr: "vrai", sc: ["police", "panneau"] },
+    { src: ["@Villeneuve_Securite", "anonyme", 22000], t: "Des explosifs auraient été retrouvés dans un casier, on nous cache la vérité 💣 gardez vos enfants chez vous demain !", ov: "EXPLOSIFS TROUVÉS ?", e: { peur: 0.9 }, mood: "anxiété", dyn: "panique", v: { ord: 0.7, vie: 0.6 }, out: 0, tr: "faux", sc: ["police", "fumee"] },
+    { src: ["@prof_jm_histoire", "temoin", 850], t: "Fière de mes élèves : sortie en 4 minutes, sans courir, comme à l'exercice 👏", ov: "ÉVACUÉS EN 4 MINUTES", e: { joie: 0.5, peur: 0.2 }, mood: "fierté", dyn: "solidarité", v: { ord: 0.5, vie: 0.4 }, out: 0, tr: "vrai", sc: ["file", "immeuble"] },
+    { src: ["@OrdreEtValeurs_VLN", "militant", 12000], t: "Encore un élève qui veut sécher un contrôle ! Ces gamins n'ont plus aucune limite 😤", ov: "TOUT ÇA POUR UN DS ?", e: { col: 0.7, deg: 0.4 }, mood: "irritation", dyn: "indignation", v: { ord: 0.8 }, out: 1, tr: "trompeur", sc: ["exam", "police"] }
+  ]
+}
+];
+const EVT={
+  blocage:{ t:"Blocage du lycée Jean-Moulin", day:6, go:"Un blocage commence devant le lycée Jean-Moulin. Tu y vas ?",
+    truth:"300 lycéens ont bloqué l'entrée contre la réforme du bac. En fin de matinée, une dizaine de jeunes ont lancé des projectiles ; la police a répondu avec du gaz lacrymogène. Deux policiers légèrement blessés, une lycéenne aidée par un policier. Blocage levé à 13 h." },
+  repas:{ t:"Distribution alimentaire étudiante", day:5, go:"Grande distribution alimentaire pour les étudiants ce soir. Tu y vas ?",
+    truth:"1 200 étudiants sont venus chercher un colis. Les dons ont battu un record (4 tonnes). Aucune nourriture n'a été jetée par la mairie. Beaucoup d'étudiants ont un téléphone… et pas assez d'argent pour manger : les deux sont vrais." },
+  lea:{ t:"Accident mortel de Léa, 19 ans", day:4, go:"Une marche blanche pour Léa a lieu samedi. Tu y vas ?",
+    truth:"Léa, 19 ans, à trottinette, a été percutée par une voiture qui a grillé un feu rouge. Le carrefour était signalé dangereux depuis 3 ans. La trottinette n'est pas en cause. 2 000 personnes à la marche blanche, dans le calme." },
+  ia:{ t:"Triche à l'IA aux partiels", day:3, go:null,
+    truth:"6 copies sur 400 ont été signalées, une procédure est en cours. Les détecteurs d'IA se trompent souvent : il faut des preuves. Au même moment, une étudiante a créé un outil d'IA pour aider les élèves dyslexiques." },
+  fete:{ t:"Soirée d'intégration", day:2, go:"Le BDE organise sa grande soirée solidaire. Tu y vas ?",
+    truth:"La soirée a récolté 5 000 € pour les étudiants précaires. Des riverains se sont plaints du bruit. Dans la nuit, 3 voitures ont brûlé à 1 km : aucun lien établi avec la fête. Il n'y a pas eu d'« émeute »." },
+  notes:{ t:"Panne de la plateforme de notes", day:1, go:null,
+    truth:"Un bug d'affichage a caché les notes du bac blanc pendant 2 heures. Aucune note n'a été perdue. La plateforme a coûté cher et a déjà eu des pannes. Les résultats ont été publiés le soir même." }
+};
+// sources : kind = officiel, media, militant, temoin, influ, anonyme ; f = abonnés
+// e : émotions (0 à 1), mood, dyn (dynamique), v : valeurs défendues (+) ou attaquées (−), out : attaque « l'autre camp »,
+// tr : vrai / trompeur / faux, sc : éléments de l'image, ov : texte sur l'image
+const POSTS=[
+  { ev:'blocage', src:["Union lycéenne Villeneuve",'militant',4000], t:"Les policiers gazent des lycéens pacifiques !", ov:"GAZÉS POUR AVOIR MANIFESTÉ ?!", e:{col:.9,deg:.6}, mood:'irritation', dyn:'indignation', v:{ega:1,lib:1,ord:-1}, out:1, tr:'trompeur', sc:['manif','police','fumee'] },
+  { ev:'blocage', src:["Préfecture de Villeneuve",'officiel',25000], t:"Poubelles incendiées, 2 policiers blessés : des casseurs infiltrés dans le blocage", ov:"CASSEURS : 2 POLICIERS BLESSÉS", e:{col:.7,peur:.6}, mood:'anxiété', dyn:'indignation', v:{ord:1,vie:.5,lib:-.5}, out:1, tr:'trompeur', sc:['feu','police'] },
+  { ev:'blocage', src:["Le Villeneuvois",'media',60000], t:"Blocage : 300 lycéens contre la réforme du bac, quelques heurts en fin de matinée", ov:"300 LYCÉENS MOBILISÉS", e:{col:.2,peur:.1}, mood:'méfiance', dyn:'mobilisation', v:{}, out:0, tr:'vrai', sc:['manif'] },
+  { ev:'blocage', src:["@maelle_v",'temoin',300], t:"Un policier aide une lycéenne tombée à se relever, ça fait du bien 🙏", ov:"CE POLICIER A FAIT ÇA…", e:{joie:.75,tri:.2}, mood:'enthousiasme', dyn:'solidarité', v:{hum:1,vie:.6}, out:0, tr:'vrai', sc:['police','coeur'] },
+  { ev:'repas', src:["Restos Étudiants",'militant',8000], t:"1 200 étudiants ont fait la queue pour manger hier soir", ov:"1 200 ÉTUDIANTS AFFAMÉS", e:{tri:.85,col:.3}, mood:'abattement', dyn:'solidarité', v:{ega:1,hum:1}, out:0, tr:'vrai', sc:['repas','file'] },
+  { ev:'repas', src:["@FrancoisCash",'influ',200000], t:"Ils ont des iPhone mais font la queue pour manger gratuit 🤡", ov:"PAUVRES… AVEC UN IPHONE 🤡", e:{deg:.8,col:.6}, mood:'irritation', dyn:'rivalité', v:{reu:1,ega:-1}, out:1, tr:'trompeur', sc:['file','phone'] },
+  { ev:'repas', src:["@ines.benevole",'temoin',900], t:"Record de dons : 4 tonnes collectées en 24 h, merci à tous !", ov:"4 TONNES EN 24 H !", e:{joie:.85}, mood:'enthousiasme', dyn:'solidarité', v:{hum:1,vie:.5}, out:0, tr:'vrai', sc:['repas','coeur'] },
+  { ev:'repas', src:["@VeriteCachee",'anonyme',15000], t:"La mairie a jeté 2 tonnes de nourriture au lieu de la donner !", ov:"ILS JETTENT AU LIEU DE DONNER", e:{col:.85,deg:.75}, mood:'irritation', dyn:'indignation', v:{ega:1,ord:-1}, out:1, tr:'faux', sc:['repas','poubelle'] },
+  { ev:'lea', src:["@amis_de_lea",'temoin',2000], t:"Repose en paix Léa 🕯️ Marche blanche samedi à 14 h", ov:"REPOSE EN PAIX LÉA", e:{tri:.95}, mood:'abattement', dyn:'deuil', v:{vie:1,hum:1}, out:0, tr:'vrai', sc:['bougies'] },
+  { ev:'lea', src:["@StopTrottinettes",'militant',40000], t:"ENCORE une victime des trottinettes : il faut les interdire !", ov:"TROTTINETTES : ÇA SUFFIT", e:{col:.7,peur:.6}, mood:'anxiété', dyn:'indignation', v:{vie:1,ord:1,lib:-1}, out:1, tr:'trompeur', sc:['route','bougies'] },
+  { ev:'lea', src:["Le Villeneuvois",'media',60000], t:"Accident : le conducteur de la voiture avait grillé un feu rouge, l'enquête continue", ov:"LE FEU ÉTAIT ROUGE", e:{tri:.4}, mood:'méfiance', dyn:'deuil', v:{}, out:0, tr:'vrai', sc:['route'] },
+  { ev:'lea', src:["@ruedeslycees",'militant',5000], t:"Ce carrefour était signalé dangereux depuis 3 ans. La mairie n'a rien fait.", ov:"3 ANS D'ALERTES IGNORÉES", e:{col:.8,tri:.5}, mood:'irritation', dyn:'indignation', v:{vie:1,ega:.5,ord:-1}, out:1, tr:'vrai', sc:['route','panneau'] },
+  { ev:'ia', src:["@Prof_en_colere",'influ',12000], t:"60 % des copies écrites par une IA : l'université est devenue une mascarade", ov:"60 % DE TRICHEURS ?!", e:{deg:.75,col:.7}, mood:'irritation', dyn:'rivalité', v:{reu:1,ord:1,lib:-.5}, out:1, tr:'faux', sc:['exam','robot'] },
+  { ev:'ia', src:["Université de Villeneuve",'officiel',30000], t:"Partiels : 6 copies sur 400 signalées, une procédure est en cours", ov:"6 COPIES SUR 400", e:{peur:.1}, mood:'méfiance', dyn:'rivalité', v:{ord:.5}, out:0, tr:'vrai', sc:['exam'] },
+  { ev:'ia', src:["@Etudiant_debout",'militant',6000], t:"On nous accuse sans preuve : les détecteurs d'IA se trompent tout le temps !", ov:"ACCUSÉS SANS PREUVE", e:{col:.6,peur:.6}, mood:'anxiété', dyn:'mobilisation', v:{lib:1,ega:1}, out:1, tr:'vrai', sc:['exam','robot'] },
+  { ev:'ia', src:["@NeoTech",'influ',80000], t:"Une étudiante crée une IA qui aide les élèves dyslexiques à réviser", ov:"ELLE A CRÉÉ ÇA À 20 ANS", e:{joie:.85}, mood:'enthousiasme', dyn:'solidarité', v:{hum:1,reu:1}, out:0, tr:'vrai', sc:['robot','coeur'] },
+  { ev:'fete', src:["@VilleneuveSecurite",'anonyme',20000], t:"NUIT D'ÉMEUTE : 30 voitures brûlées par des étudiants ivres", ov:"NUIT D'ÉMEUTE", e:{peur:.9,col:.8}, mood:'anxiété', dyn:'panique', v:{ord:1,vie:.5,lib:-.5}, out:1, tr:'faux', sc:['feu','fete'] },
+  { ev:'fete', src:["BDE Villeneuve",'militant',3000], t:"Plus grosse soirée solidaire de l'année : 5 000 € pour les étudiants précaires 🎉", ov:"5 000 € RÉCOLTÉS 🎉", e:{joie:.9}, mood:'enthousiasme', dyn:'fête', v:{ega:1,hum:.5}, out:0, tr:'vrai', sc:['fete','coeur'] },
+  { ev:'fete', src:["Le Villeneuvois",'media',60000], t:"Après la soirée, 3 voitures incendiées à 1 km ; aucun lien établi avec la fête", ov:"3 VOITURES BRÛLÉES", e:{peur:.25}, mood:'méfiance', dyn:'panique', v:{}, out:0, tr:'vrai', sc:['feu'] },
+  { ev:'fete', src:["@mme_dupont",'temoin',150], t:"Musique jusqu'à 4 h du matin, impossible de dormir. Ça suffit !", ov:"4 H DU MATIN…", e:{col:.5}, mood:'irritation', dyn:'rivalité', v:{ord:1}, out:1, tr:'vrai', sc:['fete','lune'] },
+  { ev:'notes', src:["@BacPanique",'influ',50000], t:"PANIQUE : toutes les notes du bac blanc ont été effacées !!!", ov:"TOUTES LES NOTES EFFACÉES", e:{peur:.95}, mood:'anxiété', dyn:'panique', v:{reu:1}, out:0, tr:'faux', sc:['ecran'] },
+  { ev:'notes', src:["Rectorat",'officiel',40000], t:"Incident d'affichage réglé : aucune note n'a été perdue", ov:"AUCUNE NOTE PERDUE", e:{joie:.2}, mood:'méfiance', dyn:'panique', v:{ord:1}, out:0, tr:'vrai', sc:['ecran'] },
+  { ev:'notes', src:["@Lucas_major",'temoin',2000], t:"17 de moyenne et accepté en prépa 🚀 le travail paie", ov:"LE TRAVAIL PAIE 🚀", e:{joie:.8}, mood:'enthousiasme', dyn:'fête', v:{reu:1}, out:0, tr:'vrai', sc:['ecran','trophee'] },
+  { ev:'notes', src:["Syndicat des profs",'militant',7000], t:"Une plateforme à 4 millions d'euros qui plante encore : on paie pour ça ?", ov:"4 MILLIONS POUR ÇA ?", e:{col:.7}, mood:'irritation', dyn:'indignation', v:{ega:.5,ord:-1}, out:1, tr:'vrai', sc:['ecran','argent'] }
+].map((p,i)=>Object.assign(p,{ id:i }));
+const KIND={ officiel:['🏛️','Officiels'], media:['📰','Journal local'], militant:['📣','Militants et assos'], temoin:['🙋','Témoins'], influ:['⭐','Influenceurs'], anonyme:['🕶️','Comptes anonymes'] };
+// personnages : une phrase les décrit ; leurs valeurs et leur sensibilité aux émotions restent cachées jusqu'à la fin
+const CHARS=[
+  { e:'🎤', t:'Lina, rappeuse', d:"Elle écrit sur son quartier et se bat pour que chacun ait sa chance.", f:35000, v:{ega:1,hum:.7,lib:.5}, s:{col:1.4,tri:1.2,joie:.9,peur:.8,deg:1} },
+  { e:'🎬', t:'Hugo, acteur de cinéma', d:"Star des films d'action, il adore les défis et les belles histoires de réussite.", f:120000, v:{reu:1,lib:.8}, s:{joie:1.4,peur:.7,col:.9,tri:.8,deg:1} },
+  { e:'🎨', t:'Sacha, street-artiste', d:"Il peint les murs de la ville la nuit et se méfie de toute autorité.", f:8000, v:{lib:1,ega:.6,ord:-.6}, s:{col:1.3,deg:1.3,joie:1,peur:.6,tri:.9} },
+  { e:'🎻', t:'Clara, violoniste', d:"Elle croit au travail, à la discipline et au respect des règles.", f:4000, v:{ord:.9,reu:.9}, s:{peur:1.2,deg:1.2,col:.8,joie:1,tri:1} },
+  { e:'📸', t:'Malik, photographe nature', d:"Il parcourt les forêts et défend tout ce qui vit, humains compris.", f:15000, v:{vie:1,hum:.8}, s:{tri:1.4,joie:1.2,col:.9,peur:1,deg:1} },
+  { e:'🎮', t:'Zoé, streameuse', d:"Elle passe ses soirées en direct, adore rire, gagner et dire ce qu'elle pense.", f:60000, v:{lib:.9,reu:.7}, s:{joie:1.5,col:1.1,peur:.8,tri:.6,deg:1.1} },
+  { e:'🩺', t:'Nadia, médecin urgentiste', d:"Elle sauve des vies chaque nuit et ne supporte pas l'imprudence.", f:3000, v:{vie:1,hum:.7,ord:.4}, s:{peur:1.3,tri:1.1,col:1,joie:.9,deg:1} },
+  { e:'👮', t:'Marc, policier', d:"Il protège la ville et pense que les règles sont faites pour être respectées.", f:900, v:{ord:1,vie:.5}, s:{col:1.2,peur:1.2,deg:1,joie:.8,tri:.8} },
+  { e:'🧑‍🏫', t:'Mme Durand, professeure', d:"Elle veut que tous ses élèves aient les mêmes chances de réussir.", f:400, v:{ega:1,hum:.8,reu:.3}, s:{tri:1.3,peur:1.1,col:1,joie:1,deg:.9} },
+  { e:'🎓', t:'Yanis, étudiant', d:"Il rêve de réussir et défend la liberté de chacun de vivre comme il veut.", f:150, v:{lib:1,reu:.6}, s:{peur:1.2,col:1.1,joie:1.1,tri:.9,deg:1} }
+];
+EVT2.forEach(e=>{ EVT[e.id]={t:e.t,day:e.day,go:e.go,truth:e.truth}; e.posts.forEach(p=>POSTS.push(Object.assign(p,{ev:e.id}))); });
+POSTS.forEach((p,i)=>p.id=i);
+const ARCH=[ { t:'Ordre et sécurité', v:{ord:1,vie:.5,reu:.3}, cx:25, cy:20 }, { t:'Égalité et solidarité', v:{ega:1,hum:.7,lib:.4}, cx:75, cy:20 },
+  { t:'Liberté et réussite', v:{lib:1,reu:.8}, cx:25, cy:52 }, { t:'Vie et humanisme', v:{vie:1,hum:.9}, cx:75, cy:52 } ];
+const vecOf=o=>VK.map(k=>(o&&o[k])||0);
+function cosv(a,b){ let d=0,na=0,nb=0; for(let i=0;i<a.length;i++){ d+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; } return na&&nb?d/Math.sqrt(na*nb):0; }
+const arousal=p=>clamp(Math.max(...Object.entries(p.e).map(([k,x])=>x*EM[k][3]))+(p.out?.12:0),0,1);
+const domEmo=p=>Object.entries(p.e).sort((a,b)=>b[1]-a[1])[0][0];
+const fmtN=n=>n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' M':n>=1e4?Math.round(n/1e3)+' k':n.toLocaleString('fr-FR');
+/* ---------- images générées : une scène par événement, floue tant qu'on n'a pas recoupé ---------- */
+let SVGN=0;
+function scene(p){
+  const id='g'+(SVGN++), seed=p.id*7+3, R=k=>{ const x=Math.sin(seed*99+k*13.7)*10000; return x-Math.floor(x); };
+  const BG={ col:['#6a1018','#1a0508'], peur:['#2e1a5c','#0a0618'], deg:['#33521a','#0d1505'], joie:['#8a5a12','#1d1408'], tri:['#1e3352','#090e18'] }[domEmo(p)];
+  const weak=arousal(p)<.35, bg=weak?['#2e3a4a','#10151c']:BG;
+  let s=`<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bg[0]}"/><stop offset="1" stop-color="${bg[1]}"/></linearGradient></defs><rect width="320" height="180" fill="url(#${id})"/>`;
+  const crowd=(n,y,c)=>{ let o=''; for(let i=0;i<n;i++){ const x=8+i*(304/n)+R(i)*8, h=18+R(i+50)*14; o+=`<circle cx="${x}" cy="${y-h-7}" r="7" fill="${c}"/><rect x="${x-9}" y="${y-h}" width="18" height="${h+20}" rx="7" fill="${c}"/>`; } return o; };
+  const parts={
+    sport:()=>`<rect x="0" y="130" width="320" height="50" fill="#1f6a2a"/><rect x="230" y="70" width="70" height="60" fill="none" stroke="#fff" stroke-width="4"/><circle cx="150" cy="118" r="12" fill="#fff"/><path d="M144 112l12 0l4 8l-10 6l-10-6z" fill="#222"/>`+crowd(8,128,'#0d2a12'),
+    hopital:()=>`<rect x="70" y="50" width="180" height="120" fill="#dfe6ee"/><rect x="140" y="62" width="40" height="40" fill="#e33"/><rect x="155" y="66" width="10" height="32" fill="#fff"/><rect x="144" y="77" width="32" height="10" fill="#fff"/>`+[0,1,2,3].map(i=>`<rect x="${86+i*42}" y="116" width="24" height="18" fill="#7aa0c8"/>`).join(''),
+    immeuble:()=>`<rect x="90" y="30" width="140" height="150" fill="#5a5560"/>`+[0,1,2,3,4].map(r=>[0,1,2,3].map(c=>`<rect x="${102+c*32}" y="${42+r*26}" width="20" height="16" fill="${R(r*4+c)>.6?'#ffcf4a':'#2a2830'}"/>`).join('')).join('')+`<path d="M100 60 q10 20 0 40" stroke="#3a4a2a" stroke-width="5" fill="none" opacity=".7"/>`,
+    arbre:()=>[0,1,2,3].map(i=>{ const x=40+i*80; return `<rect x="${x-5}" y="110" width="10" height="50" fill="#5a3a1a"/><circle cx="${x}" cy="${95-R(i)*12}" r="${28+R(i+2)*10}" fill="${['#2f7a3a','#3f8a2a','#2a6a4a','#4a8a3a'][i]}"/>`; }).join('')+`<rect x="0" y="160" width="320" height="20" fill="#2a4a1a"/>`,
+    bus:()=>`<rect x="60" y="80" width="200" height="70" rx="10" fill="#ffcf4a"/>`+[0,1,2,3,4].map(i=>`<rect x="${74+i*36}" y="90" width="26" height="24" fill="#9fc3ff"/>`).join('')+`<circle cx="100" cy="152" r="12" fill="#222"/><circle cx="220" cy="152" r="12" fill="#222"/>`,
+    micro:()=>`<polygon points="160,0 110,180 210,180" fill="#fff" opacity=".12"/><rect x="156" y="70" width="8" height="70" fill="#888"/><ellipse cx="160" cy="64" rx="12" ry="16" fill="#333"/>`+crowd(16,180,'#140f20'),
+    pluie:()=>[...Array(40)].map((_,i)=>`<line x1="${R(i)*320}" y1="${R(i+40)*120}" x2="${R(i)*320-6}" y2="${R(i+40)*120+16}" stroke="#9fc3ff" stroke-width="2" opacity=".6"/>`).join('')+`<rect x="0" y="140" width="320" height="40" fill="#3a6a9a" opacity=".8"/>`,
+    manif:()=>crowd(16,170,'#1a1424')+`<rect x="40" y="70" width="110" height="26" fill="#f2ead2" transform="rotate(-4 95 83)"/><text x="95" y="89" font-size="15" font-weight="700" text-anchor="middle" fill="#7a0010" transform="rotate(-4 95 83)">NON À LA RÉFORME</text><line x1="45" y1="96" x2="45" y2="150" stroke="#5a3a1a" stroke-width="3"/><line x1="145" y1="92" x2="145" y2="150" stroke="#5a3a1a" stroke-width="3"/>`,
+    police:()=>`<rect x="200" y="95" width="105" height="50" rx="6" fill="#1d2b55"/><rect x="210" y="102" width="30" height="16" fill="#9fc3ff"/><rect x="240" y="86" width="22" height="9" rx="3" fill="#3a7bff"/><circle cx="251" cy="90" r="9" fill="#3a7bff" opacity=".5"/><text x="275" y="133" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">POLICE</text><circle cx="220" cy="150" r="9" fill="#111"/><circle cx="288" cy="150" r="9" fill="#111"/>`+[170,186].map(x=>`<circle cx="${x}" cy="118" r="9" fill="#0d1530"/><rect x="${x-9}" y="125" width="18" height="40" rx="6" fill="#0d1530"/>`).join(''),
+    fumee:()=>[0,1,2,3,4,5].map(i=>`<circle cx="${120+R(i)*120}" cy="${60+R(i+9)*50}" r="${22+R(i+3)*20}" fill="#c9c9c9" opacity=".35"/>`).join(''),
+    feu:()=>`<rect x="110" y="128" width="46" height="40" rx="4" fill="#2a2a2a"/>`+[0,1,2,3].map(i=>`<ellipse cx="${118+i*10}" cy="${118-R(i)*12}" rx="${9+R(i+4)*5}" ry="${26+R(i+2)*14}" fill="${i%2?'#ffb547':'#ff5a1a'}" opacity=".9"/>`).join('')+[0,1,2].map(i=>`<circle cx="${130+i*18}" cy="${55-i*10}" r="${18+i*6}" fill="#555" opacity=".45"/>`).join(''),
+    coeur:()=>`<path d="M160 72 C160 52 132 48 132 70 C132 88 160 100 160 112 C160 100 188 88 188 70 C188 48 160 52 160 72Z" fill="#ff6aa8" opacity=".85"/>`,
+    repas:()=>`<rect x="20" y="118" width="280" height="12" fill="#6b4a2a"/>`+[0,1,2,3,4,5].map(i=>`<rect x="${32+i*45}" y="${92-R(i)*10}" width="34" height="${26+R(i)*10}" fill="#c99a5a" stroke="#7a5a2a"/>`).join(''),
+    file:()=>crowd(12,178,'#16131f'),
+    phone:()=>`<rect x="236" y="40" width="46" height="84" rx="8" fill="#111" stroke="#ddd" stroke-width="2"/><text x="259" y="88" font-size="26" text-anchor="middle">🤡</text>`,
+    poubelle:()=>`<rect x="244" y="96" width="44" height="60" rx="4" fill="#3a3a3a"/><rect x="238" y="88" width="56" height="10" rx="3" fill="#555"/>`+[0,1,2].map(i=>`<circle cx="${252+i*14}" cy="${86-R(i)*6}" r="7" fill="#c99a5a"/>`).join(''),
+    bougies:()=>[0,1,2,3,4,5,6].map(i=>{ const x=40+i*38, h=26+R(i)*24; return `<rect x="${x}" y="${150-h}" width="12" height="${h}" fill="#f2ead2"/><ellipse cx="${x+6}" cy="${143-h}" rx="5" ry="10" fill="#ffcf4a"/><circle cx="${x+6}" cy="${140-h}" r="16" fill="#ffcf4a" opacity=".18"/>`; }).join('')+`<text x="160" y="172" font-size="13" text-anchor="middle" fill="#f2ead2" opacity=".8">💐 💐 💐 💐</text>`,
+    route:()=>`<polygon points="120,180 200,180 175,60 145,60" fill="#2a2a30"/>`+[0,1,2,3,4].map(i=>`<rect x="${128+i*12}" y="150" width="7" height="22" fill="#eee"/>`).join('')+`<circle cx="60" cy="62" r="7" fill="#ff3a3a"/><rect x="54" y="52" width="12" height="44" rx="4" fill="none" stroke="#888" stroke-width="2"/>`,
+    panneau:()=>`<polygon points="262,40 292,92 232,92" fill="#ffcf4a" stroke="#c00" stroke-width="4"/><text x="262" y="86" font-size="30" font-weight="700" text-anchor="middle" fill="#111">!</text>`,
+    exam:()=>[0,1,2].map(r=>[0,1,2,3].map(c=>`<rect x="${40+c*64+r*6}" y="${92+r*28}" width="44" height="16" fill="#8a6a4a"/><rect x="${52+c*64+r*6}" y="${84+r*28}" width="20" height="8" fill="#f2ead2"/>`).join('')).join(''),
+    robot:()=>`<rect x="240" y="40" width="54" height="46" rx="10" fill="#9aa4b8"/><circle cx="256" cy="60" r="6" fill="#5ce1e6"/><circle cx="278" cy="60" r="6" fill="#5ce1e6"/><rect x="258" y="74" width="18" height="4" fill="#333"/><line x1="267" y1="40" x2="267" y2="28" stroke="#9aa4b8" stroke-width="3"/><circle cx="267" cy="26" r="4" fill="#ff5a5a"/>`,
+    fete:()=>[0,1,2].map(i=>{ const cx=60+i*100, cy=40+R(i)*20, c=['#ff6aa8','#ffcf4a','#5ce1e6'][i]; return [...Array(10)].map((_,k)=>{ const a=k/10*6.28; return `<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(a)*24}" y2="${cy+Math.sin(a)*24}" stroke="${c}" stroke-width="2"/>`; }).join(''); }).join('')+crowd(14,180,'#1a1030')+`<text x="40" y="120" font-size="20" fill="#ffcf4a">♪</text><text x="270" y="110" font-size="20" fill="#ffcf4a">♫</text>`,
+    lune:()=>`<circle cx="280" cy="34" r="16" fill="#f2ead2"/><circle cx="286" cy="30" r="14" fill="${bg[0]}"/>`,
+    ecran:()=>`<rect x="80" y="38" width="160" height="96" rx="6" fill="#111" stroke="#666" stroke-width="3"/><rect x="88" y="46" width="144" height="80" fill="#e8f0ff"/><text x="160" y="96" font-size="30" font-weight="700" text-anchor="middle" fill="#c00">${p.tr==='faux'?'ERREUR':'17,4'}</text><rect x="130" y="134" width="60" height="10" fill="#444"/>`,
+    trophee:()=>`<path d="M262 50h36v16c0 14-8 22-18 22s-18-8-18-22z" fill="#ffcf4a"/><rect x="274" y="88" width="12" height="14" fill="#ffcf4a"/><rect x="266" y="102" width="28" height="8" fill="#c9a23a"/>`,
+    argent:()=>[0,1,2].map(i=>`<text x="${30+i*30}" y="${60+i*14}" font-size="24">💶</text>`).join('')
+  };
+  p.sc.forEach(k=>{ if(parts[k]) s+=parts[k](); });
+  return `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${s}</svg>`;
+}
+
+function gReseau(){
+  stopGame();
+  head('🌐','Le réseau','Choisis ton personnage. Deux semaines d\'actualité étudiante vont défiler dans ton fil. <b>Objectif 1 : gagner des abonnés.</b> Puis <b>objectif 2 : te faire l\'idée la plus juste de ce qui s\'est vraiment passé.</b>');
+  const box=mk('div','games',null,main);
+  box.innerHTML=CHARS.map((c,i)=>`<button class="gcard" data-i="${i}"><span class="e">${c.e}</span><span class="t">${c.t}</span><span class="d">« ${c.d} »</span><span class="s">${fmtN(c.f)} abonnés</span></button>`).join('');
+  box.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>playReseau(CHARS[+b.dataset.i]));
+}
+function playReseau(C){
+  stopGame();
+  const S={ C, F:C.f, F0:C.f, likes:0, prof:vecOf(C.v), mood:{col:0,peur:0,deg:0,joie:0,tri:0}, moodLog:[], seen:new Set(), visited:new Set(), round:0, phase:0, N1:22, N2:10,
+    shared:[], ignored:[], liked:[], feedAlign:[], busy:false, tok:{}, inviteAt:new Set([4,9,14,19]), ownPosts:[] };
+  const role=()=>S.F>=20000?['📡','Émetteur : ce que tu publies part loin']:S.F>=1000?['📶','Relais : tu touches ta communauté']:['👀','Observateur : tu reçois plus que tu n\'émets'];
+  head(C.e,C.t,'');
+  mk('div',null,`<div class="hud"><span id="rs-r"></span><span>👥 <b id="rs-f"></b></span><span class="likes" id="rs-l"></span></div>
+    <div id="rs-goal"></div>
+    <div class="rswrap"><div><div class="rspost" id="rs-post"></div><div class="row" id="rs-act" style="margin-top:8px"></div></div>
+    <div><div class="world rsnet" id="rs-net"><svg aria-label="Ton réseau : chaque point est un compte, le blanc c'est toi"></svg><div class="rsleg" id="rs-leg"></div></div>
+      <p class="lead" id="rs-role" style="margin:6px 0 0;font-size:13px"></p></div></div>
+    <div id="rs-z"></div>`,main);
+  // ---- le réseau simulé : 4 communautés de valeurs (leurs noms restent cachés), quelques gros comptes ----
+  const A=[];
+  ARCH.forEach((ar,ai)=>{ for(let k=0;k<20;k++){ const v=vecOf(ar.v).map(x=>clamp(x+rand(-.35,.35),-.2,1.2)); A.push({ v, arch:ai, f:k<2?Math.round(Math.pow(10,rand(4,5.3))):Math.round(Math.pow(10,rand(1,3.3))), x:clamp(ar.cx+rand(-15,15),3,97), y:clamp(ar.cy+rand(-11,11),3,67), nb:[] }); } });
+  A.forEach((a,i)=>{ A.map((b,j)=>[j,cosv(a.v,b.v)-Math.hypot(a.x-b.x,a.y-b.y)/80]).filter(([j])=>j!==i).sort((p,q)=>q[1]-p[1]).slice(0,3).forEach(([j])=>{ if(!a.nb.includes(j)){ a.nb.push(j); A[j].nb.push(i); } }); if(Math.random()<.12){ const j=randi(0,A.length-1); if(j!==i&&!a.nb.includes(j)){ a.nb.push(j); A[j].nb.push(i); } } });
+  const best=ARCH.map((ar,i)=>[i,cosv(vecOf(ar.v),vecOf(C.v))]).sort((p,q)=>q[1]-p[1])[0][0];
+  // plus on a d'abonnés, plus on est au centre du réseau
+  const cen=clamp(Math.log10(C.f)/5.2,0,1), ME={ x:ARCH[best].cx+(50-ARCH[best].cx)*cen, y:ARCH[best].cy+(36-ARCH[best].cy)*cen };
+  let aud=[];
+  const audience=()=>{ const M=clamp(Math.round(2+Math.log10(S.F)*2.6),4,20); aud=A.map((a,i)=>[i,cosv(a.v,vecOf(C.v))+rand(0,.3)-Math.hypot(a.x-ME.x,a.y-ME.y)/120]).sort((p,q)=>q[1]-p[1]).slice(0,M).map(([i])=>i); };
+  audience();
+  const svg=$('#rs-net svg'); svg.setAttribute('viewBox','0 0 100 70');
+  const ACOL=['#6aa0ff','#ff6aa8','#ffb547','#6ee7a0'];
+  function drawNet(reveal){
+    let s='';
+    A.forEach((a,i)=>a.nb.forEach(j=>{ if(j>i) s+=`<line x1="${a.x}" y1="${a.y}" x2="${A[j].x}" y2="${A[j].y}" stroke="#2a2650" stroke-width=".3"/>`; }));
+    aud.forEach(i=>{ s+=`<line x1="${ME.x}" y1="${ME.y}" x2="${A[i].x}" y2="${A[i].y}" stroke="#ffffff40" stroke-width=".35"/>`; });
+    s+=A.map((a,i)=>`<circle class="pp" data-i="${i}" cx="${a.x}" cy="${a.y}" r="${(.9+Math.log10(a.f)*.35).toFixed(2)}" fill="${ACOL[a.arch]}" opacity=".55"/>`).join('');
+    s+=`<circle cx="${ME.x}" cy="${ME.y}" r="${(1.3+Math.log10(S.F)*.45).toFixed(2)}" fill="#fff" stroke="#000" stroke-width=".3"/><text x="${ME.x}" y="${ME.y+.9}" font-size="2.6" text-anchor="middle">${C.e}</text>`;
+    svg.innerHTML=s;
+    $('#rs-leg').innerHTML=reveal?ARCH.map((ar,i)=>`<span><i style="background:${ACOL[i]}"></i>${ar.t}</span>`).join(''):'<span>4 communautés : à toi de deviner ce qui les rassemble…</span>';
+  }
+  const dots=()=>[...svg.querySelectorAll('circle.pp')];
+  function hud(){
+    $('#rs-r').textContent=S.phase===0?'Ton réseau':S.phase===1?`Fil · ${Math.min(S.round+1,S.N1)} / ${S.N1}`:S.phase===2?`Enquête · ${Math.min(S.round+1,S.N2)} / ${S.N2}`:'Bilan';
+    $('#rs-f').textContent=fmtN(S.F); $('#rs-l').textContent='❤ '+fmtN(S.likes);
+    const r=role(); $('#rs-role').textContent=`${r[0]} ${r[1]} · ${aud.length} comptes te suivent directement dans ce réseau.`;
+  }
+  const angles=ev=>POSTS.filter(p=>p.ev===ev&&S.seen.has(p.id)).length;
+  const blurOf=ev=>Math.max(0,10-(angles(ev)+(S.visited.has(ev)?2:0))*2.5);
+  const dayTxt=d=>d<=1?'hier':`il y a ${d} jours`;
+  // pendant le jeu, aucun indice : ni émotions, ni valeurs. Tout est révélé à la fin.
+  function card(p,extra='',tags=false){
+    const E=EVT[p.ev], k=KIND[p.src[1]];
+    return `<div class="rsimg" style="--bl:${blurOf(p.ev)}px">${scene(p)}<div class="rsov">${esc(p.ov)}</div><div class="rsday">${dayTxt(E.day)}</div></div>
+      <div class="rsbody"><div class="src"><span class="av">${k[0]}</span><b style="color:#1b1838">${esc(p.src[0])}</b><span class="meta">· ${fmtN(p.src[2])} abonnés</span></div>
+      <h3>${esc(p.t)}</h3>${tags?tagHTML(p):''}${extra}</div>`;
+  }
+  function tagHTML(p){
+    return `<div class="rstags">${Object.entries(p.e).filter(([,x])=>x>=.3).map(([e])=>`<span class="tag" style="background:${EM[e][2]}44">${EM[e][0]} ${EM[e][1]}</span>`).join('')}<span class="tag tg2">humeur : ${p.mood}</span><span class="tag tg2">${p.dyn}</span></div>
+      <div class="rstags">${Object.entries(p.v).map(([k,x])=>`<span class="tag ${x>0?'vp':'vm'}">${x>0?'':'contre '}${VAL[k][0]} ${VAL[k][1]}</span>`).join('')}<span class="tag ${p.tr==='vrai'?'vp':'vm'}">${p.tr==='vrai'?'✔ vrai':p.tr==='faux'?'✘ faux':'⚠ trompeur'}</span></div>`;
+  }
+  // ---- l'algorithme du fil : ce qui ressemble à ce que tu aimes, ce qui fait réagir, ce qui vient de gros comptes ----
+  function pickFeed(){
+    const pool=POSTS.filter(p=>!S.seen.has(p.id)); if(!pool.length) return null;
+    return pool.map(p=>[p,.5*cosv(S.prof,vecOf(p.v))+.35*arousal(p)+.15*Math.log10(p.src[2])/5.5+rand(0,.25)]).sort((a,b)=>b[1]-a[1])[0][0];
+  }
+  // ton humeur (cachée) : chaque post t'atteint selon ta sensibilité
+  function expose(p,k){ for(const e in S.mood) S.mood[e]*=.85; for(const e in p.e) S.mood[e]+=p.e[e]*k*(C.s[e]||1); S.moodLog.push(Object.assign({},S.mood)); }
+  function learn(p,k){ const v=vecOf(p.v); S.prof=S.prof.map((x,i)=>x*.92+v[i]*k); }
+  // ---- étape 0 : on te montre ton réseau ----
+  function intro(){
+    const r=role();
+    $('#rs-post').innerHTML=`<div class="rsbody"><h3>${C.e} ${esc(C.t)}</h3><p style="margin:0 0 6px;font-style:italic">« ${esc(C.d)} »</p>
+      <p style="margin:0 0 6px">Voici ton réseau : chaque point est un compte, le plus gros point blanc c'est toi. Tu as <b>${fmtN(S.F)} abonnés</b>.</p>
+      <p style="margin:0 0 6px"><b>${r[0]} ${r[1]}.</b> Les traits blancs relient tes abonnés directs. Les couleurs montrent 4 communautés : tu découvriras à la fin ce qui les rassemble.</p>
+      <p style="margin:0">Pendant ${S.N1} tours, des posts arrivent : ❤️ like, 🔁 republie (tes abonnés le voient) ou ignore. Parfois un événement t'invite à y aller. <b>Gagne un maximum d'abonnés !</b></p></div>`;
+    $('#rs-act').innerHTML=`<button class="btn ok" id="rs-start">C'est parti ▶</button>`;
+    $('#rs-start').onclick=()=>{ S.phase=1; next(); };
+    hud();
+  }
+  let cur=null;
+  function next(){
+    if(S.phase===1 && S.round>=S.N1) return endPhase1();
+    if(S.phase===2 && S.round>=S.N2) return endGame();
+    if(S.phase===1 && S.inviteAt.has(S.round) && !S.inv){ const ev=pickInvite(); if(ev){ S.inv=1; return invite(ev); } }
+    S.inv=0;
+    if(S.phase===2) return enquete();
+    cur=pickFeed(); if(!cur) return endPhase1();
+    S.seen.add(cur.id); S.feedAlign.push(cosv(vecOf(C.v),vecOf(cur.v)));
+    expose(cur,.5); show(cur); hud();
+  }
+  // on t'invite plutôt à un événement dont tu as entendu parler
+  function pickInvite(){ const evs=Object.keys(EVT).filter(ev=>EVT[ev].go&&!S.visited.has(ev)&&!S.declined?.has(ev)); if(!evs.length) return null; return evs.sort((a,b)=>angles(b)-angles(a)+rand(-.5,.5))[0]; }
+  function show(p){
+    $('#rs-post').innerHTML=card(p);
+    $('#rs-act').innerHTML=`<button class="btn" id="rs-like">❤️ Liker</button><button class="btn ok" id="rs-rp">🔁 Republier</button><button class="btn" id="rs-ig">Ignorer</button>`;
+    $('#rs-like').onclick=()=>act(p,'like'); $('#rs-rp').onclick=()=>act(p,'rp'); $('#rs-ig').onclick=()=>act(p,'ig');
+  }
+  // ---- propagation : vague après vague, chacun repartage selon l'émotion, ses valeurs et qui a posté ----
+  function cascade(start,p,done){
+    const tok=S.tok, A0=arousal(p), pv=vecOf(p.v), seen=new Set(start), D=dots(); let front=[...start], depth=0, reach=0, likers=0, alS=0;
+    const touch=i=>{ const al=cosv(A[i].v,pv); reach++; alS+=al; if(Math.random()<.25+.55*Math.max(0,al)) likers++; const d=D[i]; d.setAttribute('fill',EM[domEmo(p)][2]); d.setAttribute('opacity','1'); };
+    front.forEach(touch);
+    const step=()=>{
+      if(tok!==S.tok) return;
+      depth++; const nx=[];
+      front.forEach(i=>A[i].nb.forEach(j=>{ if(seen.has(j)) return; const al=cosv(A[j].v,pv);
+        const pr=clamp(.04+.6*A0*Math.max(0,al)+(p.out?.2*Math.max(0,al):0)+(al<-.2?.06*A0:0)+Math.log10(p.src?p.src[2]:S.F)/60,0,.92)*Math.pow(.88,depth);
+        if(Math.random()<pr){ seen.add(j); nx.push(j); touch(j); } }));
+      front=nx;
+      if(nx.length && depth<6) setTimeout(step,240); else setTimeout(()=>{ if(tok===S.tok){ D.forEach((d,i)=>{ d.setAttribute('fill',ACOL[A[i].arch]); d.setAttribute('opacity','.55'); }); done({reach,likers,al:reach?alS/reach:0}); } },600);
+    };
+    setTimeout(step,240);
+  }
+  const srcAgent=p=>{ const pv=vecOf(p.v); return A.map((x,i)=>[i,cosv(x.v,pv)+Math.log10(x.f)/10+rand(0,.3)]).sort((q,r)=>r[1]-q[1])[0][0]; };
+  function act(p,a){
+    if(S.busy) return; S.busy=true; $('#rs-act').querySelectorAll('button').forEach(b=>b.disabled=true);
+    if(a==='rp'){
+      S.shared.push(p); learn(p,.5); expose(p,.4);
+      cascade(aud,p,r=>{
+        const likes=Math.round(r.likers*(1+S.F/(aud.length*40))+rand(0,3));
+        let gain=Math.round(likes*.1+r.likers*2*(.5+Math.max(0,r.al))), msg=`🔁 ${r.reach} comptes touchés`;
+        if(cosv(vecOf(C.v),vecOf(p.v))<-.15){ const lost=Math.round(S.F*.04)+5; gain-=lost; msg+=` · 😒 une partie de tes abonnés n'a pas aimé`; }
+        hearts(likes,()=>{ S.F=Math.max(10,S.F+gain); audience(); drawNet(); hud(); toast(`${msg} · ${gain>=0?'+':''}${fmtN(gain)} abonnés`); S.busy=false; S.round++; next(); });
+      });
+    } else {
+      if(a==='like'){ S.liked.push(p); learn(p,.25); } else { S.ignored.push(p); learn(p,-.05); }
+      cascade([srcAgent(p)],p,()=>{ S.busy=false; S.round++; hud(); next(); });
+    }
+  }
+  // ---- les cœurs tombent : attrape-les ! (ceux qui t'échappent ne valent que 40 %) ----
+  function hearts(likes,done){
+    const n=clamp(Math.round(2+Math.log2(likes+1)*2),likes?3:0,22), host=$('#rs-post');
+    if(!n){ toast('💔 Personne n\'a aimé…'); return setTimeout(done,900); }
+    const val=likes/n; let left=n, got=0;
+    for(let i=0;i<n;i++){
+      const h=mk('button','rsheart','❤️',host); h.style.left=rand(4,86)+'%'; h.style.animationDelay=(i*.12)+'s'; h.style.animationDuration=rand(1.6,2.4)+'s';
+      const end=caught=>{ if(h.done) return; h.done=1; got+=caught?val:val*.4; h.remove(); if(--left===0){ S.likes+=Math.round(got); hud(); done(); } };
+      h.onpointerdown=e=>{ e.preventDefault(); end(true); };
+      h.addEventListener('animationend',()=>end(false));
+    }
+  }
+  // ---- événements : y aller ou pas ----
+  function invite(ev){
+    const E=EVT[ev], base=POSTS.find(p=>p.ev===ev);
+    $('#rs-post').innerHTML=`<div class="rsimg" style="--bl:0px">${scene(base)}<div class="rsov">📍 ${esc(E.t.toUpperCase())}</div><div class="rsday">${dayTxt(E.day)}</div></div><div class="rsbody"><h3>${esc(E.go)}</h3><p style="margin:0;color:#5a5580">Sur place, tu verras ce qui se passe vraiment… et tu pourras publier ta vidéo.</p></div>`;
+    $('#rs-act').innerHTML=`<button class="btn ok" id="rs-go">📍 J'y vais</button><button class="btn" id="rs-no">Je reste chez moi</button>`;
+    $('#rs-no').onclick=()=>{ (S.declined||(S.declined=new Set())).add(ev); S.round++; next(); };
+    $('#rs-go').onclick=()=>{
+      S.visited.add(ev);
+      $('#rs-post').innerHTML=`<div class="rsimg" style="--bl:0px">${scene(base)}<div class="rsov">VU SUR PLACE</div><div class="rsday">${dayTxt(E.day)}</div></div><div class="rsbody"><h3>Ce que tu vois sur place</h3><p style="margin:0">${esc(E.truth)}</p><p style="margin:8px 0 0;color:#5a5580">Quelle vidéo publies-tu ?</p></div>`;
+      $('#rs-act').innerHTML=`<button class="btn ok" id="rs-hot">🔥 Le moment le plus choquant</button><button class="btn" id="rs-calm">🎥 Tout ce qui s'est passé, en entier</button>`;
+      const pub=hot=>{
+        if(S.busy) return; S.busy=true; $('#rs-act').querySelectorAll('button').forEach(b=>b.disabled=true);
+        const mine={ id:-1, ev, e:hot?{col:.9,peur:.6}:{joie:.2,tri:.2}, v:hot?base.v:{}, out:hot?1:0, sc:base.sc, tr:hot?'trompeur':'vrai' };
+        expose(mine,.5);
+        cascade(aud,mine,r=>{ const likes=Math.round(r.likers*(1+S.F/(aud.length*40))+rand(0,3)), gain=Math.round(likes*.1+r.likers*2*(.5+Math.max(0,r.al)));
+          S.ownPosts.push({hot,likes,ev});
+          hearts(likes,()=>{ S.F+=gain; audience(); drawNet(); hud(); toast(`Ta vidéo ${hot?'choc':'complète'} : ${fmtN(likes)} likes, +${fmtN(gain)} abonnés`); S.busy=false; S.round++; next(); }); });
+      };
+      $('#rs-hot').onclick=()=>pub(true); $('#rs-calm').onclick=()=>pub(false);
+    };
+  }
+  // ---- vision de la réalité : 4 points de vue par événement (y être allé en vaut 2) ----
+  const evKeys=()=>Object.keys(EVT).sort((a,b)=>EVT[b].day-EVT[a].day);
+  const clar=ev=>Math.min(1,(angles(ev)+(S.visited.has(ev)?2:0))/4);
+  const vision=()=>Math.round(evKeys().reduce((s,ev)=>s+clar(ev),0)/evKeys().length*100);
+  const known=()=>evKeys().filter(ev=>angles(ev)||S.visited.has(ev)).length;
+  function mapHTML(){ return `<div class="rsmap">${evKeys().map(ev=>{ const n=angles(ev), v=S.visited.has(ev); return `<div class="${n||v?'':'unk'}"><div class="rsimg mini" style="--bl:${n||v?blurOf(ev):14}px">${scene(POSTS.find(p=>p.ev===ev))}</div><small>${n||v?esc(EVT[ev].t):'???'}<br>${v?'📍 ':''}${n}/4</small></div>`; }).join('')}</div>`; }
+  function endPhase1(){
+    S.phase=2; S.round=0; S.F1=S.F; S.vis1=vision();
+    $('#rs-act').innerHTML='';
+    $('#rs-post').innerHTML=`<div class="rsbody"><h3>Fin du fil : ${fmtN(S.F0)} → <b style="color:#c0306f">${fmtN(S.F)}</b> abonnés</h3>
+      <p style="margin:0 0 6px">En 2 semaines, il s'est passé <b>${evKeys().length} événements</b>. Ton fil t'en a montré <b>${known()}</b>. Ta vision de la réalité : <b>${vision()} %</b>.</p>
+      ${mapHTML()}
+      <p style="margin:8px 0 0"><b>Objectif 2 :</b> en ${S.N2} recherches, choisis <b>quel type de source</b> consulter pour comprendre un maximum d'événements. Il faut 4 points de vue pour bien comprendre (y être allé en vaut 2) ; 3 suffisent pour recouper.</p></div>`;
+    $('#rs-act').innerHTML=`<button class="btn ok" id="rs-p2">🔎 Commencer l'enquête</button>`;
+    $('#rs-p2').onclick=()=>{ hud(); next(); };
+    hud();
+  }
+  function enquete(){
+    $('#rs-goal').innerHTML=`<div class="goal">🔎 Enquête ${S.round+1} / ${S.N2} · ta vision de la réalité : <b>${vision()} %</b></div>`;
+    $('#rs-post').innerHTML=`<div class="rsbody"><h3>Quelle source consultes-tu ?</h3>${mapHTML()}</div>`;
+    $('#rs-act').innerHTML=Object.entries(KIND).map(([k,[e,t]])=>{ const n=POSTS.filter(p=>p.src[1]===k&&!S.seen.has(p.id)).length; return `<button class="btn" data-k="${k}" ${n?'':'disabled'}>${e} ${t}</button>`; }).join('');
+    $('#rs-act').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{
+      // le moteur de recherche te propose d'abord ce qui complète ce que tu connais déjà
+      const pool=POSTS.filter(p=>p.src[1]===b.dataset.k&&!S.seen.has(p.id)).sort((p,q)=>{ const a=angles(p.ev), c=angles(q.ev); return (c>0&&c<4?1:0)-(a>0&&a<4?1:0)+rand(-.6,.6); });
+      const p=pool[0]; S.seen.add(p.id); expose(p,.3);
+      const E=EVT[p.ev], ok=S.visited.has(p.ev)||angles(p.ev)>=3;
+      $('#rs-post').innerHTML=card(p,`<div class="verif ${p.tr==='vrai'?'t':'f'}" style="margin-top:8px">${p.tr==='vrai'?'✔ Vrai':p.tr==='faux'?'✘ Faux':'⚠ Trompeur : vrai en partie, mais présenté pour choquer'}</div>${ok?`<div class="verif t" style="background:#e3f0ff;color:#123">🧩 Événement recoupé : ${esc(E.truth)}</div>`:`<div class="verif" style="background:#eee;color:#444">${angles(p.ev)} point${angles(p.ev)>1?'s':''} de vue sur « ${esc(E.t)} » : il en faut 3 pour recouper.</div>`}`);
+      $('#rs-act').innerHTML=`<button class="btn ok" id="rs-nx">Suivant ▶</button>`;
+      $('#rs-nx').onclick=()=>{ S.round++; next(); };
+      hud();
+    });
+  }
+  // ---- bilan : on révèle tout ce qui était caché ----
+  function bars(o,colors,max){ const mx=max||Math.max(.01,...Object.values(o)); return Object.entries(o).map(([k,x])=>`<div>${colors[k][0]} ${colors[k][1]}<div class="g"><div style="width:${Math.round(Math.max(0,x)/mx*100)}%;background:${colors[k][2]||'var(--pink)'}"></div></div></div>`).join(''); }
+  function endGame(){
+    S.phase=3; hud(); drawNet(true);
+    $('#rs-goal').innerHTML=''; $('#rs-act').innerHTML='';
+    const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0, pc=x=>Math.round(x*100);
+    const arS=avg(S.shared.map(arousal)), arI=avg(S.ignored.concat(S.liked).map(arousal));
+    const bubble=avg(S.feedAlign.map(x=>x>.2?1:0)), bad=S.shared.filter(p=>p.tr!=='vrai').length, vis=vision();
+    const hot=S.ownPosts.filter(o=>o.hot), calm=S.ownPosts.filter(o=>!o.hot);
+    const vObj={}; VK.forEach(k=>vObj[k]=C.v[k]||0); const pObj={}; VK.forEach((k,i)=>pObj[k]=S.prof[i]);
+    const VC={}; VK.forEach(k=>VC[k]=[VAL[k][0],VAL[k][1],'var(--cyan)']);
+    const EC={}; Object.keys(EM).forEach(k=>EC[k]=[EM[k][0],EM[k][1],EM[k][2]]);
+    const topMood=Object.entries(S.mood).sort((a,b)=>b[1]-a[1])[0];
+    addPts(Math.round(vis/4)+10); D.best.reseau=Math.max(D.best.reseau||0,S.F1); save();
+    $('#rs-post').innerHTML=`<div class="rsbody"><h3>Bilan</h3>
+      <p>👥 Abonnés : ${fmtN(S.F0)} → <b>${fmtN(S.F1)}</b>. 🔎 Vision de la réalité : ${S.vis1} % après le fil, <b>${vis} %</b> après l'enquête.</p>
+      <ul style="margin:0;padding-left:18px">
+        <li>${pc(bubble)} % des posts de ton fil <b>allaient dans le sens de tes valeurs</b>.</li>
+        <li>Ce que tu as republié était <b>${arS>arI+.05?'plus':'à peu près aussi'} chargé en émotion</b> que le reste (${pc(arS)} % contre ${pc(arI)} %).</li>
+        <li>${bad?`Tu as republié <b>${bad}</b> post${bad>1?'s':''} faux ou trompeur${bad>1?'s':''}.`:'Tu n\'as republié aucun post faux ou trompeur.'}</li>
+        ${hot.length||calm.length?`<li>Tes vidéos sur place : ${hot.length?`choc ${fmtN(Math.round(avg(hot.map(o=>o.likes))))} likes en moyenne`:''}${hot.length&&calm.length?' · ':''}${calm.length?`complètes ${fmtN(Math.round(avg(calm.map(o=>o.likes))))} likes en moyenne`:''}.</li>`:''}
+      </ul></div>`;
+    const z=$('#rs-z');
+    mk('div','card',`<h3 style="margin:0 0 6px">🔓 Ce qui était caché</h3>
+      <div class="rsrev"><div><b>Les valeurs de ${esc(C.t.split(',')[0])}</b><div class="prof">${bars(vObj,VC,1)}</div></div>
+      <div><b>Ce que l'algorithme a cru que tu aimais</b><div class="prof">${bars(pObj,VC)}</div></div>
+      <div><b>Sa sensibilité aux émotions</b><div class="prof">${bars(C.s,EC,1.5)}</div></div>
+      <div><b>Ton humeur à la fin : ${topMood[1]>.4?MOODOF[topMood[0]]:'calme'}</b><div class="prof">${bars(S.mood,EC)}</div></div></div>
+      <p class="lead" style="margin:8px 0 0">Les couleurs du réseau correspondent à des communautés de valeurs : ${ARCH.map((ar,i)=>`<b style="color:${ACOL[i]}">${ar.t}</b>`).join(', ')}.</p>`,z);
+    mk('div','card',`<h3 style="margin:0 0 6px">Ce que tu as republié</h3>${S.shared.length?S.shared.map(p=>`<div class="rsmini"><b>${esc(p.src[0])}</b> : ${esc(p.t)}${tagHTML(p)}</div>`).join(''):'<p>Rien.</p>'}`,z);
+    mk('div','card',`<h3 style="margin:0 0 6px">Ce que disent les chercheurs</h3><ul style="margin:0;padding-left:18px">
+      <li>Les contenus qui <b>activent fort</b> (colère, peur, dégoût, mais aussi émerveillement) sont plus partagés ; la tristesse, émotion « basse », beaucoup moins (Berger et Milkman, 2012).</li>
+      <li>Chaque mot <b>moral et émotionnel</b> dans un message augmente ses partages d'environ 20 % (Brady et al., 2017).</li>
+      <li>Ce qui <b>attaque « l'autre camp »</b> est ce qui se partage le mieux (Rathje et al., 2021).</li>
+      <li>Les fausses nouvelles vont <b>plus loin et plus vite</b> que les vraies, surtout parce qu'elles surprennent (Vosoughi et al., 2018).</li>
+      <li>Mais une belle histoire peut aussi devenir virale : « un policier aide une lycéenne » se partage dans une communauté qui valorise l'humanisme… et beaucoup moins dans celle qui y voit un adversaire.</li></ul>
+      <div class="row" style="margin-top:10px"><button class="btn" id="rs-again">Rejouer avec un autre personnage</button><button class="btn ok" id="rs-d">Noter ma découverte</button></div>`,z);
+    z.scrollIntoView({behavior:'smooth'});
+    $('#rs-again').onclick=gReseau;
+    $('#rs-d').onclick=()=>{ $('#rs-d').parentNode.remove(); discovery('reseau','Pourquoi ton fil ne te montre pas la réalité telle qu\'elle est ?',[
+      'Parce que les journalistes mentent',
+      'Parce que ce qui circule le plus est ce qui fait réagir fort et ce qui conforte les valeurs de chaque communauté ; pour voir la réalité, il faut croiser des sources différentes',
+      'Parce que les réseaux sociaux montrent tout au hasard'],1,
+      'Un post se propage s\'il déclenche une <b>émotion forte</b> et s\'il <b>valide les valeurs</b> de ceux qui le reçoivent. L\'algorithme te montre ce qui ressemble à ce que tu aimes. Résultat : chacun voit un morceau déformé de la réalité. Pour la reconstituer, il faut <b>recouper</b> des sources de types différents.'); };
+  }
+  G.cur={ stop:()=>{ S.tok={}; document.querySelectorAll('.toast').forEach(e=>e.remove()); }, over:true };
+  drawNet(); intro();
+}
+
 /* ---------- menu ---------- */
 const GAMES=[
   ['zombie','🧟','Zombies QCM','Une horde arrive, chaque zombie porte une réponse. Abats le bon avant qu\'il franchisse la barricade !',gZombie],
@@ -962,11 +1602,12 @@ const GAMES=[
   ['box','⬛','La boîte noire','Des nombres entrent, d\'autres sortent. Trouve la règle cachée et prouve-la.',()=>gBox(0)],
   ['feed','📱','Le fil d\'actu','Republier ou pas ? Regarde les émotions se propager et le monde changer.',gFeed],
   ['bubble','🫧','La bulle','Like ce qui te plaît… et découvre tout ce que l\'algorithme ne t\'a jamais montré.',gBubble],
-  ['likes','❤️','Les likes','Publie, gagne des likes, garde ta flamme… et découvre ce qui fait vraiment marcher un post.',gLikes]
+  ['likes','❤️','Les likes','Publie, gagne des likes, garde ta flamme… et découvre ce qui fait vraiment marcher un post.',gLikes],
+  ['reseau','🌐','Le réseau','Rappeuse, acteur, streameuse, médecin, prof… : deux semaines d\'actu étudiante, 100 posts, des émotions qui se propagent. Gagne des abonnés… puis retrouve la réalité.',gReseau]
 ];
 function menu(){
   stopGame();
-  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Six épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
+  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Sept épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
     <div class="games">${GAMES.map(([id,e,t,d],i)=>`<button class="gcard${D.disc[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.disc[id]?'✓ découverte notée':''}${D.best[id]?` · record ${D.best[id].toLocaleString('fr-FR')}`:''}</span></button>`).join('')}</div>
     <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button></div>`;
   main.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>GAMES[+b.dataset.i][4]());

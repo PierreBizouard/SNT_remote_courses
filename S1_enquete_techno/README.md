@@ -10,6 +10,7 @@ Séance d'introduction SNT en version ultra-ludique : les élèves font les déc
 | 📱 Le fil d'actu | Les émotions fortes se propagent plus loin : économie de l'attention |
 | 🫧 La bulle | Boucle de rétroaction des likes, bulle de filtres, mission « sortir de sa bulle » |
 | ❤️ Les likes | Hasard quand on est inconnu, superstition (menu de croyances testé par expérience), gamification |
+| 🌐 Le réseau | 10 personnages (artistes, médecin, policier, prof, étudiant) aux valeurs cachées, 100 posts sur 25 événements étudiants, propagation des émotions, enquête pour recouper, révélation finale + travaux de recherche |
 
 Chaque jeu se termine par « Ta découverte » : un choix + une phrase de l'élève. La page « Mes découvertes » récapitule tout et se copie pour l'envoyer au professeur. Les réponses restent sur l'appareil (localStorage).
 
