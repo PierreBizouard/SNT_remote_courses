@@ -167,6 +167,39 @@ body.paused .stage{filter:blur(14px)}
 .scev figure{margin:0;flex:1 1 0;min-width:0;max-width:110px;text-align:center;font-size:11px;color:var(--muted)}
 .scev svg{display:block;width:100%;border-radius:8px}
 .scev b{color:var(--amber)}
+.ugoal{font-size:14px} .ugoal small{display:block;margin-top:4px;color:var(--muted)}
+.uwrap{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;align-items:start}
+.ubank{display:flex;flex-wrap:wrap;gap:6px}
+.ubox{padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--deep);color:var(--fg);font:700 13px var(--f-body);text-align:left}
+.ubox.used{opacity:.35}
+.uchain{display:grid;gap:2px}
+.ucell{border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:var(--deep)}
+.ucell.mach{border:2px solid var(--mc);background:color-mix(in srgb,var(--mc) 12%,var(--deep))}
+.umname{font:700 12px var(--f-mono);color:var(--mc);margin-bottom:2px}
+.urow{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.urow input{width:20px;height:20px;accent-color:var(--amber)}
+.unm{flex:1 1 140px;font:700 13px var(--f-body)}
+.uw{display:flex;gap:3px}
+.uw button,.umv button{min-width:34px;height:34px;padding:0 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg);font-size:16px}
+.uw button.on{background:var(--amber);border-color:var(--amber)}
+.umv{display:flex;gap:3px}
+.uarr{text-align:center;color:var(--muted);font-size:12px;line-height:1}
+.ubelt .ubrow{display:flex;gap:4px;overflow-x:auto;padding-bottom:4px}
+.ubst{flex:0 0 auto;display:grid;place-items:center;width:52px;height:52px;border-radius:10px;background:var(--deep);border:1px solid var(--line);font-size:20px;position:relative}
+.ubst i{position:absolute;right:-4px;bottom:-6px;font-size:14px;font-style:normal}
+.ubst.mach{border-color:var(--amber)}
+.ubits{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;font-size:20px}
+.ubits span{transition:transform .2s} .ubits span.bad,.ubits span.ok{transform:scale(1.2)}
+.ugs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px}
+.ug{display:grid;padding:6px 8px;border-radius:10px;background:var(--deep);border:2px solid var(--line);font-size:12px}
+.ug b{font:700 18px var(--f-mono)} .ug small{color:var(--muted)}
+.ug.ok{border-color:var(--good)} .ug.ko{border-color:var(--bad)}
+.unotes{font-size:13px;margin:6px 0}
+.ufin{margin:6px 0;padding:6px 8px;background:var(--deep);border-radius:10px}
+.ufin div{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px}
+.uchip{padding:2px 6px;border:1px solid var(--line);border-radius:7px;font-size:15px}
+.ufin i{color:var(--muted);font-style:normal}
+@media (max-width:640px){ .uwrap{grid-template-columns:1fr} .ugs{grid-template-columns:repeat(2,1fr)} }
 .turret{position:absolute;left:50%;bottom:6px;font-size:42px;transform:translateX(-50%);z-index:20;pointer-events:none}
 .barricade{position:absolute;left:0;right:0;bottom:62px;height:6px;background:repeating-linear-gradient(90deg,#8b5a2b 0 30px,#5a3a1a 30px 34px);opacity:.8}
 .splat{position:absolute;width:70px;height:70px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--blood) 0 40%,transparent 41%),radial-gradient(circle at 80% 30%,var(--blood) 0 14%,transparent 15%),radial-gradient(circle at 20% 75%,var(--blood) 0 12%,transparent 13%);opacity:.85;pointer-events:none;z-index:2}
@@ -2247,6 +2280,193 @@ function playSel(MY){
   S.ms=0; mission(); startGame(g);
 }
 
+/* =========================================================
+   12 · L'USINE À TÂCHES : découper une mission en boîtes, choisir humain / règles / IA, inventer des machines
+   ========================================================= */
+// propriétés d'une boîte : exc = part de cas bizarres, emp = besoin d'empathie, grav = gravité d'une erreur (1-3),
+// data = exemples disponibles pour entraîner une IA, phys = tâche physique, req = indispensable, after = boîtes à faire avant
+const UMIS=[
+  { e:'🍕', t:'La pizzeria du lycée', story:'Le foyer lance une pizzeria pour la soirée du lycée : 20 commandes arrivent. À toi d\'inventer la chaîne qui les traite.',
+    goal:{err:4,time:14,cost:170,sat:70},
+    steps:{
+      cmd:{e:'📞',n:'Prendre la commande',req:1,exc:.15,x:'un client parle la bouche pleine',emp:.2,grav:2,data:.9},
+      pay:{e:'💳',n:'Encaisser',req:1,after:['cmd'],exc:.04,x:'carte refusée',emp:0,grav:3,data:.6},
+      prep:{e:'🍅',n:'Garnir la pizza',req:1,after:['cmd'],exc:.12,x:'allergie au gluten',emp:0,grav:3,data:.4,phys:1},
+      cook:{e:'🔥',n:'Cuire',req:1,after:['prep'],exc:0,emp:0,grav:2,data:.5,phys:1},
+      deliv:{e:'🛵',n:'Livrer',req:1,after:['cook','pay'],exc:.18,x:'adresse introuvable',emp:.3,grav:2,data:.7,phys:1},
+      claim:{e:'😤',n:'Gérer les réclamations',after:['deliv'],exc:.5,x:'client furieux',emp:.9,grav:1,data:.3,claim:1},
+      route:{e:'🔀',n:'Repérer les cas bizarres',route:1,exc:0,emp:0,grav:1,data:.8},
+      dup:{e:'🖨️',n:'Imprimer la commande 3 fois',useless:1,exc:0,emp:0,grav:0,data:1},
+      dance:{e:'💃',n:'Danser devant le four',useless:1,exc:0,emp:0,grav:0,data:0,phys:1}
+    } },
+  { e:'📬', t:'Les messages de la vie scolaire', story:'La vie scolaire reçoit 20 messages par heure : absences, questions, et parfois une alerte grave. Organise le traitement.',
+    goal:{err:4,time:14,cost:185,sat:70},
+    steps:{
+      read:{e:'📥',n:'Lire le message',req:1,exc:.12,x:'message écrit en verlan',emp:0,grav:1,data:.9},
+      sort:{e:'🏷️',n:'Classer le message',req:1,after:['read'],exc:.15,x:'message ambigu',emp:0,grav:2,data:.9},
+      faq:{e:'💬',n:'Répondre aux questions fréquentes',req:1,after:['sort'],exc:.2,x:'question jamais vue',emp:.3,grav:1,data:.8},
+      alert:{e:'🚨',n:'Traiter une alerte de harcèlement',req:1,after:['sort'],exc:.1,x:'élève en détresse',emp:1,grav:3,data:.2},
+      arch:{e:'🗄️',n:'Archiver',req:1,after:['faq','alert'],exc:0,emp:0,grav:1,data:1},
+      route:{e:'🔀',n:'Repérer les cas bizarres',route:1,exc:0,emp:0,grav:1,data:.8},
+      fax:{e:'📠',n:'Faxer au rectorat',useless:1,exc:0,emp:0,grav:0,data:1},
+      bday:{e:'🎂',n:'Souhaiter bon anniversaire au serveur',useless:1,exc:0,emp:0,grav:0,data:1}
+    } },
+  { e:'🎮', t:'Le tournoi e-sport du lycée', story:'Tournoi de jeu vidéo au CDI : 20 équipes s\'inscrivent. Inscriptions, autorisations, matchs, litiges… à toi de jouer.',
+    goal:{err:4,time:15,cost:195,sat:70},
+    steps:{
+      ins:{e:'📝',n:'Enregistrer les inscriptions',req:1,exc:.05,x:'pseudo en double',emp:0,grav:1,data:.9},
+      auth:{e:'🪪',n:'Vérifier l\'autorisation parentale',req:1,after:['ins'],exc:.12,x:'papier illisible',emp:0,grav:3,data:.4},
+      team:{e:'⚖️',n:'Former des poules équilibrées',req:1,after:['auth'],exc:.08,x:'joueur sans classement',emp:0,grav:1,data:.9},
+      plan:{e:'📅',n:'Planifier les matchs',req:1,after:['team'],exc:.05,x:'salle déjà prise',emp:0,grav:1,data:.7},
+      ref:{e:'🧑‍⚖️',n:'Arbitrer les litiges',req:1,after:['plan'],exc:.35,x:'accusation de triche',emp:.8,grav:2,data:.3},
+      res:{e:'📣',n:'Annoncer les résultats',req:1,after:['ref'],exc:0,emp:.1,grav:1,data:1},
+      route:{e:'🔀',n:'Repérer les cas bizarres',route:1,exc:0,emp:0,grav:1,data:.8},
+      gif:{e:'🎞️',n:'Faire un GIF de chaque joueur',useless:1,exc:0,emp:0,grav:0,data:1}
+    } }
+];
+// qui fait la boîte : temps (s par commande), coût par commande, mise en place, erreurs
+const UW={
+  h:{e:'🙋',n:'Humain',t:5,c:3,setup:0},
+  r:{e:'⚙️',n:'Machine à règles',t:.5,c:.2,setup:15},
+  a:{e:'🤖',n:'IA',t:1,c:.5,setup:30}
+};
+// simule N commandes à travers la chaîne ; renvoie les mesures et les causes d'erreurs
+function usineSim(M,chain,N=20,rnd=Math.random){
+  const ST=M.steps, res={ time:0, cost:0, err:0, sat:0, notes:{}, items:[] };
+  const note=(k,t)=>{ res.notes[k]=res.notes[k]||{t,n:0}; res.notes[k].n++; };
+  // mise en place : une machine inventée ne se paie qu'une fois
+  const setups=new Set(); chain.forEach(b=>{ if(b.w!=='h') setups.add(b.m||b.id); });
+  chain.forEach(b=>{ if(b.w!=='h' && setups.has(b.m||b.id)){ setups.delete(b.m||b.id); res.cost+=UW[b.w].setup; } });
+  // étapes manquantes ou dans le désordre
+  const ids=chain.map(b=>b.id), pos=Object.fromEntries(ids.map((id,i)=>[id,i]));
+  const missing=Object.keys(ST).filter(k=>ST[k].req && !ids.includes(k));
+  const disorder=chain.filter(b=>ST[b.id]&&(ST[b.id].after||[]).some(a=>pos[a]==null||pos[a]>pos[b.id]));
+  const rI=chain.findIndex(b=>ST[b.id]&&ST[b.id].route), hasClaim=chain.some(b=>ST[b.id]&&ST[b.id].claim);
+  for(let i=0;i<N;i++){
+    let t=0, c=0, bad=false, sat=100, lost=0; const marks=[];
+    chain.forEach((b,k)=>{
+      const s=ST[b.id]||{exc:0,emp:0,grav:0,data:.5,custom:1}, W=UW[b.w];
+      let tt=W.t*(b.m?.6:1)*(b.w==='a'&&s.phys?1.5:1); c+=W.c;
+      if(k>0 && chain[k-1].w!==b.w && !(b.m&&chain[k-1].m===b.m)) tt+=.3;   // passage de relais
+      let e=false;
+      const ex=rnd()<s.exc;
+      if(ex){
+        // un aiguillage placé avant repère le cas bizarre et l'envoie à un humain
+        const caught=rI>=0 && rI<k && rnd()<{h:1,a:.85,r:.3}[chain[rI].w];
+        if(caught){ tt+=UW.h.t; c+=UW.h.c; if(rnd()<.02) e=true; }
+        else if(b.w==='r'){ if(rnd()<.9){ e=true; note('r-'+b.id,`${s.e} ${s.n} : la machine à règles ne sait pas quoi faire (${s.x})`); } }
+        else if(b.w==='a'){ if(rnd()<.5){ e=true; note('a-'+b.id,`${s.e} ${s.n} : l'IA répond avec assurance… et se trompe (${s.x})`); } }
+        else if(rnd()<.05) e=true;
+      } else {
+        const pe=b.w==='h'?.02:b.w==='r'?.005:.1*(1-s.data*.7);
+        if(rnd()<pe){ e=true; if(b.w==='a') note('a2-'+b.id,`${s.e} ${s.n} : l'IA manque d'exemples pour bien apprendre`); if(b.w==='h') note('h-'+b.id,`${s.e} ${s.n} : un humain fatigué fait une erreur`); }
+      }
+      if(s.emp && b.w!=='h'){ const p=s.emp*(b.w==='r'?40:22); sat-=p; if(p>=15 && i===0) note('emp-'+b.id,`${s.e} ${s.n} : une réponse de machine, froide, là où il fallait de l'empathie`); }
+      if(e){ bad=true; lost+=s.grav*15; marks.push(k); }
+      t+=tt;
+    });
+    if(missing.length){ bad=true; lost+=45; if(i===0) missing.forEach(m=>note('miss-'+m,`Il manque une étape indispensable : ${ST[m].e} ${ST[m].n}`)); }
+    if(disorder.length){ bad=true; lost+=30; if(i===0) disorder.forEach(b=>note('ord-'+b.id,`${ST[b.id].e} ${ST[b.id].n} arrive trop tôt dans la chaîne`)); }
+    if(hasClaim) lost/=2;
+    sat=clamp(sat-lost,0,100);
+    res.time+=t; res.cost+=c; res.err+=bad?1:0; res.sat+=sat; res.items.push({bad,marks});
+  }
+  chain.forEach(b=>{ if(ST[b.id]&&ST[b.id].useless) note('use-'+b.id,`${ST[b.id].e} ${ST[b.id].n} : à quoi sert cette boîte ? Elle coûte du temps et de l'argent`); });
+  res.time=Math.round(res.time/N*10)/10; res.cost=Math.round(res.cost); res.sat=Math.round(res.sat/N);
+  return res;
+}
+function gUsine(){ playUsine(0,[]); }
+function playUsine(mi,hist){
+  stopGame();
+  const M=UMIS[mi], ST=M.steps;
+  head('🏭',`L'usine à tâches · ${mi+1}/${UMIS.length}`,`${M.e} <b>${M.t}</b>. ${M.story}`);
+  const G0=M.goal;
+  mk('div','card ugoal',`🎯 <b>Objectif pour 20 commandes</b> : erreurs ≤ ${G0.err} · délai ≤ ${G0.time} s par commande · coût ≤ ${G0.cost} € · satisfaction ≥ ${G0.sat} %<br><small>🙋 humain : lent et cher, gère les cas bizarres et l'empathie · ⚙️ machine à règles : rapide, pas chère, perdue face à l'imprévu · 🤖 IA : apprend sur des exemples, gère une partie de l'imprévu… mais se trompe avec assurance</small>`,main);
+  const wrap=mk('div','uwrap',`<div class="card"><h3 style="margin:0 0 6px">Les boîtes possibles</h3><p class="lead" style="margin:0 0 6px;font-size:13px">Touche une boîte pour l'ajouter à ta chaîne. Toutes ne sont pas utiles !</p><div id="u-bank" class="ubank"></div>
+      <div class="row" style="margin-top:8px"><button class="btn" id="u-own">✏️ Inventer ma boîte</button></div></div>
+    <div class="card"><h3 style="margin:0 0 6px">Ta chaîne</h3><div id="u-chain" class="uchain"></div>
+      <div class="row" style="margin-top:8px"><button class="btn" id="u-mach">🛠️ Fusionner en machine</button><button class="btn ok" id="u-run">▶ Lancer 20 commandes</button></div><p class="lead" id="u-m" style="margin:6px 0 0;font-size:13px"></p></div>`,main);
+  const out=mk('div',null,null,main);
+  let chain=[], sel=new Set(), runs=0, mk2=0;
+  const W=['h','r','a'];
+  function bank(){
+    $('#u-bank').innerHTML=Object.entries(ST).map(([id,s])=>`<button class="ubox${chain.some(b=>b.id===id)?' used':''}" data-id="${id}">${s.e} ${esc(s.n)}</button>`).join('');
+    $('#u-bank').querySelectorAll('.ubox').forEach(b=>b.onclick=()=>{ if(chain.some(x=>x.id===b.dataset.id)) return; chain.push({id:b.dataset.id,w:'h'}); draw(); });
+  }
+  const nameOf=b=>ST[b.id]?`${ST[b.id].e} ${esc(ST[b.id].n)}`:`✏️ ${esc(b.txt)}`;
+  function draw(){
+    bank();
+    const c=$('#u-chain');
+    if(!chain.length){ c.innerHTML='<p class="lead" style="margin:0">Vide : ajoute des boîtes dans l\'ordre où elles se font.</p>'; return; }
+    c.innerHTML=chain.map((b,i)=>`${i?'<div class="uarr">⬇</div>':''}<div class="ucell${b.m?' mach':''}" style="${b.m?`--mc:${b.mc}`:''}">
+      ${b.m&&(i===0||chain[i-1].m!==b.m)?`<div class="umname">${b.me} ${esc(b.mn)}</div>`:''}
+      <div class="urow"><input type="checkbox" data-i="${i}" ${sel.has(i)?'checked':''} aria-label="sélectionner"><span class="unm">${nameOf(b)}</span>
+      <span class="uw">${W.map(w=>`<button class="${b.w===w?'on':''}" data-i="${i}" data-w="${w}" title="${UW[w].n}">${UW[w].e}</button>`).join('')}</span>
+      <span class="umv"><button data-up="${i}">↑</button><button data-dn="${i}">↓</button><button data-x="${i}">✕</button></span></div></div>`).join('');
+    c.querySelectorAll('.uw button').forEach(x=>x.onclick=()=>{ const b=chain[+x.dataset.i]; b.w=x.dataset.w; if(b.m){ if(b.w==='h'){ const m=b.m; chain.forEach(o=>{ if(o.m===m){ delete o.m; } }); } else chain.forEach(o=>{ if(o.m===b.m) o.w=b.w; }); } draw(); });
+    c.querySelectorAll('[data-up]').forEach(x=>x.onclick=()=>{ const i=+x.dataset.up; if(i>0){ [chain[i-1],chain[i]]=[chain[i],chain[i-1]]; unmerge(); sel.clear(); draw(); } });
+    c.querySelectorAll('[data-dn]').forEach(x=>x.onclick=()=>{ const i=+x.dataset.dn; if(i<chain.length-1){ [chain[i+1],chain[i]]=[chain[i],chain[i+1]]; unmerge(); sel.clear(); draw(); } });
+    c.querySelectorAll('[data-x]').forEach(x=>x.onclick=()=>{ chain.splice(+x.dataset.x,1); unmerge(); sel.clear(); draw(); });
+    c.querySelectorAll('input[type=checkbox]').forEach(x=>x.onchange=()=>{ const i=+x.dataset.i; x.checked?sel.add(i):sel.delete(i); });
+  }
+  // une machine inventée doit rester d'un seul tenant
+  function unmerge(){ const seen={}; chain.forEach((b,i)=>{ if(!b.m) return; if(seen[b.m]!=null && seen[b.m]!==i-1){ chain.forEach(o=>{ if(o.m===b.m) delete o.m; }); } seen[b.m]=i; }); }
+  $('#u-own').onclick=()=>{ const t=(prompt('Le nom de ta boîte (ce qu\'elle fait) :')||'').trim().slice(0,40); if(t){ chain.push({id:'own'+(++mk2),txt:t,w:'h'}); draw(); } };
+  $('#u-mach').onclick=()=>{
+    const I=[...sel].sort((a,b)=>a-b);
+    if(I.length<2 || I.some((v,k)=>k&&v!==I[k-1]+1)){ $('#u-m').textContent='Coche au moins 2 boîtes qui se suivent pour les fusionner en une machine.'; return; }
+    const w=chain[I[0]].w==='h'?'r':chain[I[0]].w;
+    const n=(prompt('Le nom de ta machine :','Robot '+['Turbo','Pizzatron','Mégaclasseur','Arbitron','Super-Tri'][mk2%5])||'').trim().slice(0,30)||'Ma machine';
+    const icons=['🤖','🦾','🛸','🧠','⚙️','🚀'], id='m'+(++mk2), mc=['#ffb547','#5ce1e6','#ff6aa8','#6ee7a0','#b69cff'][mk2%5];
+    I.forEach(i=>Object.assign(chain[i],{m:id,mn:n,me:icons[mk2%icons.length],mc,w}));
+    sel.clear(); $('#u-m').innerHTML=`🛠️ Machine « ${esc(n)} » inventée : plus de passage de relais entre ses boîtes, une seule mise en place, et elle va plus vite.`; draw();
+  };
+  $('#u-run').onclick=()=>{
+    if(!chain.length){ $('#u-m').textContent='Ajoute d\'abord des boîtes à ta chaîne.'; return; }
+    runs++; const r=usineSim(M,chain); show(r);
+  };
+  function show(r){
+    out.innerHTML='';
+    const ok={err:r.err<=G0.err,time:r.time<=G0.time,cost:r.cost<=G0.cost,sat:r.sat>=G0.sat}, all=Object.values(ok).every(Boolean);
+    // le tapis roulant : 20 commandes défilent à travers les boîtes
+    const belt=mk('div','card ubelt',`<div class="ubrow">${chain.map(b=>`<div class="ubst${b.m?' mach':''}"><span>${ST[b.id]?ST[b.id].e:'✏️'}</span><i>${UW[b.w].e}</i></div>`).join('')}</div><div class="ubits">${r.items.map(()=>`<span>📦</span>`).join('')}</div>`,out);
+    const bits=belt.querySelectorAll('.ubits span');
+    r.items.forEach((it,i)=>setTimeout(()=>{ if(bits[i]){ bits[i].textContent=it.bad?'💥':'✅'; bits[i].classList.add(it.bad?'bad':'ok'); } },120*i+200));
+    const g=(k,lab,v,unit,cmp)=>`<div class="ug ${ok[k]?'ok':'ko'}"><span>${lab}</span><b>${v}${unit}</b><small>objectif ${cmp}</small></div>`;
+    const notes=Object.values(r.notes).sort((a,b)=>b.n-a.n).slice(0,5);
+    const res=mk('div','card',`<h3 style="margin:0 0 6px">${all?'✅ Objectif atteint !':'Résultat de ta chaîne'}</h3>
+      <div class="ugs">${g('err','❌ Erreurs',r.err,' / 20','≤ '+G0.err)}${g('time','⏱ Délai',r.time,' s','≤ '+G0.time+' s')}${g('cost','💶 Coût',r.cost,' €','≤ '+G0.cost+' €')}${g('sat','😊 Satisfaction',r.sat,' %','≥ '+G0.sat+' %')}</div>
+      ${notes.length?`<ul class="unotes">${notes.map(n=>`<li>${n.t}${n.n>1?` <b>(${n.n} fois)</b>`:''}</li>`).join('')}</ul>`:''}
+      ${!all&&runs>=2?`<p class="lead" style="font-size:13px">💡 ${!ok.time||!ok.cost?'Trop lent ou trop cher ? Les humains ne peuvent pas tout faire : confie le répétitif aux machines.':!ok.err?'Trop d\'erreurs ? Une boîte « 🔀 Repérer les cas bizarres » placée tôt peut envoyer l\'imprévu à un humain.':'Clients mécontents ? Là où il faut de l\'empathie, mets un humain.'}${runs>=3?' Et fusionner des boîtes en machine fait gagner du temps et de l\'argent.':''}</p>`:''}
+      <div class="row">${all?`<button class="btn ok" id="u-nx">${mi+1<UMIS.length?'Mission suivante ▶':'Le bilan ▶'}</button>`:''}</div>`,out);
+    if(all){ addPts(25); $('#u-nx').onclick=()=>{ const h=hist.concat([{M,chain:chain.map(b=>({...b})),r,runs}]); mi+1<UMIS.length?playUsine(mi+1,h):usineEnd(h); }; }
+    out.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  draw();
+}
+function usineEnd(hist){
+  stopGame();
+  head('🏭','L\'usine à tâches : le bilan','');
+  D.best.usine=Math.max(D.best.usine||0,hist.length); save();
+  const cnt={h:0,r:0,a:0}; hist.forEach(x=>x.chain.forEach(b=>cnt[b.w]++));
+  const own=hist.flatMap(x=>x.chain.filter(b=>b.txt).map(b=>b.txt)), machines=[...new Set(hist.flatMap(x=>x.chain.filter(b=>b.m).map(b=>b.me+' '+b.mn)))];
+  mk('div','card',`<h3 style="margin:0 0 6px">Tes usines</h3>
+    ${hist.map(x=>`<div class="ufin"><b>${x.M.e} ${x.M.t}</b> <small>(${x.runs} essai${x.runs>1?'s':''})</small><div>${x.chain.map(b=>`<span class="uchip">${x.M.steps[b.id]?x.M.steps[b.id].e:'✏️'} ${UW[b.w].e}</span>`).join('<i>→</i>')}</div></div>`).join('')}
+    <p>Dans tes chaînes : <b>${cnt.h}</b> boîtes humaines 🙋, <b>${cnt.r}</b> machines à règles ⚙️, <b>${cnt.a}</b> IA 🤖.${machines.length?` Tes machines inventées : ${machines.map(esc).join(', ')}.`:''}${own.length?` Tes boîtes à toi : ${own.map(t=>'« '+esc(t)+' »').join(', ')}.`:''}</p>
+    <h3 style="margin:10px 0 6px">Ce qu'on retient</h3>
+    <ul><li>On n'automatise pas un métier d'un coup : on le <b>découpe en tâches</b>, puis on choisit qui fait chaque tâche.</li>
+    <li>Les machines à règles sont imbattables sur le <b>répétitif sans surprise</b>. L'IA gère une partie de l'imprévu, si elle a beaucoup d'<b>exemples</b>… mais elle se trompe avec assurance.</li>
+    <li>Les humains restent indispensables pour les <b>cas bizarres</b>, l'<b>empathie</b> et les décisions graves. Le bon schéma : la machine fait le gros du travail, repère ce qui sort de l'ordinaire, et le passe à un humain.</li>
+    <li>L'économiste Daniel Susskind le résume ainsi : les machines prennent des <b>tâches</b>, pas des métiers entiers. Et la frontière bouge : ce qu'elles ne savent pas faire aujourd'hui, elles le feront peut-être demain.</li></ul>
+    <div class="row"><button class="btn" id="u-a">Rejouer</button><button class="btn ok" id="u-d">Noter ma découverte</button></div>`,main);
+  $('#u-a').onclick=gUsine;
+  $('#u-d').onclick=()=>{ $('#u-d').parentNode.remove(); discovery('usine','Comment l\'IA et les machines transforment-elles le travail ?',[
+    'Elles prennent des tâches : on découpe le travail, on automatise le répétitif et on garde l\'humain pour l\'imprévu et l\'empathie',
+    'Elles remplacent des métiers entiers d\'un seul coup',
+    'Elles ne changent rien, les humains font toujours tout'],0,
+    'Automatiser, c\'est d\'abord <b>découper un processus en boîtes</b> (entrée → traitement → sortie). Chaque boîte peut être confiée à un humain, à une machine à règles ou à une IA, selon qu\'elle est répétitive, imprévisible ou demande de l\'empathie.'); };
+}
+
 /* ---------- menu ---------- */
 const GAMES=[
   ['zombie','🧟','Zombies QCM','Un zombie arrive avec quatre réponses autour de lui. Tire sur la bonne : un tir raté le fait accélérer !',gZombie],
@@ -2259,11 +2479,12 @@ const GAMES=[
   ['likes','❤️','Les likes','Publie, gagne des likes, garde ta flamme… et découvre ce qui fait vraiment marcher un post.',gLikes],
   ['reseau','🌐','Le réseau','Rappeuse, acteur, streameuse, médecin, prof… : deux semaines d\'actu étudiante, 100 posts, des émotions qui se propagent. Gagne des abonnés… puis retrouve la réalité.',gReseau],
   ['dopa','🧠','La boucle de dopamine','Fais défiler un fil et regarde ta dopamine en direct : pourquoi est-ce si dur d\'arrêter ?',gDopa],
-  ['sel','🎚️','Le sélecteur','Like, règle l\'algorithme et regarde le flux : boucle qui s\'emballe ou contre-réaction ?',gSel]
+  ['sel','🎚️','Le sélecteur','Like, règle l\'algorithme et regarde le flux : boucle qui s\'emballe ou contre-réaction ?',gSel],
+  ['usine','🏭','L\'usine à tâches','Découpe une mission en boîtes, choisis humain, machine ou IA pour chacune, invente des machines… et lance 20 commandes.',gUsine]
 ];
 function menu(){
   stopGame();
-  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Onze épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
+  main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Douze épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
     <div class="games">${GAMES.map(([id,e,t,d],i)=>`<button class="gcard${D.disc[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.disc[id]?'✓ découverte notée':''}${D.best[id]?` · record ${D.best[id].toLocaleString('fr-FR')}`:''}</span></button>`).join('')}</div>
     <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button></div>`;
   main.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>GAMES[+b.dataset.i][4]());
