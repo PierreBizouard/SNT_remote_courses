@@ -15,7 +15,7 @@ Une seule page HTML autonome, jouable sur ordinateur, tablette et téléphone.
 - **3 · Les colonnes** (modes boules et unités)
 - **4 · Le tableau hexa** (+ QCM)
 - **5 · Pixels et lumières**
-- Jeu secret **Détonateurs** (5 étoiles, hors note), façon Puyo Puyo : on colle des blocs 1, 2, 4, 8, 16 contre un détonateur jusqu'à ce que leur somme fasse son nombre ; deux blocs égaux fusionnent (1 + 1 = 10). Deux modes : détonateur en décimal et blocs en binaire, ou l'inverse.
+- Jeu secret **Détonateurs** (5 étoiles, hors note), façon Puyo Puyo : les blocs ont la taille de leur valeur (1, 2, 4, 8 cases ; 16 = 4x4 ou 2x8) et tombent par gravité. Une étoile-détonateur est fixée sur un bloc : elle explose quand son groupe fait exactement son nombre de cases. Blocs identiques alignés : fusion (1 + 1 = 10) ; bloc à moitié dans le vide : il se casse en deux. Trop de cases : le groupe se pétrifie en pierres grises, brisées par le souffle d'une explosion voisine (rayon selon le nombre).
 
 Paliers : un objectif de points débloque le niveau suivant, un second donne une étoile.
 Code enseignant (débloque tout) : voir `TEACHER_CODE` dans le source.

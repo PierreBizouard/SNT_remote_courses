@@ -249,9 +249,10 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .l3-q.turbo{left:0;top:0;transform:none}
 /* ---------- bonus : détonateurs (façon Puyo Puyo) ---------- */
 .pu-well{position:absolute;border:2px solid var(--line);border-top:2px dashed var(--bad);border-radius:0 0 10px 10px;background:rgba(8,6,20,.45)}
-.pu{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:28%;border:2px solid #0006;font:700 var(--pf,14px)/1 var(--f-mono);color:#120e24;transition:left .07s linear,top .07s linear;box-shadow:inset 0 -4px 0 #0003,inset 0 3px 0 #fff5;z-index:5}
+.pu{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;border:2px solid #0006;font:700 var(--pf,14px)/1 var(--f-mono);color:#120e24;transition:left .07s linear,top .07s linear;box-shadow:inset 0 -4px 0 #0003,inset 0 3px 0 #fff5;z-index:5}
 .pu small{font-size:.62em;font-weight:500;opacity:.7}
-.pu.v1{background:#6ee7a0}.pu.v2{background:#5ce1e6}.pu.v4{background:#b69cff}.pu.v8{background:#ffb547}.pu.v16{background:#ff6aa8}.pu.v32{background:#ff5a5a;color:#fff}
+.pu:not(.bomb):not(.ghost){background-image:linear-gradient(90deg,rgba(0,0,0,.16) 1px,transparent 1px),linear-gradient(rgba(0,0,0,.16) 1px,transparent 1px);background-size:var(--cs,40px) var(--cs,40px);background-position:-3px -3px}
+.pu.v1{background-color:#6ee7a0}.pu.v2{background-color:#5ce1e6}.pu.v4{background-color:#b69cff}.pu.v8{background-color:#ffb547}.pu.v16{background-color:#ff6aa8}
 .pu.bomb{background:#2a2550;color:var(--fg);border:2px solid var(--amber);border-radius:50%;box-shadow:0 0 12px rgba(255,181,71,.45);z-index:6}
 .pu.bomb .t{font-size:1.05em}
 .pu.bomb .s{font-size:.6em;color:var(--muted);margin-top:2px}
@@ -260,6 +261,16 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .pu.bomb.hot{animation:pulse .35s infinite alternate}
 .pu .fuse{position:absolute;right:-4px;top:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font:700 10px/18px var(--f-mono);text-align:center}
 .pu.piece{z-index:8;transition:none}
+.pu.starred{border-color:var(--amber);box-shadow:0 0 12px rgba(255,181,71,.55),inset 0 -4px 0 #0003}
+.pu.starred .t{position:absolute;right:4px;bottom:3px;font-size:calc(var(--pf) * .8)}
+.pu .star{position:absolute;left:1px;top:1px;width:calc(var(--cs) - 6px);height:calc(var(--cs) - 6px);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(circle,#fff6d0,#ffb547 70%);clip-path:polygon(50% 0,61% 34%,98% 35%,68% 57%,79% 92%,50% 71%,21% 92%,32% 57%,2% 35%,39% 34%);color:#1a1300;z-index:2}
+.pu .sn{position:absolute;left:calc(var(--cs) / 2 - 3px);top:calc(var(--cs) / 2);transform:translate(-50%,-40%);padding:1px 4px;border-radius:6px;background:#1a1300e6;color:#ffd27a;font:700 var(--sf,14px)/1.1 var(--f-mono);white-space:nowrap;z-index:3}
+.pu .sn small{font-size:.6em;opacity:.7}
+.pu .sig{position:absolute;left:-3px;bottom:-7px;padding:1px 5px;border-radius:7px;background:#1a1300;color:var(--amber);border:1px solid var(--amber);font:700 11px/1.2 var(--f-mono);white-space:nowrap;z-index:3}
+.pu.starred.v1 .t{display:none}
+.pu .star.hot{animation:pulse .35s infinite alternate}
+.pu .fuse{position:absolute;right:-2px;top:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font:700 10px/18px var(--f-mono);text-align:center;z-index:3}
 .pu.ghost{opacity:.18;z-index:4;transition:none}
 .pu.pop{animation:pupop .32s forwards;z-index:9}
 @keyframes pupop{40%{transform:scale(1.35)}100%{transform:scale(0);opacity:0}}
@@ -267,8 +278,9 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 @keyframes pumerge{50%{transform:scale(1.25)}}
 .pu-next{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 6px;background:rgba(8,6,20,.8);border:1px solid var(--line);border-radius:8px;font:400 10px var(--f-display);color:var(--muted);z-index:9}
 .pu-next .pu{position:relative;transition:none}
-.pu-shock{position:absolute;border-radius:50%;border:3px solid var(--amber);transform:translate(-50%,-50%);animation:shock .45s forwards;pointer-events:none;z-index:10}
-@keyframes shock{from{width:10px;height:10px;opacity:1}to{width:180px;height:180px;opacity:0}}
+.pu-shock{position:absolute;border-radius:14%;border:3px solid var(--amber);background:rgba(255,181,71,.15);transform:translate(-50%,-50%);animation:shock .45s forwards;pointer-events:none;z-index:10}
+@keyframes shock{from{width:10px;height:10px;opacity:1}to{width:var(--sz,180px);height:var(--sz,180px);opacity:0}}
+.pu.stone{background-color:#6b6880!important;color:#2a2838!important;border:2px solid #4a4760!important;box-shadow:inset 0 -4px 0 #0004,inset 0 3px 0 #fff2!important;filter:grayscale(1);border-radius:18%;animation:none}
 .turbo-clock{position:absolute;right:12px;top:16px;font:700 22px var(--f-mono);color:var(--amber);z-index:5}
 .hextab.static{position:relative;left:auto;top:auto;width:100%;max-width:380px;margin:0 auto;flex:none;z-index:1}
 .l4-byte .canvaswrap{min-height:110px}
@@ -611,8 +623,8 @@ const MODES={
       note:'En mode sauvetage, chaque bonne réponse donne une brique. Construis l\'escalier jusqu\'au fromage avant que le tapis roulant ne l\'emporte !', tag:{s:'[sauvetage] '}, tuto:{s:'l1s'} },
   2:{ list:[['b','Boules : une boule = un bit'],['u','Unités : chaque bille vaut 1']],
       note:'En mode unités, le récipient 16 contient exactement 16 billes, le 8 en contient 8…', tag:{u:'[unités] '}, tuto:{u:'l2u'} },
-  5:{ list:[['d','Détonateur en décimal, blocs en binaire'],['b','Détonateur en binaire, blocs en décimal']],
-      note:'Exemple : un détonateur 13 explose avec les blocs 8, 4 et 1 collés contre lui.', tag:{b:'[binaire] '}, tuto:{} }
+  5:{ list:[['d','Étoile en décimal, blocs en binaire'],['b','Étoile en binaire, blocs en décimal']],
+      note:'Exemple : une étoile 13 sur un bloc 4 explose quand on lui colle un 8 et un 1.', tag:{b:'[binaire] '}, tuto:{} }
 };
 function chooseMode(id){
   const M=MODES[id];
@@ -1667,151 +1679,163 @@ function L4(){
 
 /* =========================================================
    JEU SECRET — Détonateurs (façon Puyo Puyo)
-   Un détonateur 💣 porte un nombre. Colle-lui des blocs-poids (1, 2, 4, 8, 16) :
-   il explose quand la somme des blocs qui le touchent (directement ou en chaîne)
-   vaut exactement son nombre. Deux blocs égaux qui se touchent fusionnent :
-   1 + 1 = 2 (la retenue du binaire, 1 + 1 = 10), et la somme ne change pas.
+   Les blocs ont une TAILLE égale à leur valeur : 1 = 1 case, 2 = 2 cases,
+   4 = carré de 4 cases, 8 = 8 cases, 16 = 4x4 ou 2x8. Tout est soumis à la gravité.
+   Le détonateur est une étoile ⭐ fixée sur un bloc qui tombe : elle explose quand
+   son bloc et les blocs qui le touchent (en chaîne) font exactement son nombre de cases.
+   Deux blocs identiques alignés fusionnent (1 + 1 = 10, la retenue) ; un bloc à moitié
+   dans le vide se casse en deux (10 = 1 + 1). Trop de cases : le groupe se pétrifie en
+   pierres grises, que seul le souffle d'une explosion voisine peut briser.
    ========================================================= */
 function L6(){
-  const COLS=6, ROWS=12, BIN=G.mode==='b';   // 'd' : détonateur décimal, blocs binaires · 'b' : l'inverse
-  const S={ g:[...Array(ROWS)].map(()=>Array(COLS).fill(null)), p:null, next:null, ft:0, phase:'spawn', rt:0, chain:0, np:0, nb:0, cs:40, ox:0, oy:0, well:null, nextEl:null, ghost:[], over:false, maxT:31 };
-  const fall=()=>Math.max(.16,.85-G.score/1600);
-  const fuse=()=>Math.max(28,60-S.nb*1.2);
+  const COLS=8, ROWS=14, BIN=G.mode==='b';   // 'd' : étoile en décimal, blocs en binaire · 'b' : l'inverse
+  const S={ B:[], p:null, next:null, ft:0, phase:'spawn', rt:0, chain:0, np:0, nb:0, cs:40, ox:0, oy:0, well:null, nextEl:null, ghost:null, over:false, maxT:15 };
+  // formes possibles de chaque valeur (la touche ⟳ passe de l'une à l'autre)
+  const SHAPES={1:[[1,1]],2:[[2,1],[1,2]],4:[[2,2]],8:[[4,2],[2,4]],16:[[4,4],[8,2],[2,8]]};
+  const fuse=()=>Math.max(30,60-S.nb*1.2);
+  const fall=()=>Math.max(.18,.8-G.score/1800);
   const binL=v=>`<small>0b</small>${v.toString(2)}`;
-  const label=b=> b.bomb
-    ? `<span class="t">${BIN?binL(b.n):b.n}</span><span class="s"></span><span class="fuse"></span>`
-    : (BIN ? String(b.v) : binL(b.v));
-  function el(b){
-    if(b.el) return b.el;
-    b.el=mk('div','pu '+(b.bomb?'bomb':'v'+b.v),label(b));
-    size(b.el,b.bomb); return b.el;
+  const nameOf=v=>BIN?'0b'+v.toString(2):String(v);
+  const label=b=>`<span class="t">${BIN?b.v:binL(b.v)}</span>`+(b.star?`<span class="star"></span><b class="sn">${BIN?binL(b.star.n):b.star.n}</b><span class="sig"></span><span class="fuse"></span>`:'');
+  function el(b){ if(!b.el) b.el=mk('div',cls(b),label(b)); size(b); return b.el; }
+  const cls=b=>'pu v'+b.v+(b.star?' starred':'')+(b.stone?' stone':'');
+  function redraw(b){ const e=el(b); e.className=cls(b); e.innerHTML=label(b); size(b); }
+  function size(b){
+    const e=b.el, cs=S.cs; e.style.width=(b.w*cs-4)+'px'; e.style.height=(b.h*cs-4)+'px'; e.style.setProperty('--cs',cs+'px');
+    e.style.setProperty('--pf',Math.round(cs*(BIN?.38:.28)*(Math.min(b.w,b.h)>1?1.3:1))+'px');
+    e.style.setProperty('--sf',Math.round(cs*(BIN?.26:.32))+'px');
   }
-  function size(e,bomb=e.classList.contains('bomb')){ e.style.width=e.style.height=(S.cs-4)+'px'; e.style.setProperty('--pf',Math.round(S.cs*(bomb===BIN?.22:.34))+'px'); }
-  const cellXY=(c,r)=>[S.ox+c*S.cs+2,S.oy+r*S.cs+2];
+  const XY=(x,y)=>[S.ox+x*S.cs+2,S.oy+y*S.cs+2];
+  // ---- grille d'occupation ----
+  function occ(skip){ const g=[...Array(ROWS)].map(()=>Array(COLS).fill(null)); for(const b of S.B){ if(b===skip) continue; for(let y=b.y;y<b.y+b.h;y++) for(let x=b.x;x<b.x+b.w;x++) if(y>=0) g[y][x]=b; } return g; }
+  function fitsAt(b,x,y,w=b.w,h=b.h,g=occ(b)){ if(x<0||x+w>COLS||y+h>ROWS) return false; for(let yy=y;yy<y+h;yy++) for(let xx=x;xx<x+w;xx++) if(yy>=0&&g[yy][xx]) return false; return true; }
+  function neigh(b,g){ const s=new Set(); for(let y=b.y;y<b.y+b.h;y++) for(let x=b.x;x<b.x+b.w;x++) for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const X=x+dx, Y=y+dy; if(X<0||X>=COLS||Y<0||Y>=ROWS) continue; const o=g[Y][X]; if(o&&o!==b) s.add(o); } return s; }
+  const starB=()=>S.B.find(b=>b.star&&!b.stone);
+  // le groupe de l'étoile : son bloc + tous les blocs qui le touchent, de proche en proche
+  function cluster(sb,g=occ()){
+    const seen=new Set(), st=[sb]; let sum=0;
+    while(st.length){ const o=st.pop(); if(seen.has(o)||o.stone) continue; seen.add(o); sum+=o.v; neigh(o,g).forEach(n=>st.push(n)); }
+    return { sum, L:[...seen] };
+  }
   // ---- pièces ----
-  function bombs(){ const L=[]; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){ const b=S.g[r][c]; if(b&&b.bomb) L.push([r,c,b]); } return L; }
-  function needBits(){ let m=0; for(const [r,c,b] of bombs()){ const s=cluster(r,c).sum; if(s<b.n) m|=b.n-s; } if(S.p&&S.p.a.bomb) m|=S.p.a.n; return m; }
+  function mkBlock(v){ const [w,h]=SHAPES[v][0]; return { v, w, h, x:0, y:0 }; }
   function weight(){
-    const m=needBits(), opts=[1,2,4,8,16].filter(v=>m&v);
-    if(opts.length && Math.random()<.7) return { v:pick(opts) };
-    return { v:pick([1,1,2,2,4,4,8,16]) };
+    const vals=[1,2,4,8].concat(S.maxT>15?[16]:[]), sb=starB();
+    if(sb){ const m=sb.star.n-cluster(sb).sum; const opts=vals.filter(v=>m>0&&(m&v)); if(opts.length&&Math.random()<.7) return mkBlock(pick(opts)); }
+    return mkBlock(pick([1,1,2,2,4,4,8].concat(S.maxT>15?[16]:[])));
   }
   function newPiece(){
     S.np++;
-    const nbB=bombs().length;
-    if(nbB===0 || (S.np%5===0 && nbB<3)){
-      let n; const pop=x=>x.toString(2).split('1').length-1, mp=S.nb<3?2:S.nb<8?3:5;
-      do{ n=randi(3,S.maxT); }while(pop(n)>mp || pop(n)<2);
-      return { a:{bomb:true,n,t:fuse()}, b:null };
+    // une seule étoile à la fois : la suivante n'arrive que quand la précédente a sauté (ou s'est pétrifiée)
+    if(!starB() && !(S.p&&S.p.star) && !(S.next&&S.next.star)){
+      const pop=x=>x.toString(2).split('1').length-1, mp=S.nb<3?2:S.nb<8?3:4;
+      const b=mkBlock(pick([1,1,2,4])); let n;
+      do{ n=randi(b.v+1,S.maxT); }while(pop(n)>mp||pop(n)<2);
+      b.star={ n, t:fuse() }; return b;
     }
-    return { a:weight(), b:weight() };
+    return weight();
   }
-  const off=[[0,-1],[1,0],[0,1],[-1,0]];
-  function cells(p,x=p.x,y=p.y,rot=p.rot){ const L=[[x,y,p.a]]; if(p.b) L.push([x+off[rot][0],y+off[rot][1],p.b]); return L; }
-  const free=(c,r)=>c>=0&&c<COLS&&r<ROWS&&(r<0||!S.g[r][c]);
-  const fits=(p,x,y,rot)=>cells(p,x,y,rot).every(([c,r])=>free(c,r));
   function spawn(){
     S.p=S.next||newPiece(); S.next=newPiece();
-    Object.assign(S.p,{ x:2, y:0, rot:0 });
-    if(!fits(S.p,2,0,0)){ S.p=null; S.over=true; G.lives=0; hud(); banner('Le puits est plein !','bad'); G.run=false; setTimeout(gameOver,900); return; }
-    el(S.p.a).classList.add('piece'); if(S.p.b) el(S.p.b).classList.add('piece');
-    drawNext(); S.phase='fall'; S.ft=0;
+    const p=S.p; p.x=Math.floor((COLS-p.w)/2); p.y=-p.h+1;
+    if(!fitsAt(p,p.x,p.y)){ S.p=null; full(); return; }
+    el(p).classList.add('piece'); drawNext(); S.phase='fall'; S.ft=0;
   }
+  function full(){ S.over=true; G.lives=0; hud(); banner('Le puits est plein !','bad'); G.run=false; setTimeout(gameOver,900); }
   function drawNext(){
-    S.nextEl.innerHTML='SUIVANT';
-    const n=S.next, mini=b=>{ const e=document.createElement('div'); e.className='pu '+(b.bomb?'bomb':'v'+b.v); e.innerHTML=label(b).replace('<span class="fuse"></span>',''); e.style.width=e.style.height=Math.round(S.cs*.7)+'px'; e.style.setProperty('--pf',Math.round(S.cs*(!!b.bomb===BIN?.15:.24))+'px'); return e; };
-    if(n.b) S.nextEl.appendChild(mini(n.b)); S.nextEl.appendChild(mini(n.a));
+    S.nextEl.innerHTML='SUIVANT'; const n=S.next, k=Math.min(S.cs*.42,60/Math.max(n.w,n.h));
+    const e=document.createElement('div'); e.className=cls(n); e.innerHTML=label(n).replace('<span class="fuse"></span>','');
+    e.style.width=(n.w*k)+'px'; e.style.height=(n.h*k)+'px'; e.style.setProperty('--cs',k+'px'); e.style.setProperty('--pf',Math.round(k*.42)+'px'); e.style.setProperty('--sf',Math.round(k*.5)+'px');
+    S.nextEl.appendChild(e);
   }
-  function move(dx){ const p=S.p; if(p && S.phase==='fall' && fits(p,p.x+dx,p.y,p.rot)) p.x+=dx; }
+  function move(dx){ const p=S.p; if(p&&S.phase==='fall'&&fitsAt(p,p.x+dx,p.y)) p.x+=dx; }
   function rotate(){
-    const p=S.p; if(!p||!p.b||S.phase!=='fall') return;
-    const nr=(p.rot+1)%4;
-    for(const dx of [0,-1,1]) if(fits(p,p.x+dx,p.y,nr)){ p.x+=dx; p.rot=nr; return; }
+    const p=S.p; if(!p||S.phase!=='fall') return; const L=SHAPES[p.v]; if(L.length<2) return;
+    const i=L.findIndex(([w,h])=>w===p.w&&h===p.h), [w,h]=L[(i+1)%L.length];
+    for(const dx of [0,-1,1,-2,2,-3,3]) if(fitsAt(p,p.x+dx,p.y+(p.h-h),w,h)){ p.x+=dx; p.y+=p.h-h; p.w=w; p.h=h; size(p); return; }
   }
   function land(){
-    const p=S.p; S.p=null;
-    for(const [c,r,b] of cells(p)){ b.el.classList.remove('piece'); if(r>=0) S.g[r][c]=b; else { b.el.remove(); } }
+    const p=S.p; S.p=null; p.el.classList.remove('piece'); S.B.push(p);
+    if(p.y<0) return full();   // posé en dépassant du haut : le puits déborde
     S.chain=0; S.phase='resolve'; S.rt=.05;
   }
-  function drop(){ const p=S.p; if(!p||S.phase!=='fall') return; let n=0; while(fits(p,p.x,p.y+1,p.rot)){ p.y++; n++; } if(n) addScore(Math.ceil(n/2)); land(); }
-  // ---- règles ----
+  function drop(){ const p=S.p; if(!p||S.phase!=='fall') return; let n=0; while(fitsAt(p,p.x,p.y+1)){ p.y++; n++; } if(n) addScore(Math.ceil(n/2)); land(); }
+  // ---- règles, une étape à la fois ----
   function gravity(){
-    let moved=false;
-    for(let c=0;c<COLS;c++){ let w=ROWS-1; for(let r=ROWS-1;r>=0;r--){ const b=S.g[r][c]; if(b){ if(r!==w){ S.g[w][c]=b; S.g[r][c]=null; moved=true; } w--; } } }
+    let moved=false, again=true;
+    while(again){ again=false; for(const b of [...S.B].sort((a,c)=>(c.y+c.h)-(a.y+a.h))){ if(fitsAt(b,b.x,b.y+1)){ b.y++; again=moved=true; } } }
     return moved;
   }
-  function merges(){
-    let any=false;
-    for(let r=ROWS-1;r>=0;r--) for(let c=0;c<COLS;c++){
-      const b=S.g[r][c]; if(!b||b.bomb) continue;
-      for(const [dc,dr] of [[0,-1],[1,0]]){
-        const r2=r+dr, c2=c+dc; if(r2<0||c2>=COLS) continue;
-        const o=S.g[r2][c2]; if(!o||o.bomb||o.v!==b.v||o.done||b.done) continue;
-        // 1 + 1 = 10 : les deux blocs égaux deviennent un bloc de poids double (la somme ne change pas)
-        o.done=true; S.g[r2][c2]=null; o.el.classList.add('pop'); setTimeout(()=>o.el.remove(),320);
-        b.v*=2; b.done=true; b.el.className='pu merge v'+b.v; b.el.innerHTML=label(b);
-        const [x,y]=cellXY(c,r); floatTxt(x+S.cs/2,y,BIN?`${b.v/2}+${b.v/2}=${b.v}`:`1+1=10`,'good'); addScore(2);
-        any=true; break;
-      }
+  function splits(){
+    // un bloc à moitié dans le vide se casse en deux moitiés (gauche / droite) qui tombent chacune de leur côté
+    const g=occ(); let any=false;
+    for(const b of [...S.B]){
+      if(b.w<2||b.y+b.h>=ROWS) continue;
+      let sup=0; for(let x=b.x;x<b.x+b.w;x++) if(g[b.y+b.h][x]) sup++;
+      if(sup===0||sup===b.w) continue;
+      const hw=b.w/2, half=b.v/2, mkH=(x,star)=>{ const n={ v:half, w:hw, h:b.h, x, y:b.y, stone:b.stone, star }; el(n); return n; };
+      const a=mkH(b.x,b.star), c=mkH(b.x+hw,null);   // l'étoile reste sur la moitié gauche
+      const [px,py]=XY(b.x+b.w/2,b.y); floatTxt(px,py,b.stone?'crac !':`${nameOf(b.v)} = ${nameOf(half)} + ${nameOf(half)}`,'bad');
+      el(b).remove(); S.B.splice(S.B.indexOf(b),1,a,c); any=true;
     }
-    for(const row of S.g) for(const b of row) if(b) b.done=false;
+    if(any) S.B.forEach(b=>place(el(b),...XY(b.x,b.y)));
     return any;
   }
-  function cluster(r0,c0){
-    const seen=new Set(), L=[]; let sum=0; const st=[];
-    for(const [dc,dr] of off){ st.push([r0+dr,c0+dc]); }
-    while(st.length){
-      const [r,c]=st.pop(); if(r<0||r>=ROWS||c<0||c>=COLS) continue;
-      const b=S.g[r][c], k=r*COLS+c; if(!b||b.bomb||seen.has(k)) continue;
-      seen.add(k); L.push([r,c]); sum+=b.v;
-      for(const [dc,dr] of off) st.push([r+dr,c+dc]);
+  function merges(){
+    // deux blocs identiques alignés fusionnent : 1 + 1 = 2, 2 + 2 = 4… (en binaire : 0b1 + 0b1 = 0b10)
+    for(const a of S.B) for(const b of S.B){
+      if(a===b||a.stone||b.stone||a.v!==b.v||a.w!==b.w||a.h!==b.h||a.v>=16) continue;
+      let w=a.w, h=a.h;
+      if(a.y===b.y && a.x+a.w===b.x) w*=2; else if(a.x===b.x && a.y+a.h===b.y) h*=2; else continue;
+      const v=a.v*2; if(!SHAPES[v].some(([W,H])=>W===w&&H===h)) continue;
+      const eb=el(b); a.v=v; a.w=w; a.h=h; a.star=a.star||b.star; redraw(a); a.el.classList.add('merge'); place(a.el,...XY(a.x,a.y));
+      eb.classList.add('pop'); setTimeout(()=>eb.remove(),320); S.B.splice(S.B.indexOf(b),1);
+      const [x,y]=XY(a.x+a.w/2,a.y); floatTxt(x,y,BIN?`${v/2} + ${v/2} = ${v}`:`0b${(v/2).toString(2)} + 0b${(v/2).toString(2)} = 0b${v.toString(2)}`,'good'); addScore(2);
+      return true;
     }
-    return { sum, L };
+    return false;
   }
+  function kill(b){ const e=el(b); e.classList.add('pop'); setTimeout(()=>e.remove(),330); const i=S.B.indexOf(b); if(i>=0) S.B.splice(i,1); }
   function blasts(){
-    const hits=[];
-    for(const [r,c,b] of bombs()){ const cl=cluster(r,c); if(cl.sum===b.n) hits.push([r,c,b,cl]); }
-    if(!hits.length) return false;
+    const sb=starB(); if(!sb) return false;
+    const cl=cluster(sb), n=sb.star.n; if(cl.sum!==n) return false;
     S.chain++; setCombo(S.chain);
-    const kill=new Set();
-    for(const [r,c,b,cl] of hits){
-      kill.add(r*COLS+c); cl.L.forEach(([rr,cc])=>kill.add(rr*COLS+cc));
-      const [x,y]=cellXY(c,r), bits=cl.L.length;
-      const sh=mk('div','pu-shock'); place(sh,x+S.cs/2,y+S.cs/2); setTimeout(()=>sh.remove(),460);
-      addScore((15+bits*10+Math.round(b.t))*S.chain,x+S.cs/2,y);
-      banner(`${BIN?'0b'+b.n.toString(2):b.n} = ${cl.L.map(([rr,cc])=>S.g[rr][cc].v).sort((a,b)=>b-a).join(' + ')}${S.chain>1?' · chaîne x'+S.chain:''}`,'good');
-      S.nb++; if(S.nb%6===0 && S.maxT<63){ S.maxT=63; banner('Les détonateurs montent jusqu\'à 63 !','good'); }
-    }
-    kill.forEach(k=>{ const r=Math.floor(k/COLS), c=k%COLS, b=S.g[r][c]; S.g[r][c]=null; b.el.classList.add('pop'); setTimeout(()=>b.el.remove(),330); });
+    // souffle autour de l'étoile : 1 case sous 8, 2 cases jusqu'à 15, 3 cases au-delà ; il brise les pierres touchées
+    const rad=n<8?1:n<16?2:3, sx=sb.x, sy=sb.y;
+    const stones=S.B.filter(o=>o.stone && o.x<=sx+rad && o.x+o.w-1>=sx-rad && o.y<=sy+rad && o.y+o.h-1>=sy-rad);
+    const [x,y]=XY(sx,sy);
+    const sh=mk('div','pu-shock'); sh.style.setProperty('--sz',((2*rad+1)*S.cs)+'px'); place(sh,x+S.cs/2,y+S.cs/2); setTimeout(()=>sh.remove(),460);
+    addScore((15+cl.L.length*10+Math.round(sb.star.t)+stones.length*5)*S.chain,x+S.cs/2,y);
+    banner(`${nameOf(n)} = ${cl.L.map(o=>o.v).sort((a,b)=>b-a).map(nameOf).join(' + ')}${stones.length?` · ${stones.length} pierre${stones.length>1?'s':''} brisée${stones.length>1?'s':''}`:''}`,'good');
+    [...cl.L,...stones].forEach(kill);
+    S.nb++; if(S.nb===6){ S.maxT=31; setTimeout(()=>banner('Nouveau : le bloc 16 et des étoiles jusqu\'à 31 !','good'),1700); }
     flash('good'); return true;
   }
-  function step(){ return gravity() || merges() || blasts(); }
-  function misfire(r,c,b){
-    // mèche à zéro : le détonateur saute tout seul et emporte ses voisins, mais tu perds une vie
-    const cl=cluster(r,c);
-    ErrLog.add(5,(BIN?'0b'+b.n.toString(2):b.n)+' (detonateur)',cl.sum+' colle',b.n);
-    [[r,c],...cl.L].forEach(([rr,cc])=>{ const o=S.g[rr][cc]; S.g[rr][cc]=null; o.el.classList.add('pop'); setTimeout(()=>o.el.remove(),330); });
-    loseLife(`Raté : ${BIN?'0b'+b.n.toString(2):b.n} n'était pas ${cl.sum}`);
-    if(G.lives>0){ S.phase='resolve'; S.rt=.3; S.chain=0; }
+  // trop de cases : l'étoile et tout son groupe se pétrifient en pierres grises
+  function stone(sb,why){
+    const cl=cluster(sb);
+    ErrLog.add(5,nameOf(sb.star.n)+' (etoile)',cl.sum+' cases',sb.star.n);
+    cl.L.forEach(o=>{ o.stone=true; o.star=null; redraw(o); });
+    banner(why,'bad'); shake(); flash('bad');
+  }
+  function petrify(){ const sb=starB(); if(!sb) return false; const s=cluster(sb).sum; if(s<=sb.star.n) return false; stone(sb,`Trop ! ${nameOf(s)} > ${nameOf(sb.star.n)} : pétrifié`); return true; }
+  function step(){ return gravity() || splits() || merges() || blasts() || petrify(); }
+  function misfire(sb){
+    stone(sb,`Mèche éteinte : ${nameOf(sb.star.n)} pétrifié`);
+    G.lives--; hud(); if(G.lives<=0){ G.run=false; setTimeout(gameOver,600); return; }
+    S.phase='resolve'; S.rt=.3; S.chain=0;
   }
   // ---- affichage ----
+  function starInfo(b,s){ const st=b.el.querySelector('.star'); if(!st) return; st.classList.toggle('hot',b.star.t<8); b.el.querySelector('.sn').classList.toggle('hot',b.star.t<8); const sg=b.el.querySelector('.sig'); sg.innerHTML=s==null?'':'Σ '+(BIN?binL(s):s); sg.hidden=s==null; b.el.querySelector('.fuse').textContent=Math.ceil(b.star.t); }
   function render(){
-    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-      const b=S.g[r][c]; if(!b) continue;
-      const e=el(b), [x,y]=cellXY(c,r); place(e,x,y);
-      if(b.bomb){
-        const s=cluster(r,c).sum, over=s>b.n;
-        e.classList.toggle('over',over); e.classList.toggle('hot',b.t<8);
-        e.querySelector('.s').innerHTML=over?'trop !':'Σ '+(BIN?binL(s):s);
-        e.querySelector('.fuse').textContent=Math.ceil(b.t);
-      }
-    }
-    S.ghost.forEach(g=>g.remove()); S.ghost=[];
+    for(const b of S.B) place(el(b),...XY(b.x,b.y));
+    const sb=starB(); if(sb) starInfo(sb,cluster(sb).sum);
+    if(S.ghost){ S.ghost.remove(); S.ghost=null; }
     const p=S.p;
     if(p){
-      let gy=p.y; while(fits(p,p.x,gy+1,p.rot)) gy++;
-      for(const [c,r,b] of cells(p)){ const [x,y]=cellXY(c,r); place(el(b),x,y); if(b.bomb){ b.el.querySelector('.s').innerHTML=''; b.el.querySelector('.fuse').textContent=Math.ceil(b.t); } }
-      for(const [c,r,b] of cells(p,p.x,gy)){ if(r<0) continue; const e=mk('div','pu ghost '+(b.bomb?'bomb':'v'+b.v),''); size(e); const [x,y]=cellXY(c,r); place(e,x,y); S.ghost.push(e); }
+      place(el(p),...XY(p.x,p.y)); if(p.star) starInfo(p,null);
+      let gy=p.y; while(fitsAt(p,p.x,gy+1)) gy++;
+      if(gy>p.y){ const e=mk('div','pu ghost',''); e.style.width=(p.w*S.cs-4)+'px'; e.style.height=(p.h*S.cs-4)+'px'; place(e,...XY(p.x,gy)); S.ghost=e; }
     }
   }
   return {
@@ -1819,14 +1843,14 @@ function L6(){
       setKeys([{label:'◀',k:'ArrowLeft'},{label:'⟳',k:'ArrowUp'},{label:'▶',k:'ArrowRight'},{label:'▼',k:'ArrowDown'},{label:'Lâcher',k:'OK',cls:'ok small',span:2}]);
       $('#bufrow').hidden=true;
       S.well=mk('div','pu-well'); S.nextEl=mk('div','pu-next');
-      // au doigt : toucher à gauche / à droite de la pièce la déplace, toucher la pièce la tourne, glisser vers le bas la lâche
+      // au doigt : toucher à gauche / à droite du bloc le déplace, toucher le bloc le tourne, glisser vers le bas le lâche
       let sy=null, sx=0;
       stage.onpointerdown=e=>{ if(G.pause||G.tuto) return; const r=stage.getBoundingClientRect(); sy=e.clientY; sx=e.clientX-r.left; };
       stage.onpointerup=e=>{
         if(sy==null||G.pause||G.tuto||!S.p) return; const dy=e.clientY-sy; sy=null;
         if(dy>60) return drop();
-        const px=S.ox+(S.p.x+.5)*S.cs;
-        if(Math.abs(sx-px)<S.cs*.7) rotate(); else move(sx<px?-1:1);
+        const l=S.ox+S.p.x*S.cs, r=l+S.p.w*S.cs;
+        if(sx>=l-S.cs*.2 && sx<=r+S.cs*.2) rotate(); else move(sx<l?-1:1);
         render();
       };
       S.next=newPiece(); spawn();
@@ -1834,32 +1858,30 @@ function L6(){
     layout(){
       S.cs=Math.floor(Math.min((W-16)/COLS,(H-14)/ROWS));
       S.ox=Math.round((W-S.cs*COLS)/2); S.oy=Math.round(H-S.cs*ROWS-6);
-      // sur un écran large, le « suivant » se met à côté du puits
-      if(W-S.ox-S.cs*COLS>S.cs*1.3){ S.nextEl.style.right='auto'; S.nextEl.style.left=(S.ox+S.cs*COLS+10)+'px'; }
+      if(W-S.ox-S.cs*COLS>S.cs*2.2){ S.nextEl.style.right='auto'; S.nextEl.style.left=(S.ox+S.cs*COLS+10)+'px'; }
       Object.assign(S.well.style,{ left:(S.ox-2)+'px', top:(S.oy-2)+'px', width:(S.cs*COLS+4)+'px', height:(S.cs*ROWS+4)+'px' });
-      stage.querySelectorAll('.pu:not(.ghost)').forEach(size); if(S.next) drawNext(); render();
+      S.B.forEach(size); if(S.p) size(S.p); if(S.next) drawNext(); render();
     },
     update(dt){
       if(S.over) return;
-      // un détonateur surchargé (« trop ! ») ne peut plus exploser proprement : sa mèche brûle 4 fois plus vite
-      for(const [r,c,b] of bombs()){ b.t-=dt*(cluster(r,c).sum>b.n?4:1); if(b.t<=0 && S.phase!=='resolve'){ misfire(r,c,b); render(); return; } }
-      if(S.p && S.p.a.bomb) S.p.a.t=Math.max(5,S.p.a.t-dt*.5);
+      const sb=starB(); if(sb){ sb.star.t-=dt; if(sb.star.t<=0 && S.phase!=='resolve'){ misfire(sb); render(); return; } }
+      if(S.p && S.p.star) S.p.star.t=Math.max(5,S.p.star.t-dt*.5);
       if(S.phase==='resolve'){
         S.rt-=dt; if(S.rt>0) return;
-        if(step()){ S.rt=.28; render(); return; }
+        if(step()){ S.rt=.3; render(); return; }
         setCombo(0); S.phase='spawn';
       }
-      if(S.phase==='spawn'){ spawn(); }
+      if(S.phase==='spawn') spawn();
       if(S.phase==='fall'){
         const p=S.p; S.ft+=dt;
-        if(S.ft>=fall()){ S.ft=0; if(fits(p,p.x,p.y+1,p.rot)) p.y++; else land(); }
+        if(S.ft>=fall()){ S.ft=0; if(fitsAt(p,p.x,p.y+1)) p.y++; else land(); }
       }
       render();
     },
     key(k){
       if(k==='ArrowLeft') move(-1); else if(k==='ArrowRight') move(1);
       else if(k==='ArrowUp') rotate();
-      else if(k==='ArrowDown'){ const p=S.p; if(p&&S.phase==='fall'&&fits(p,p.x,p.y+1,p.rot)){ p.y++; S.ft=0; addScore(1); } }
+      else if(k==='ArrowDown'){ const p=S.p; if(p&&S.phase==='fall'&&fitsAt(p,p.x,p.y+1)){ p.y++; S.ft=0; addScore(1); } }
       else if(k==='OK') drop();
       render();
     }
@@ -1912,13 +1934,15 @@ const TUTOS = [
   ]
 ];
 TUTOS[5] = [
-  { t:'Bravo, tu as trouvé le <b>jeu secret</b> ! Un <b>détonateur</b> 💣 porte un nombre. Pour le faire exploser, colle-lui des <b>blocs</b> dont la somme fait <b>exactement</b> ce nombre.', el:'.pu.bomb' },
-  { t:'Les blocs valent <b>1, 2, 4, 8 ou 16</b>, les poids du binaire. Exemple : 13 = 8 + 4 + 1, donc colle les blocs 8, 4 et 1. Un bloc compte s\'il touche le détonateur, ou s\'il touche un bloc qui le touche.' },
-  { t:'Selon le mode, le détonateur est écrit en décimal et les blocs en binaire (<b>0b</b>100 = 4), ou l\'inverse. Lis bien les deux bases !' },
-  { t:'Deux blocs <b>égaux</b> qui se touchent fusionnent : 1 + 1 = 2, 2 + 2 = 4… En binaire, c\'est la <b>retenue</b> : 0b1 + 0b1 = 0b10. La somme ne change pas.' },
-  { t:'Sous le nombre, <b>Σ</b> montre la somme déjà collée. Trop de blocs ? Il affiche « trop ! ». La pastille rouge est la <b>mèche</b> : à zéro, le détonateur saute tout seul et tu perds une vie.' },
-  { t:'◀ ▶ déplacent la pièce, ⟳ la tourne, ▼ la descend, <b>Lâcher</b> la fait tomber. Au doigt : touche à gauche ou à droite de la pièce, touche la pièce pour la tourner, glisse vers le bas pour la lâcher.', el:'#keys' },
-  { t:'Plusieurs explosions à la suite font une <b>chaîne</b> : les points sont multipliés. Si le puits déborde, la partie s\'arrête. Le jeu secret ne compte pas dans la note.' }
+  { t:'Bravo, tu as trouvé le <b>jeu secret</b> ! Le <b>détonateur</b> est une étoile ⭐ fixée sur un bloc qui tombe. Elle porte un nombre.', el:'.pu.starred' },
+  { t:'Chaque bloc a la <b>taille de sa valeur</b> : le 1 occupe 1 case, le 2 occupe 2 cases, le 4 forme un carré de 4 cases, le 8 un rectangle de 8 cases, le 16 un carré 4x4 ou une barre 2x8. Compte les cases !' },
+  { t:'L\'étoile explose quand <b>son bloc</b> et les blocs qui le touchent (de proche en proche) font <b>exactement</b> son nombre de cases. Exemple : étoile 13 sur un bloc 4 : il manque 9 = 8 + 1.' },
+  { t:'Selon le mode, l\'étoile est écrite en décimal et les blocs en binaire (<b>0b</b>100 = 4), ou l\'inverse.' },
+  { t:'Deux blocs <b>identiques</b> côte à côte (ou l\'un sur l\'autre) fusionnent : 1 + 1 = 2, 2 + 2 = 4… C\'est la <b>retenue</b> du binaire : 0b1 + 0b1 = 0b10.' },
+  { t:'Tout tombe : un bloc posé <b>à moitié dans le vide</b> se casse en deux moitiés qui tombent : 4 = 2 + 2, 2 = 1 + 1.' },
+  { t:'Dans l\'étoile, <b>Σ</b> compte les cases déjà réunies. Trop de cases ? Le groupe se <b>pétrifie</b> en <b>pierres grises</b> qui ne comptent plus. La pastille rouge est la <b>mèche</b> : à zéro, le groupe se pétrifie aussi et tu perds une vie.' },
+  { t:'Pour briser des pierres, fais exploser une étoile <b>près d\'elles</b>. Plus son nombre est grand, plus le souffle porte loin : 1 case autour sous 8, 2 cases jusqu\'à 15, 3 cases au-delà.' },
+  { t:'◀ ▶ déplacent le bloc, ⟳ change sa forme, ▼ le descend, <b>Lâcher</b> le fait tomber. Au doigt : touche à côté du bloc pour le déplacer, touche le bloc pour le tourner, glisse vers le bas pour le lâcher. Une seule étoile à la fois ; si le puits déborde, la partie s\'arrête.', el:'#keys' }
 ];
 TUTOS[0] = [
   { t:'Voici le nombre à écrire en <b>binaire sur 5 bits</b>. Le compteur indique combien de <b>billes</b> il reste à placer : il y en a juste assez.', el:'.l0-left' },
@@ -2007,7 +2031,7 @@ const LEVELS = [
   { name:'Les colonnes 16-8-4-2-1', desc:'Remplis les bons récipients pour écrire le nombre en binaire sur 5 bits. Deux modes : une boule par bit, ou une bille par unité.', make:L2 },
   { name:'Le tableau hexa', desc:'Binaire ↔ hexadécimal sur 4 ou 8 bits. Le tableau de conversion s\'enfuit, se salit et attaque.', make:L3 },
   { name:'Pixels et lumières', desc:'Révèle une image codée en hexa, convertis un de ses octets, puis colorie-la en mélangeant les lumières RVB.', make:L4 },
-  { name:'Détonateurs', desc:'Façon Puyo Puyo : colle des blocs 1, 2, 4, 8, 16 contre un détonateur pour que leur somme fasse son nombre. Deux blocs égaux fusionnent : 1 + 1 = 10 !', make:L6 }
+  { name:'Détonateurs', desc:'Façon Puyo Puyo : des blocs de 1, 2, 4, 8 cases tombent, une étoile-détonateur est fixée sur l\'un d\'eux. Réunis exactement son nombre de cases ! Les blocs égaux fusionnent (1 + 1 = 10), ceux dans le vide se cassent.', make:L6 }
 ];
 function renderMenu(){
   const ns=nStars();
