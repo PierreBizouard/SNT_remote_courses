@@ -280,7 +280,10 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .pu-next .pu{position:relative;transition:none}
 .pu-shock{position:absolute;border-radius:14%;border:3px solid var(--amber);background:rgba(255,181,71,.15);transform:translate(-50%,-50%);animation:shock .45s forwards;pointer-events:none;z-index:10}
 @keyframes shock{from{width:10px;height:10px;opacity:1}to{width:var(--sz,180px);height:var(--sz,180px);opacity:0}}
-.pu.stone{background-color:#6b6880!important;color:#2a2838!important;border:2px solid #4a4760!important;box-shadow:inset 0 -4px 0 #0004,inset 0 3px 0 #fff2!important;filter:grayscale(1);border-radius:18%;animation:none}
+.pu .hpb{position:absolute;left:6px;right:6px;bottom:5px;height:6px;border-radius:3px;background:#1a1828;overflow:hidden}
+.pu .hpb i{display:block;height:100%;background:linear-gradient(90deg,#ff5a5a,#6ee7a0);transition:width .3s}
+.pu.stone.hit{animation:shake .3s}
+.pu.stone{background-color:#6b6880!important;color:#2a2838!important;border:2px solid #4a4760!important;box-shadow:inset 0 -4px 0 #0004,inset 0 3px 0 #fff2!important;border-radius:8px;animation:none}
 .turbo-clock{position:absolute;right:12px;top:16px;font:700 22px var(--f-mono);color:var(--amber);z-index:5}
 .hextab.static{position:relative;left:auto;top:auto;width:100%;max-width:380px;margin:0 auto;flex:none;z-index:1}
 .l4-byte .canvaswrap{min-height:110px}
@@ -1696,7 +1699,7 @@ function L6(){
   const fall=()=>Math.max(.18,.8-G.score/1800);
   const binL=v=>`<small>0b</small>${v.toString(2)}`;
   const nameOf=v=>BIN?'0b'+v.toString(2):String(v);
-  const label=b=>`<span class="t">${BIN?b.v:binL(b.v)}</span>`+(b.star?`<span class="star"></span><b class="sn">${BIN?binL(b.star.n):b.star.n}</b><span class="sig"></span><span class="fuse"></span>`:'');
+  const label=b=>`<span class="t">${BIN?b.v:binL(b.v)}</span>`+(b.stone?`<span class="hpb"><i style="width:${Math.round(b.hp/b.hpMax*100)}%"></i></span>`:'')+(b.star?`<span class="star"></span><b class="sn">${BIN?binL(b.star.n):b.star.n}</b><span class="sig"></span><span class="fuse"></span>`:'');
   function el(b){ if(!b.el) b.el=mk('div',cls(b),label(b)); size(b); return b.el; }
   const cls=b=>'pu v'+b.v+(b.star?' starred':'')+(b.stone?' stone':'');
   function redraw(b){ const e=el(b); e.className=cls(b); e.innerHTML=label(b); size(b); }
@@ -1710,7 +1713,16 @@ function L6(){
   function occ(skip){ const g=[...Array(ROWS)].map(()=>Array(COLS).fill(null)); for(const b of S.B){ if(b===skip) continue; for(let y=b.y;y<b.y+b.h;y++) for(let x=b.x;x<b.x+b.w;x++) if(y>=0) g[y][x]=b; } return g; }
   function fitsAt(b,x,y,w=b.w,h=b.h,g=occ(b)){ if(x<0||x+w>COLS||y+h>ROWS) return false; for(let yy=y;yy<y+h;yy++) for(let xx=x;xx<x+w;xx++) if(yy>=0&&g[yy][xx]) return false; return true; }
   function neigh(b,g){ const s=new Set(); for(let y=b.y;y<b.y+b.h;y++) for(let x=b.x;x<b.x+b.w;x++) for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const X=x+dx, Y=y+dy; if(X<0||X>=COLS||Y<0||Y>=ROWS) continue; const o=g[Y][X]; if(o&&o!==b) s.add(o); } return s; }
-  const starB=()=>S.B.find(b=>b.star&&!b.stone);
+  // vie d'une pierre : 1 pour un bloc 1, 2 pour un 2, 3 pour un 4, 4 pour un 8, 5 pour un 16
+  const hpOf=v=>1+Math.log2(v);
+  const stars=()=>S.B.filter(b=>b.star&&!b.stone);
+  const starB=()=>stars()[0];
+  // groupes : chaque étoile avec les blocs qui la touchent ; deux étoiles dans le même groupe additionnent leurs nombres
+  function groups(){
+    const g=occ(), out=[], done=new Set();
+    for(const sb of stars()){ if(done.has(sb)) continue; const cl=cluster(sb,g); const st=cl.L.filter(o=>o.star); st.forEach(o=>done.add(o)); out.push({ L:cl.L, sum:cl.sum, st, n:st.reduce((a,o)=>a+o.star.n,0) }); }
+    return out;
+  }
   // le groupe de l'étoile : son bloc + tous les blocs qui le touchent, de proche en proche
   function cluster(sb,g=occ()){
     const seen=new Set(), st=[sb]; let sum=0;
@@ -1720,14 +1732,15 @@ function L6(){
   // ---- pièces ----
   function mkBlock(v){ const [w,h]=SHAPES[v][0]; return { v, w, h, x:0, y:0 }; }
   function weight(){
-    const vals=[1,2,4,8].concat(S.maxT>15?[16]:[]), sb=starB();
-    if(sb){ const m=sb.star.n-cluster(sb).sum; const opts=vals.filter(v=>m>0&&(m&v)); if(opts.length&&Math.random()<.7) return mkBlock(pick(opts)); }
+    const vals=[1,2,4,8].concat(S.maxT>15?[16]:[]), gr=groups()[0];
+    if(gr){ const m=gr.n-gr.sum; const opts=vals.filter(v=>m>0&&(m&v)); if(opts.length&&Math.random()<.7) return mkBlock(pick(opts)); }
     return mkBlock(pick([1,1,2,2,4,4,8].concat(S.maxT>15?[16]:[])));
   }
   function newPiece(){
     S.np++;
-    // une seule étoile à la fois : la suivante n'arrive que quand la précédente a sauté (ou s'est pétrifiée)
-    if(!starB() && !(S.p&&S.p.star) && !(S.next&&S.next.star)){
+    // au plus 2 étoiles en jeu ; une nouvelle arrive quand il n'y en a plus, ou de temps en temps s'il n'y en a qu'une
+    const live=stars().length+(S.p&&S.p.star?1:0)+(S.next&&S.next.star?1:0);
+    if(live===0 || (live===1 && S.np%6===0)){
       const pop=x=>x.toString(2).split('1').length-1, mp=S.nb<3?2:S.nb<8?3:4;
       const b=mkBlock(pick([1,1,2,4])); let n;
       do{ n=randi(b.v+1,S.maxT); }while(pop(n)>mp||pop(n)<2);
@@ -1773,7 +1786,7 @@ function L6(){
       if(b.w<2||b.y+b.h>=ROWS) continue;
       let sup=0; for(let x=b.x;x<b.x+b.w;x++) if(g[b.y+b.h][x]) sup++;
       if(sup===0||sup===b.w) continue;
-      const hw=b.w/2, half=b.v/2, mkH=(x,star)=>{ const n={ v:half, w:hw, h:b.h, x, y:b.y, stone:b.stone, star }; el(n); return n; };
+      const hw=b.w/2, half=b.v/2, mkH=(x,star)=>{ const n={ v:half, w:hw, h:b.h, x, y:b.y, stone:b.stone, star }; if(b.stone){ n.hpMax=hpOf(half); n.hp=Math.min(n.hpMax,b.hp); } el(n); return n; };
       const a=mkH(b.x,b.star), c=mkH(b.x+hw,null);   // l'étoile reste sur la moitié gauche
       const [px,py]=XY(b.x+b.w/2,b.y); floatTxt(px,py,b.stone?'crac !':`${nameOf(b.v)} = ${nameOf(half)} + ${nameOf(half)}`,'bad');
       el(b).remove(); S.B.splice(S.B.indexOf(b),1,a,c); any=true;
@@ -1788,7 +1801,7 @@ function L6(){
       let w=a.w, h=a.h;
       if(a.y===b.y && a.x+a.w===b.x) w*=2; else if(a.x===b.x && a.y+a.h===b.y) h*=2; else continue;
       const v=a.v*2; if(!SHAPES[v].some(([W,H])=>W===w&&H===h)) continue;
-      const eb=el(b); a.v=v; a.w=w; a.h=h; a.star=a.star||b.star; redraw(a); a.el.classList.add('merge'); place(a.el,...XY(a.x,a.y));
+      const eb=el(b); a.v=v; a.w=w; a.h=h; a.star=a.star&&b.star?{ n:a.star.n+b.star.n, t:Math.max(a.star.t,b.star.t) }:a.star||b.star; redraw(a); a.el.classList.add('merge'); place(a.el,...XY(a.x,a.y));
       eb.classList.add('pop'); setTimeout(()=>eb.remove(),320); S.B.splice(S.B.indexOf(b),1);
       const [x,y]=XY(a.x+a.w/2,a.y); floatTxt(x,y,BIN?`${v/2} + ${v/2} = ${v}`:`0b${(v/2).toString(2)} + 0b${(v/2).toString(2)} = 0b${v.toString(2)}`,'good'); addScore(2);
       return true;
@@ -1796,40 +1809,50 @@ function L6(){
     return false;
   }
   function kill(b){ const e=el(b); e.classList.add('pop'); setTimeout(()=>e.remove(),330); const i=S.B.indexOf(b); if(i>=0) S.B.splice(i,1); }
+  // souffle : au moins 1 case autour de tout le groupe qui explose, 2 cases à partir de 16, 3 à partir de 32.
+  // Il détruit les blocs et les pierres touchés (pas les autres étoiles).
+  const near=(o,L,rad)=>L.some(q=>o.x<=q.x+q.w-1+rad && o.x+o.w-1>=q.x-rad && o.y<=q.y+q.h-1+rad && o.y+o.h-1>=q.y-rad);
   function blasts(){
-    const sb=starB(); if(!sb) return false;
-    const cl=cluster(sb), n=sb.star.n; if(cl.sum!==n) return false;
+    const hits=groups().filter(gr=>gr.sum===gr.n); if(!hits.length) return false;
     S.chain++; setCombo(S.chain);
-    // souffle autour de l'étoile : 1 case sous 8, 2 cases jusqu'à 15, 3 cases au-delà ; il brise les pierres touchées
-    const rad=n<8?1:n<16?2:3, sx=sb.x, sy=sb.y;
-    const stones=S.B.filter(o=>o.stone && o.x<=sx+rad && o.x+o.w-1>=sx-rad && o.y<=sy+rad && o.y+o.h-1>=sy-rad);
-    const [x,y]=XY(sx,sy);
-    const sh=mk('div','pu-shock'); sh.style.setProperty('--sz',((2*rad+1)*S.cs)+'px'); place(sh,x+S.cs/2,y+S.cs/2); setTimeout(()=>sh.remove(),460);
-    addScore((15+cl.L.length*10+Math.round(sb.star.t)+stones.length*5)*S.chain,x+S.cs/2,y);
-    banner(`${nameOf(n)} = ${cl.L.map(o=>o.v).sort((a,b)=>b-a).map(nameOf).join(' + ')}${stones.length?` · ${stones.length} pierre${stones.length>1?'s':''} brisée${stones.length>1?'s':''}`:''}`,'good');
-    [...cl.L,...stones].forEach(kill);
-    S.nb++; if(S.nb===6){ S.maxT=31; setTimeout(()=>banner('Nouveau : le bloc 16 et des étoiles jusqu\'à 31 !','good'),1700); }
+    const gone=new Set();
+    for(const gr of hits){
+      const n=gr.n, rad=n<16?1:n<32?2:3;
+      gr.L.forEach(o=>gone.add(o));
+      const around=S.B.filter(o=>!gone.has(o)&&!(o.star&&!o.stone)&&near(o,gr.L,rad));
+      // les pierres perdent des points de vie (plus le nombre est grand, plus le coup est fort) ; les blocs normaux sautent
+      const dmg=rad;
+      around.forEach(o=>{ if(!o.stone) return gone.add(o); o.hp-=dmg; if(o.hp<=0) gone.add(o); else { const e=el(o); e.querySelector('.hpb i').style.width=Math.round(o.hp/o.hpMax*100)+'%'; e.classList.remove('hit'); void e.offsetWidth; e.classList.add('hit'); } });
+      const xs=gr.L.map(o=>o.x), ys=gr.L.map(o=>o.y), x0=Math.min(...xs), y0=Math.min(...ys), x1=Math.max(...gr.L.map(o=>o.x+o.w)), y1=Math.max(...gr.L.map(o=>o.y+o.h));
+      const [cx,cy]=XY((x0+x1)/2,(y0+y1)/2);
+      const sh=mk('div','pu-shock'); sh.style.setProperty('--sz',((Math.max(x1-x0,y1-y0)+2*rad)*S.cs)+'px'); place(sh,cx,cy); setTimeout(()=>sh.remove(),460);
+      const nst=around.filter(o=>o.stone&&gone.has(o)).length;
+      addScore((15+gr.L.length*10+Math.round(Math.min(...gr.st.map(o=>o.star.t)))+around.length*4)*S.chain*gr.st.length,cx,cy);
+      banner(`${gr.st.length>1?gr.st.map(o=>nameOf(o.star.n)).join(' ⭐ ')+' → ':''}${nameOf(n)} = ${gr.L.map(o=>o.v).sort((a,b)=>b-a).map(nameOf).join(' + ')}${nst?` · ${nst} pierre${nst>1?'s':''} brisée${nst>1?'s':''}`:''}`,'good');
+      S.nb++; if(S.nb===6){ S.maxT=31; setTimeout(()=>banner('Nouveau : le bloc 16 et des étoiles jusqu\'à 31 !','good'),1700); }
+    }
+    gone.forEach(kill);
     flash('good'); return true;
   }
-  // trop de cases : l'étoile et tout son groupe se pétrifient en pierres grises
-  function stone(sb,why){
-    const cl=cluster(sb);
-    ErrLog.add(5,nameOf(sb.star.n)+' (etoile)',cl.sum+' cases',sb.star.n);
-    cl.L.forEach(o=>{ o.stone=true; o.star=null; redraw(o); });
+  // trop de cases : les étoiles et tout leur groupe se pétrifient en pierres grises
+  function stoneGroup(gr,why){
+    ErrLog.add(5,nameOf(gr.n)+' (etoile)',gr.sum+' cases',gr.n);
+    gr.L.forEach(o=>{ o.stone=true; o.star=null; o.hpMax=o.hp=hpOf(o.v); redraw(o); });
     banner(why,'bad'); shake(); flash('bad');
   }
-  function petrify(){ const sb=starB(); if(!sb) return false; const s=cluster(sb).sum; if(s<=sb.star.n) return false; stone(sb,`Trop ! ${nameOf(s)} > ${nameOf(sb.star.n)} : pétrifié`); return true; }
+  function petrify(){ const gr=groups().find(g=>g.sum>g.n); if(!gr) return false; stoneGroup(gr,`Trop ! ${nameOf(gr.sum)} > ${nameOf(gr.n)} : pétrifié`); return true; }
   function step(){ return gravity() || splits() || merges() || blasts() || petrify(); }
   function misfire(sb){
-    stone(sb,`Mèche éteinte : ${nameOf(sb.star.n)} pétrifié`);
+    const gr=groups().find(g=>g.st.includes(sb));
+    stoneGroup(gr,`Mèche éteinte : ${nameOf(gr.n)} pétrifié`);
     G.lives--; hud(); if(G.lives<=0){ G.run=false; setTimeout(gameOver,600); return; }
     S.phase='resolve'; S.rt=.3; S.chain=0;
   }
   // ---- affichage ----
-  function starInfo(b,s){ const st=b.el.querySelector('.star'); if(!st) return; st.classList.toggle('hot',b.star.t<8); b.el.querySelector('.sn').classList.toggle('hot',b.star.t<8); const sg=b.el.querySelector('.sig'); sg.innerHTML=s==null?'':'Σ '+(BIN?binL(s):s); sg.hidden=s==null; b.el.querySelector('.fuse').textContent=Math.ceil(b.star.t); }
+  function starInfo(b,s){ const st=b.el.querySelector('.star'); if(!st) return; st.classList.toggle('hot',b.star.t<8); b.el.querySelector('.sn').classList.toggle('hot',b.star.t<8); const sg=b.el.querySelector('.sig'); sg.innerHTML=s==null?'':'Σ '+(BIN?binL(s[0]):s[0])+(s[2]>1?' / '+(BIN?binL(s[1]):s[1]):''); sg.hidden=s==null; b.el.querySelector('.fuse').textContent=Math.ceil(b.star.t); }
   function render(){
     for(const b of S.B) place(el(b),...XY(b.x,b.y));
-    const sb=starB(); if(sb) starInfo(sb,cluster(sb).sum);
+    for(const gr of groups()) gr.st.forEach(o=>starInfo(o,[gr.sum,gr.n,gr.st.length]));
     if(S.ghost){ S.ghost.remove(); S.ghost=null; }
     const p=S.p;
     if(p){
@@ -1864,7 +1887,7 @@ function L6(){
     },
     update(dt){
       if(S.over) return;
-      const sb=starB(); if(sb){ sb.star.t-=dt; if(sb.star.t<=0 && S.phase!=='resolve'){ misfire(sb); render(); return; } }
+      for(const sb of stars()){ sb.star.t-=dt; if(sb.star.t<=0 && S.phase!=='resolve'){ misfire(sb); render(); return; } }
       if(S.p && S.p.star) S.p.star.t=Math.max(5,S.p.star.t-dt*.5);
       if(S.phase==='resolve'){
         S.rt-=dt; if(S.rt>0) return;
@@ -1941,8 +1964,9 @@ TUTOS[5] = [
   { t:'Deux blocs <b>identiques</b> côte à côte (ou l\'un sur l\'autre) fusionnent : 1 + 1 = 2, 2 + 2 = 4… C\'est la <b>retenue</b> du binaire : 0b1 + 0b1 = 0b10.' },
   { t:'Tout tombe : un bloc posé <b>à moitié dans le vide</b> se casse en deux moitiés qui tombent : 4 = 2 + 2, 2 = 1 + 1.' },
   { t:'Dans l\'étoile, <b>Σ</b> compte les cases déjà réunies. Trop de cases ? Le groupe se <b>pétrifie</b> en <b>pierres grises</b> qui ne comptent plus. La pastille rouge est la <b>mèche</b> : à zéro, le groupe se pétrifie aussi et tu perds une vie.' },
-  { t:'Pour briser des pierres, fais exploser une étoile <b>près d\'elles</b>. Plus son nombre est grand, plus le souffle porte loin : 1 case autour sous 8, 2 cases jusqu\'à 15, 3 cases au-delà.' },
-  { t:'◀ ▶ déplacent le bloc, ⟳ change sa forme, ▼ le descend, <b>Lâcher</b> le fait tomber. Au doigt : touche à côté du bloc pour le déplacer, touche le bloc pour le tourner, glisse vers le bas pour le lâcher. Une seule étoile à la fois ; si le puits déborde, la partie s\'arrête.', el:'#keys' }
+  { t:'L\'explosion détruit aussi les blocs <b>autour du groupe</b> : au moins 1 case, 2 cases à partir de 16, 3 cases à partir de 32. Chaque pierre a une <b>barre de vie</b> : chaque explosion proche l\'abîme (plus fort si le nombre est grand), et elle se brise quand sa barre est vide. Les grosses pierres résistent plus longtemps.' },
+  { t:'Deux étoiles dans le même groupe <b>additionnent leurs nombres</b> : une étoile 5 et une étoile 9 réunies demandent 14 cases. Plus difficile, mais beaucoup plus de points !' },
+  { t:'◀ ▶ déplacent le bloc, ⟳ change sa forme, ▼ le descend, <b>Lâcher</b> le fait tomber. Au doigt : touche à côté du bloc pour le déplacer, touche le bloc pour le tourner, glisse vers le bas pour le lâcher. Si le puits déborde, la partie s\'arrête.', el:'#keys' }
 ];
 TUTOS[0] = [
   { t:'Voici le nombre à écrire en <b>binaire sur 5 bits</b>. Le compteur indique combien de <b>billes</b> il reste à placer : il y en a juste assez.', el:'.l0-left' },
