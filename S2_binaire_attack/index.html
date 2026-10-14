@@ -455,7 +455,7 @@ function place(e,x,y){ e.style.left = x+'px'; e.style.top = y+'px'; }
 /* ---------- progression : ÉLÉA (SCORM 1.2) si présent, sinon cet appareil ---------- */
 const UNLOCK=[250,300,200,250,300];   // palier 1 : débloque le niveau suivant (et compte pour la note ÉLÉA)
 const STAR=[500,600,450,500,600]; // palier 2 : une étoile ; les 5 étoiles ouvrent le jeu secret
-const NL=5, SECRET=5, BONUS=6;
+const NL=5, SECRET=5;
 const TEACHER_CODE='SNT-PROF';
 const SCORM=(()=>{
   let api=null;
@@ -530,7 +530,7 @@ function best(id){ return Store.data.best[id]||0; }
 function saveBest(id,v){ if(v>best(id)){ Store.data.best[id]=v; } Store.save(); }
 function hasStar(i){ return best(i)>=STAR[i]; }
 function nStars(){ return STAR.filter((x,i)=>hasStar(i)).length; }
-function unlocked(i){ return i===0 || i===BONUS || Store.data.prof || (i===SECRET ? nStars()===NL : best(i-1)>=UNLOCK[i-1]); }
+function unlocked(i){ return i===0 || Store.data.prof || (i===SECRET ? nStars()===NL : best(i-1)>=UNLOCK[i-1]); }
 
 /* ---------- game state & shared helpers ---------- */
 const G = { lv:null, id:0, score:0, lives:3, run:false, pause:false };
@@ -611,7 +611,7 @@ const MODES={
       note:'En mode sauvetage, chaque bonne réponse donne une brique. Construis l\'escalier jusqu\'au fromage avant que le tapis roulant ne l\'emporte !', tag:{s:'[sauvetage] '}, tuto:{s:'l1s'} },
   2:{ list:[['b','Boules : une boule = un bit'],['u','Unités : chaque bille vaut 1']],
       note:'En mode unités, le récipient 16 contient exactement 16 billes, le 8 en contient 8…', tag:{u:'[unités] '}, tuto:{u:'l2u'} },
-  6:{ list:[['d','Détonateur en décimal, blocs en binaire'],['b','Détonateur en binaire, blocs en décimal']],
+  5:{ list:[['d','Détonateur en décimal, blocs en binaire'],['b','Détonateur en binaire, blocs en décimal']],
       note:'Exemple : un détonateur 13 explose avec les blocs 8, 4 et 1 collés contre lui.', tag:{b:'[binaire] '}, tuto:{} }
 };
 function chooseMode(id){
@@ -634,7 +634,7 @@ function startLevel(id,mode){
   stage.innerHTML=''; stage.onpointerdown=stage.onpointermove=stage.onpointerup=stage.onpointercancel=stage.onpointerleave=null; stage.className=''; delete stage.dataset.flash;
   Seal.reset(); Object.assign(G,{ id, score:0, lives:3, run:true, pause:false, time:0, tp:[null,null] });
   $('#menu').hidden=true; $('#app').hidden=false;
-  $('#lvname').textContent = ((MODES[id] && MODES[id].tag[G.mode]) || '') + (id===BONUS ? 'Bonus · '+LEVELS[id].name : id===SECRET ? 'Jeu secret · '+LEVELS[id].name : (id+1)+' · '+LEVELS[id].name+' · palier '+UNLOCK[id]+' · ★ '+STAR[id]);
+  $('#lvname').textContent = ((MODES[id] && MODES[id].tag[G.mode]) || '') + (id===SECRET ? 'Jeu secret · '+LEVELS[id].name : (id+1)+' · '+LEVELS[id].name+' · palier '+UNLOCK[id]+' · ★ '+STAR[id]);
   hud(); setCombo(0); Buf.clear(); $('#bufrow').hidden=false;
   G.lv = LEVELS[id].make();
   G.lv.start(); measure(); G.lv.layout && G.lv.layout(); G.lv.update(0);
@@ -670,7 +670,7 @@ function gameOver(){
       msg+= top>=star ? (prev<star ? '<b class="gold">★ Étoile gagnée !</b>' : '★ Étoile déjà gagnée.') : `Encore <b>${star-top}</b> points pour l'étoile ★ (palier 2 : ${star}).`;
       if(nStars()===NL && starsBefore<NL) msg+='<br><b class="gold">Les '+NL+' étoiles sont réunies : le jeu secret est ouvert !</b>';
     }
-  } else msg=id===BONUS?'Mode bonus : il ne compte pas dans la note, rejoue pour battre ton record.':'Le jeu secret se rejoue à volonté pour battre ton record.';
+  } else msg='Le jeu secret se rejoue à volonté pour battre ton record.';
   // temps de réalisation des paliers, par niveau et par mode (pour comparer les modes)
   const mm=t=>Math.floor(t/60)+' min '+String(Math.round(t%60)).padStart(2,'0')+' s';
   let tmsg='';
@@ -1666,51 +1666,7 @@ function L4(){
 
 
 /* =========================================================
-   JEU SECRET — Turbo conversions (toutes les bases, contre la montre)
-   ========================================================= */
-function L5(){
-  const KINDS=[['b2d',2,10],['d2b',10,2],['h2b',16,2],['b2h',2,16],['h2d',16,10],['d2h',10,16]];
-  const NAME={2:'binaire',10:'décimal',16:'hexadécimal'};
-  const S={ tl:60, t:0, q:null, combo:0, n:0, x:60, y:60, vx:70, vy:55 };
-  let qEl, bar, tb, clock;
-  const fmt=(v,b)=> b===2 ? nib(bin(v,8).replace(/^0{4}(?=\d{4})/,'')) : b===16 ? hx(v,v>15?2:1) : String(v);
-  function newQ(){
-    const [k,from,to]=pick(KINDS), v=randi(S.n<5?1:16, S.n<5?15:255);
-    S.q={k,from,to,v};
-    qEl.innerHTML=`<b>${from===2?'<span class="pre">0b</span>':from===16?'<span class="pre">0x</span>':''}${fmt(v,from)}</b><small>→ en ${NAME[to]}</small>`;
-    Buf.allowed = to===2?'01':to===10?'0123456789':'0123456789ABCDEF'; Buf.max = to===2?8:to===10?3:2; Buf.clear(); refreshKeys();
-  }
-  function fire(){
-    const v=Buf.v; if(!v) return; Buf.clear();
-    const q=S.q, ok=parseInt(v,q.to)===q.v;
-    if(ok){ S.combo++; S.n++; setCombo(S.combo); S.tl=Math.min(90,S.tl+2); addScore(10+S.combo*3,S.x+60,S.y); newQ(); }
-    else { ErrLog.add(5,fmt(q.v,q.from)+' base '+q.from+' vers base '+q.to,v,fmt(q.v,q.to)); S.combo=0; setCombo(0); S.tl-=3; flash('bad'); floatTxt(W/2,H/2,`Non : ${fmt(q.v,q.to)}`,'bad'); newQ(); }
-  }
-  return {
-    start(){
-      setKeys('0123456789ABCDEF'.split('').map(c=>({label:c,k:c})).concat([{label:'⌫',k:'BACK',cls:'alt'},{label:'OK',k:'OK',cls:'ok'}]),'Tape la conversion, puis OK');
-      tb=mk('div','timebar'); tb.style.top='6px'; bar=mk('span','',null,tb);
-      clock=mk('div','turbo-clock');
-      qEl=mk('div','l3-q turbo');
-      newQ();
-    },
-    update(dt){
-      S.t+=dt; S.tl-=dt;
-      bar.style.transform=`scaleX(${clamp(S.tl/60,0,1)})`; tb.classList.toggle('low',S.tl<10);
-      clock.textContent=Math.max(0,Math.ceil(S.tl))+' s';
-      const qw=qEl.offsetWidth, qh=qEl.offsetHeight, sp=1+S.combo*.08;
-      S.x+=S.vx*dt*sp; S.y+=S.vy*dt*sp;
-      if(S.x<0){S.x=0;S.vx=Math.abs(S.vx);} if(S.x>W-qw){S.x=Math.max(0,W-qw);S.vx=-Math.abs(S.vx);}
-      if(S.y<40){S.y=40;S.vy=Math.abs(S.vy);} if(S.y>H-qh-10){S.y=Math.max(40,H-qh-10);S.vy=-Math.abs(S.vy);}
-      qEl.style.transform=`translate(${S.x}px,${S.y}px) rotate(${Math.sin(S.t*2)*4}deg)`;
-      if(S.tl<=0){ G.run=false; setTimeout(gameOver,300); }
-    },
-    key(k){ if(k==='OK') fire(); else if(k==='BACK') Buf.back(); else if(k.length===1) Buf.push(k); }
-  };
-}
-
-/* =========================================================
-   BONUS — Détonateurs (façon Puyo Puyo)
+   JEU SECRET — Détonateurs (façon Puyo Puyo)
    Un détonateur 💣 porte un nombre. Colle-lui des blocs-poids (1, 2, 4, 8, 16) :
    il explose quand la somme des blocs qui le touchent (directement ou en chaîne)
    vaut exactement son nombre. Deux blocs égaux qui se touchent fusionnent :
@@ -1833,7 +1789,7 @@ function L6(){
   function misfire(r,c,b){
     // mèche à zéro : le détonateur saute tout seul et emporte ses voisins, mais tu perds une vie
     const cl=cluster(r,c);
-    ErrLog.add(6,(BIN?'0b'+b.n.toString(2):b.n)+' (detonateur)',cl.sum+' colle',b.n);
+    ErrLog.add(5,(BIN?'0b'+b.n.toString(2):b.n)+' (detonateur)',cl.sum+' colle',b.n);
     [[r,c],...cl.L].forEach(([rr,cc])=>{ const o=S.g[rr][cc]; S.g[rr][cc]=null; o.el.classList.add('pop'); setTimeout(()=>o.el.remove(),330); });
     loseLife(`Raté : ${BIN?'0b'+b.n.toString(2):b.n} n'était pas ${cl.sum}`);
     if(G.lives>0){ S.phase='resolve'; S.rt=.3; S.chain=0; }
@@ -1956,18 +1912,13 @@ const TUTOS = [
   ]
 ];
 TUTOS[5] = [
-  { t:'Bravo, tu as trouvé le <b>jeu secret</b> ! 60 secondes, toutes les bases mélangées : binaire, décimal et hexadécimal.', el:'.l3-q' },
-  { t:'Chaque bonne réponse ajoute <b>2 secondes</b> et fait monter le multiplicateur. Une erreur retire <b>3 secondes</b>.', el:'.turbo-clock' },
-  { t:'Regarde bien la base demandée sous le nombre, puis tape ta réponse et <b>OK</b>.', el:'#inputrow' }
-];
-TUTOS[6] = [
-  { t:'Un <b>détonateur</b> 💣 porte un nombre. Pour le faire exploser, colle-lui des <b>blocs</b> dont la somme fait <b>exactement</b> ce nombre.', el:'.pu.bomb' },
+  { t:'Bravo, tu as trouvé le <b>jeu secret</b> ! Un <b>détonateur</b> 💣 porte un nombre. Pour le faire exploser, colle-lui des <b>blocs</b> dont la somme fait <b>exactement</b> ce nombre.', el:'.pu.bomb' },
   { t:'Les blocs valent <b>1, 2, 4, 8 ou 16</b>, les poids du binaire. Exemple : 13 = 8 + 4 + 1, donc colle les blocs 8, 4 et 1. Un bloc compte s\'il touche le détonateur, ou s\'il touche un bloc qui le touche.' },
   { t:'Selon le mode, le détonateur est écrit en décimal et les blocs en binaire (<b>0b</b>100 = 4), ou l\'inverse. Lis bien les deux bases !' },
   { t:'Deux blocs <b>égaux</b> qui se touchent fusionnent : 1 + 1 = 2, 2 + 2 = 4… En binaire, c\'est la <b>retenue</b> : 0b1 + 0b1 = 0b10. La somme ne change pas.' },
   { t:'Sous le nombre, <b>Σ</b> montre la somme déjà collée. Trop de blocs ? Il affiche « trop ! ». La pastille rouge est la <b>mèche</b> : à zéro, le détonateur saute tout seul et tu perds une vie.' },
   { t:'◀ ▶ déplacent la pièce, ⟳ la tourne, ▼ la descend, <b>Lâcher</b> la fait tomber. Au doigt : touche à gauche ou à droite de la pièce, touche la pièce pour la tourner, glisse vers le bas pour la lâcher.', el:'#keys' },
-  { t:'Plusieurs explosions à la suite font une <b>chaîne</b> : les points sont multipliés. Si le puits déborde, la partie s\'arrête. C\'est un mode bonus : il ne compte pas dans la note.' }
+  { t:'Plusieurs explosions à la suite font une <b>chaîne</b> : les points sont multipliés. Si le puits déborde, la partie s\'arrête. Le jeu secret ne compte pas dans la note.' }
 ];
 TUTOS[0] = [
   { t:'Voici le nombre à écrire en <b>binaire sur 5 bits</b>. Le compteur indique combien de <b>billes</b> il reste à placer : il y en a juste assez.', el:'.l0-left' },
@@ -2056,7 +2007,6 @@ const LEVELS = [
   { name:'Les colonnes 16-8-4-2-1', desc:'Remplis les bons récipients pour écrire le nombre en binaire sur 5 bits. Deux modes : une boule par bit, ou une bille par unité.', make:L2 },
   { name:'Le tableau hexa', desc:'Binaire ↔ hexadécimal sur 4 ou 8 bits. Le tableau de conversion s\'enfuit, se salit et attaque.', make:L3 },
   { name:'Pixels et lumières', desc:'Révèle une image codée en hexa, convertis un de ses octets, puis colorie-la en mélangeant les lumières RVB.', make:L4 },
-  { name:'Turbo conversions', desc:'60 secondes, toutes les bases mélangées : binaire, décimal, hexadécimal. Chaque bonne réponse rajoute du temps.', make:L5 },
   { name:'Détonateurs', desc:'Façon Puyo Puyo : colle des blocs 1, 2, 4, 8, 16 contre un détonateur pour que leur somme fasse son nombre. Deux blocs égaux fusionnent : 1 + 1 = 10 !', make:L6 }
 ];
 function renderMenu(){
@@ -2065,7 +2015,6 @@ function renderMenu(){
   const seen=tutoSeen('learn');
   $('#levels').innerHTML=`<button class="lvcard learn${seen?'':' fresh'}" id="lw-open"><span class="n">0</span><span class="t">Comprendre le binaire</span><span class="d">Tutoriel de démarrage : des billes rangées en paquets de 10, puis de 5, puis de 2. Pourquoi les tas valent 1, 2, 4, 8, 16, et pourquoi l'électronique compte en binaire.</span><span class="b">${seen?'Tutoriel terminé ✓ · à revoir quand tu veux':'Commence par ici !'}</span></button>`+LEVELS.map((l,i)=>{
     const open=unlocked(i), sec=i===SECRET;
-    if(i===BONUS) return `<button class="lvcard bonus" data-i="${i}"><span class="n">💣</span><span class="t">Bonus · ${l.name}</span><span class="d">${l.desc}</span><span class="b">Toujours ouvert, hors note · record : ${best(i)}</span></button>`;
     if(sec){
       return `<button class="lvcard secret${open?'':' locked'}" data-i="${i}" ${open?'':'aria-disabled="true"'}><span class="n">${open?'★':'?'}</span><span class="t">${open?l.name:'Jeu secret'}</span><span class="d">${open?l.desc:'Gagne une étoile ★ dans chacun des '+NL+' niveaux pour le découvrir.'}</span><span class="b">${open?'Record : '+best(i):'Étoiles : '+ns+' / '+NL}</span></button>`;
     }
