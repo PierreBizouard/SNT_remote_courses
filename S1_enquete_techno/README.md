@@ -24,3 +24,7 @@ Chaque jeu se termine par « Ta découverte » : un choix + une phrase de l'él�
 ## ÉLÉA (Moodle)
 
 `techno-survivor-scorm.zip` : paquet SCORM 1.2 à déposer comme activité SCORM. Note sur 100 = part des 12 épreuves dont la découverte est notée (statut « terminé » à 12/12). Chaque découverte est envoyée comme deux interactions (réponse au QCM, correcte ou non, et phrase de l'élève) : elles se lisent dans le rapport des interactions de l'activité. La progression est gardée sur ÉLÉA.
+
+## Ordre et déblocage (15/10/2026)
+
+Ordre : inventions, CyberSpeedScribe, fil d'actu, dopamine, usine à tâches, boîte noire, puis zombies, pieuvre, bulle, likes, réseau, sélecteur. Les épreuves s'ouvrent deux par deux : une paire s'ouvre quand les deux épreuves précédentes ont leur découverte notée (les autres sont floutées). Code prof `SNT-PROF` (page « Mes découvertes ») : tout ouvert. La pieuvre a 6 réseaux, dont « Deux sous-réseaux » avec des zones colorées.

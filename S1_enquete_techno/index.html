@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>S1 · Techno Survivor</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v13 · 15/10/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v14 · 15/10/2026</div>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -42,6 +42,9 @@ b{color:var(--amber)}
 .gcard .d{color:var(--muted);font-size:14px}
 .gcard .s{font:700 13px var(--f-mono);color:var(--good)}
 .gcard.done{border-color:var(--good)}
+.gcard.locked{cursor:not-allowed;opacity:.75}
+.gcard.locked .e,.gcard.locked .t,.gcard.locked .d{filter:blur(5px);user-select:none}
+.gcard.locked .s.lk{color:var(--amber)}
 /* scène commune */
 .stage{position:relative;height:min(62vh,540px);min-height:380px;border-radius:12px;overflow:hidden;border:1px solid var(--line);touch-action:manipulation;-webkit-user-select:none;user-select:none}
 body.paused .stage{filter:blur(14px)}
@@ -242,6 +245,9 @@ body.paused .stage{filter:blur(14px)}
 .onode.tu .em{border-color:var(--good)}
 .onode.qg .em{border-color:var(--cyan)}
 .onode .nm{font-size:11px}
+.ozone{position:absolute;border:2px dashed var(--zc);border-radius:18px;background:color-mix(in srgb,var(--zc) 9%,transparent);pointer-events:none;z-index:0}
+.ozone.lb span{top:auto;bottom:-10px;right:10px;left:auto}
+.ozone span{position:absolute;left:10px;top:-10px;padding:0 6px;border-radius:6px;background:var(--bg);color:var(--zc);font:700 11px var(--f-mono);white-space:nowrap}
 .onode.hs .em{background:#5a1010;border-color:var(--bad);box-shadow:0 0 14px #ff5a1a}
 .onode.hs .em::after{content:'🔥';position:absolute;font-size:22px;transform:translate(14px,-16px)}
 .oarr{position:absolute;transform:translate(-50%,-50%);z-index:25;width:40px;height:40px;border-radius:50%;border:2px solid var(--amber);background:#2a2010ee;color:var(--amber);font-size:22px;display:grid;place-items:center;padding:0;animation:pulse .6s infinite alternate;cursor:pointer}
@@ -424,7 +430,7 @@ function save(){
   try{
     if(SCORM){
       // la question n'est pas gardée (elle est dans le jeu) : suspend_data reste petit
-      const slim={ pts:D.pts, best:D.best, disc:{} };
+      const slim={ pts:D.pts, best:D.best, prof:D.prof, disc:{} };
       for(const k in D.disc){ const d=D.disc[k]; slim.disc[k]={ pick:String(d.pick||'').slice(0,120), got:d.got, ok:d.ok, txt:String(d.txt||'').slice(0,300) }; }
       SCORM.LMSSetValue('cmi.suspend_data',JSON.stringify(slim));
       const n=GAMES.filter(g=>D.disc[g[0]]).length, pct=Math.round(n*100/GAMES.length);
@@ -502,7 +508,8 @@ const ZQ=[
   ['Homo sapiens existe depuis environ…','300 000 ans',['5 000 ans','2 000 ans','30 millions d\'années']],
   ['Le numérique, c\'est d\'abord…','Transformer l\'information en nombres',['Tout ce qui est virtuel','Internet','Les jeux vidéo']],
   ['Que montre l\'iceberg de la technologie ?','La partie cachée est bien plus grande que la partie visible',['Les ordinateurs ont froid','Le téléphone suffit à tout faire']],
-  ['Pourquoi copier un fichier ne coûte presque rien ?','Ce sont des nombres recopiés à l\'identique',['Les fichiers sont petits','Internet est gratuit']],
+  ['Pourquoi copier un fichier ne coûte presque rien ?','Ce ne sont que des nombres (0 et 1) : la copie est identique',['Les fichiers sont petits','Internet est gratuit','Les électrons sont gratuits']],
+  ['Quand un fichier voyage d\'un ordinateur à l\'autre, qu\'est-ce qui circule ?','Des 0 et des 1, en paquets de signaux électriques',['Le fichier en papier','Une photo du fichier','Rien : il est déjà partout']],
   ['Juillet 2024, la mise à jour ratée de CrowdStrike…','A bloqué des millions d\'ordinateurs',['A effacé Internet','A supprimé tous les SMS']],
   ['Internet et le Web…','Le Web est un service qui utilise Internet',['C\'est exactement la même chose','Internet est un site du Web']],
   ['En 1703, Leibniz décrit…','Le système binaire',['L\'imprimerie','Le téléphone','La radio']],
@@ -514,7 +521,8 @@ const ZQ=[
   ['Un CD est un support…','Numérique',['Analogique','Biologique']],
   ['ChatGPT a été rendu public en…','2022',['2007','1999','2012']],
   ['Le premier ordinateur électronique (ENIAC) date de…','1945',['1890','1981','2000']],
-  ['Internet (ARPANET) est né en…','1969',['1989','2001','1945']],
+  ['ARPANET, l\'ancêtre d\'Internet, est né en…','1969',['1989','2001','1945']],
+  ['Comment s\'appelait l\'ancêtre d\'Internet, né en 1969 ?','ARPANET',['Le Minitel','Le Web','Le Wi-Fi']],
   ['Le Web a été inventé en…','1989',['1969','2007','1950']],
   ['Notre relation à la technologie est…','Ambivalente : on aime et on rejette',['Toujours positive','Toujours négative']],
   ['Pourquoi les inventions s\'accélèrent ?','L\'information circule de plus en plus vite',['On est plus intelligents qu\'avant','Il n\'y a plus de règles']]
@@ -603,7 +611,7 @@ function gZombie(){
 const FAM=[
   { e:'✍️', t:'Écrire et diffuser', c:'#ffb547', items:[['✍️','Écriture',-3300],['📖','Imprimerie',1450],['⌨️','Machine à écrire',1868],['🕸️','Web',1989],['📱','Smartphone',2007]] },
   { e:'🔥', t:'Énergie et transport', c:'#ff7a5a', items:[['🔥','Maîtrise du feu',-400000],['🛞','Roue',-3500],['🚂','Machine à vapeur',1769],['🚆','Train à vapeur',1804],['🚗','Voiture à moteur à explosion',1886]] },
-  { e:'📡', t:'Communiquer à distance', c:'#5ce1e6', items:[['🗼','Télégraphe à bras (Chappe)',1794],['⚡','Télégraphe électrique',1837],['☎️','Téléphone',1876],['📻','Radio',1895],['🌐','Internet',1969]] },
+  { e:'📡', t:'Communiquer à distance', c:'#5ce1e6', items:[['🗼','Télégraphe à bras (Chappe)',1794],['⚡','Télégraphe électrique',1837],['☎️','Téléphone',1876],['📻','Radio',1895],['🌐','ARPANET (ancêtre d\'Internet)',1969]] },
   { e:'🧮', t:'Calculer', c:'#b69cff', items:[['🧮','Machine à calculer de Pascal',1642],['0️⃣','Calcul en binaire',1703],['🧵','Cartes perforées (métier Jacquard)',1801],['🖥️','Premier ordinateur',1945],['🔲','Microprocesseur',1971]] },
   { e:'📷', t:'Images', c:'#ff6aa8', items:[['🦬','Peintures dans les grottes',-36000],['📷','Photographie',1826],['🎞️','Cinéma',1895],['📺','Télévision',1926],['📸','Appareil photo numérique',1975]] },
   { e:'🎵', t:'Sons', c:'#ff9ad0', items:[['🪈','Flûte en os',-40000],['🎙️','Microphone',1878],['💿','Disque vinyle',1948],['📀','CD audio',1982],['🎧','Musique en MP3',1993]] },
@@ -667,7 +675,7 @@ function gInv(){
   }
   // le smartphone (2007) réunit des inventions de plusieurs familles : à retrouver dans la frise
   function phone(){
-    const NEED={ 'Batterie lithium-ion':'🔋 la batterie', 'Appareil photo numérique':'📸 l\'appareil photo', 'Microphone':'🎙️ le micro', 'Microprocesseur':'🔲 le microprocesseur', 'Internet':'🌐 Internet' };
+    const NEED={ 'Batterie lithium-ion':'🔋 la batterie', 'Appareil photo numérique':'📸 l\'appareil photo', 'Microphone':'🎙️ le micro', 'Microprocesseur':'🔲 le microprocesseur', 'ARPANET (ancêtre d\'Internet)':'🌐 Internet (né ARPANET)' };
     let found=0;
     qb.innerHTML='📱 Le smartphone (2007) réunit <b>5 inventions</b> de tes familles. Clique-les dans ta frise !';
     const ph=mk('div','ivphone',`<div class="scr">📱</div><div class="parts">${Object.values(NEED).map(t=>`<span class="pp">?</span>`).join('')}</div>`,grid);
@@ -853,10 +861,14 @@ const OLV=[
     nodes:{ Q:['qg',.07,.64], A:['sw',.24,.5], B:['sw',.5,.38], C:['sw',.5,.78], D:['sw',.76,.56],
       t1:['tu',.3,.8], t2:['tu',.5,.58], t3:['tu',.88,.36], t4:['tu',.88,.84], t5:['tu',.72,.95] },
     links:'Q-A A-B A-C B-C B-D C-D A-t1 B-t2 D-t3 D-t4 C-t5', net:'10.0.0' },
+  { t:'Deux sous-réseaux', e:'🏘️', hp:7, intro:'Ton réseau est coupé en deux <b>sous-réseaux</b>, chacun de sa couleur. Dans un sous-réseau, toutes les adresses commencent pareil : <b style="color:#5ce1e6">192.168.1</b>.x à gauche, <b style="color:#ff6aa8">172.16.5</b>.x à droite (c\'est la partie <b>réseau</b>, /24). Pour passer d\'un sous-réseau à l\'autre, le paquet doit traverser les <b>routeurs</b> 🗼. Regarde la couleur du début de l\'adresse du paquet !',
+    nodes:{ Q:['qg',.08,.5,null,'192.168.1'], SA:['sw',.24,.5,null,'192.168.1'], tA1:['tu',.1,.86,null,'192.168.1'], tA2:['tu',.3,.86,null,'192.168.1'], tA3:['tu',.3,.2,null,'192.168.1'],
+      RA:['rt',.43,.5,'192.168.1'], RB:['rt',.6,.5,'172.16.5'], SB:['sw',.76,.5,null,'172.16.5'], tB1:['tu',.9,.2,null,'172.16.5'], tB2:['tu',.92,.55,null,'172.16.5'], tB3:['tu',.74,.88,null,'172.16.5'] },
+    links:'Q-SA SA-tA1 SA-tA2 SA-tA3 SA-RA RA-RB RB-SB SB-tB1 SB-tB2 SB-tB3', subnets:1 },
   { t:'Sous-réseaux et routeurs', e:'🗼', hp:8, intro:'Trois <b>sous-réseaux</b> reliés par des <b>routeurs</b>. Une adresse IPv4 a 4 nombres : avec <b>/24</b>, les 3 premiers désignent le réseau (192.168.2), le dernier la machine (.14). Le routeur lit le réseau, le switch trouve la machine.',
-    nodes:{ Q:['qg',.08,.5], SA:['sw',.2,.68], tA:['tu',.08,.88], RA:['rt',.36,.6,'192.168.1'],
-      RB:['rt',.56,.36,'192.168.2'], SB:['sw',.74,.32], tB1:['tu',.9,.22], tB2:['tu',.9,.46],
-      RC:['rt',.58,.86,'10.8.0'], SC:['sw',.76,.8], tC1:['tu',.92,.7], tC2:['tu',.9,.95] },
+    nodes:{ Q:['qg',.08,.5,null,'192.168.1'], SA:['sw',.2,.68,null,'192.168.1'], tA:['tu',.08,.88,null,'192.168.1'], RA:['rt',.36,.6,'192.168.1'],
+      RB:['rt',.56,.36,'192.168.2'], SB:['sw',.74,.32,null,'192.168.2'], tB1:['tu',.9,.22,null,'192.168.2'], tB2:['tu',.9,.46,null,'192.168.2'],
+      RC:['rt',.58,.86,'10.8.0'], SC:['sw',.76,.8,null,'10.8.0'], tC1:['tu',.92,.7,null,'10.8.0'], tC2:['tu',.9,.95,null,'10.8.0'] },
     links:'Q-SA SA-tA SA-RA RA-RB RA-RC RB-RC RB-SB SB-tB1 SB-tB2 RC-SC SC-tC1 SC-tC2', subnets:1 }
 ];
 function gOcto(){
@@ -875,11 +887,15 @@ function playOcto(L,carry){
   // ---- construction du réseau et des adresses IPv4 ----
   const N={}, used=new Set();
   const host=net=>{ let h; do{ h=randi(10,250); }while(used.has(net+'.'+h)); used.add(net+'.'+h); return h; };
-  Object.entries(LV.nodes).forEach(([id,[t,x,y,net]])=>{ N[id]={id,t,x,y,nb:[]}; if(net) N[id].net=net; });
+  Object.entries(LV.nodes).forEach(([id,[t,x,y,net,sub]])=>{ N[id]={id,t,x,y,nb:[]}; if(net) N[id].net=net; N[id].sub=sub||net||LV.net; });
   const linksA=LV.links.split(' ').map(s=>{ const [a,b]=s.split('-'); const l={a,b,cut:0,line:null}; N[a].nb.push(b); N[b].nb.push(a); return l; });
   const linkOf=(a,b)=>linksA.find(l=>(l.a===a&&l.b===b)||(l.a===b&&l.b===a));
   // dans chaque sous-réseau, toutes les machines partagent les 3 premiers nombres
-  const netOf=id=>{ if(!LV.subnets) return LV.net; if(id==='Q'||id==='SA'||id==='tA') return '192.168.1'; if(/B/.test(id)) return '192.168.2'; return '10.8.0'; };
+  const netOf=id=>N[id].sub;
+  // une couleur par sous-réseau : la partie « réseau » de chaque adresse est écrite dans cette couleur
+  const SUBS=[...new Set(Object.values(N).map(n=>n.sub))], SCOL=['#5ce1e6','#ff6aa8','#ffb547','#6ee7a0'];
+  const colOf=net=>LV.subnets?SCOL[SUBS.indexOf(net)%SCOL.length]:'var(--fg)';
+  const ipHtml=ip=>{ const k=ip.lastIndexOf('.'); return LV.subnets?`<b style="color:${colOf(ip.slice(0,k))}">${ip.slice(0,k)}</b>${ip.slice(k)}`:ip; };
   Object.values(N).forEach(n=>{
     if(n.t==='tu'||n.t==='qg') n.ip=netOf(n.id)+'.'+host(netOf(n.id));
     if(n.t==='rt') n.ip=n.net+'.1';
@@ -887,8 +903,11 @@ function playOcto(L,carry){
   const em={qg:'💻',sw:'🔀',rt:'🗼',tu:'🚀'}, nm={qg:'QG',sw:'Switch',rt:'Routeur',tu:'Tourelle'};
   linksA.forEach(l=>{ l.line=document.createElementNS('http://www.w3.org/2000/svg','line'); l.line.setAttribute('class','link'); svg.appendChild(l.line); });
   Object.values(N).forEach(n=>{
-    n.el=mk('div','node onode '+n.t,`<span class="em">${em[n.t]}</span><span class="nm">${n.t==='rt'?'Routeur<br>'+n.net+'.0/24':n.t==='tu'||n.t==='qg'?(n.t==='qg'?'QG ':'')+n.ip:nm[n.t]}</span>`,st);
+    n.el=mk('div','node onode '+n.t,`<span class="em">${em[n.t]}</span><span class="nm">${n.t==='rt'?'Routeur<br>'+ipHtml(n.net+'.0')+'/24':n.t==='tu'||n.t==='qg'?(n.t==='qg'?'QG ':'')+ipHtml(n.ip):nm[n.t]}</span>`,st);
   });
+  // zones colorées des sous-réseaux (derrière les machines)
+  const zones=LV.subnets?SUBS.map(net=>({ net, el:mk('div','ozone',`<span>Sous-réseau ${net}.0/24</span>`,st) })):[];
+  zones.forEach(z=>{ z.el.style.setProperty('--zc',colOf(z.net)); });
   const octo=mk('div','octo','🐙<span class="eyes"><i></i><i></i></span>',st);
   const S={ W:0,H:0, pk:[], hp:LV.hp, shield:carry.shield, ok:0, lost:0, cutLost:0, spawn:1, laserT:6, rage:0, ox:.5, ph:0, over:false, firing:0, arrows:[], t:0 };
   const g={ over:false };
@@ -896,6 +915,10 @@ function playOcto(L,carry){
   function layout(){
     S.W=st.clientWidth; S.H=st.clientHeight;
     Object.values(N).forEach(n=>place(n.el,n.x*S.W,n.y*S.H));
+    zones.forEach(z=>{ const M=Object.values(N).filter(n=>n.sub===z.net), xs=M.map(n=>n.x*S.W), ys=M.map(n=>n.y*S.H), pad=40;
+      const x0=Math.max(2,Math.min(...xs)-pad), y0=Math.max(2,Math.min(...ys)-pad-10), x1=Math.min(S.W-2,Math.max(...xs)+pad), y1=Math.min(S.H-2,Math.max(...ys)+pad+6);
+      Object.assign(z.el.style,{ left:x0+'px', top:y0+'px', width:(x1-x0)+'px', height:(y1-y0)+'px' });
+      z.el.querySelector('span').textContent=(x1-x0>230?'Sous-réseau ':'')+z.net+'.0/24'; z.el.classList.toggle('lb',zones.indexOf(z)%2===1); });
     linksA.forEach(l=>{ const a=P(l.a), b=P(l.b); l.line.setAttribute('x1',a.x); l.line.setAttribute('y1',a.y); l.line.setAttribute('x2',b.x); l.line.setAttribute('y2',b.y); });
     showArrows();
   }
@@ -904,10 +927,10 @@ function playOcto(L,carry){
   // ---- paquets ----
   function spawn(){
     const T=Object.values(N).filter(n=>n.t==='tu'&&!n.hs);
-    let pool=T; if(LV.subnets){ const far=T.filter(n=>netOf(n.id)!=='192.168.1'); if(far.length&&Math.random()<.8) pool=far; }
+    let pool=T; if(LV.subnets){ const far=T.filter(n=>netOf(n.id)!==N.Q.sub); if(far.length&&Math.random()<.7) pool=far; }
     if(!pool.length) return;
     const d=pick(pool);
-    const el=mk('div','pk',`📦 ${d.ip}`,st);
+    const el=mk('div','pk',`📦 ${ipHtml(d.ip)}`,st);
     const p={ el, dest:d.ip, at:'Q', prev:null, to:null, t:0, x:P('Q').x, y:P('Q').y, wait:0, born:S.t };
     S.pk.push(p); route(p);
   }
@@ -977,13 +1000,14 @@ function playOcto(L,carry){
   function finish(won,stats){
     S.over=g.over=true; stats=stats||carry.stats.concat([{t:LV.t,e:LV.e,ok:S.ok,lost:S.lost,cut:S.cutLost,time:Math.round(S.t)}]);
     D.best.octo=Math.max(D.best.octo||0,L+(won?1:0)); save();
-    endCard(won?'La pieuvre est vaincue !':'Ton réseau est tombé…', won?'Tes cinq réseaux ont tenu bon.':`La pieuvre a eu ton bouclier au niveau ${L+1} (${LV.t}).`, gOcto, ()=>{
+    endCard(won?'La pieuvre est vaincue !':'Ton réseau est tombé…', won?`Tes ${OLV.length} réseaux ont tenu bon.`:`La pieuvre a eu ton bouclier au niveau ${L+1} (${LV.t}).`, gOcto, ()=>{
       mk('div','card',`<h3 style="margin:0 0 6px">Tes réseaux face à la pieuvre</h3>
         <div class="otab">${stats.map(s=>`<div><b>${s.e} ${s.t}</b><span>${s.ok} missiles · ${s.lost} perdus · ${s.cut} grillés · ${s.time} s</span></div>`).join('')}</div>
         <ul><li><b>Arbre</b> : un seul chemin vers chaque machine. Un câble coupé isole toute une branche.</li>
         <li><b>Étoile</b> : simple, un seul choix… mais tout dépend du centre.</li>
         <li><b>Anneau</b> : deux sens possibles ; une coupure, et il faut faire le tour par l'autre côté.</li>
         <li><b>Maillé</b> : plusieurs chemins, le réseau résiste aux coupures. <b>Internet est maillé</b> : c'est pour ça qu'il survit aux pannes.</li>
+        <li><b>Sous-réseaux</b> : un grand réseau est découpé en petits réseaux (chacun sa couleur ici). Toutes les machines d'un sous-réseau ont le même début d'adresse ; pour en sortir, on passe par un <b>routeur</b>.</li>
         <li><b>Adresse IPv4</b> : 4 nombres de 0 à 255 (ex. 192.168.2.14). Avec /24, les 3 premiers désignent le <b>réseau</b>, le dernier la <b>machine</b>. Les routeurs ne lisent que le réseau, le switch trouve la machine.</li></ul>`,main);
       discovery('octo','Comment un paquet trouve-t-il la bonne machine dans un grand réseau ?',[
         'Il passe par toutes les machines une par une jusqu\'à la trouver',
@@ -2511,25 +2535,29 @@ function usineEnd(hist){
 
 /* ---------- menu ---------- */
 const GAMES=[
-  ['zombie','🧟','Zombies QCM','Un zombie arrive avec quatre réponses autour de lui. Tire sur la bonne : un tir raté le fait accélérer !',gZombie],
   ['inv','🕰️','Les inventions','Remets chaque famille d\'inventions dans l\'ordre (écrire, électricité, images, sons…), assemble un smartphone, puis construis la grande frise.',gInv],
   ['scribe','✍️','CyberSpeedScribe','Recopie des symboles, en tracé puis en pixels, à toute vitesse… puis recopie tes propres copies. Lesquels s\'abîment ?',gScribe],
-  ['octo','🐙','La pieuvre laser','Une pieuvre géante attaque ton réseau. Guide les paquets jusqu\'aux tourelles (adresses IPv4) pour lancer des missiles : arbre, étoile, anneau, maillé, sous-réseaux.',gOcto],
-  ['box','⬛','La boîte noire','Des nombres entrent, d\'autres sortent. Trouve la règle cachée et prouve-la.',()=>gBox(0)],
   ['feed','📱','Le fil d\'actu','Republier ou pas ? Regarde les émotions se propager et le monde changer.',gFeed],
+  ['dopa','🧠','La boucle de dopamine','Fais défiler un fil et regarde ta dopamine en direct : pourquoi est-ce si dur d\'arrêter ?',gDopa],
+  ['usine','🏭','L\'usine à tâches','Découpe une mission en boîtes, choisis humain, machine ou IA pour chacune, invente des machines… et lance 20 commandes.',gUsine],
+  ['box','⬛','La boîte noire','Des nombres entrent, d\'autres sortent. Trouve la règle cachée et prouve-la.',()=>gBox(0)],
+  ['zombie','🧟','Zombies QCM','Un zombie arrive avec quatre réponses autour de lui. Tire sur la bonne : un tir raté le fait accélérer !',gZombie],
+  ['octo','🐙','La pieuvre laser','Une pieuvre géante attaque ton réseau. Guide les paquets jusqu\'aux tourelles (adresses IPv4) pour lancer des missiles : arbre, étoile, anneau, maillé, sous-réseaux.',gOcto],
   ['bubble','🫧','La bulle','Like ce qui te plaît… et découvre tout ce que l\'algorithme ne t\'a jamais montré.',gBubble],
   ['likes','❤️','Les likes','Publie, gagne des likes, garde ta flamme… et découvre ce qui fait vraiment marcher un post.',gLikes],
   ['reseau','🌐','Le réseau','Rappeuse, acteur, streameuse, médecin, prof… : deux semaines d\'actu étudiante, 100 posts, des émotions qui se propagent. Gagne des abonnés… puis retrouve la réalité.',gReseau],
-  ['dopa','🧠','La boucle de dopamine','Fais défiler un fil et regarde ta dopamine en direct : pourquoi est-ce si dur d\'arrêter ?',gDopa],
-  ['sel','🎚️','Le sélecteur','Like, règle l\'algorithme et regarde le flux : boucle qui s\'emballe ou contre-réaction ?',gSel],
-  ['usine','🏭','L\'usine à tâches','Découpe une mission en boîtes, choisis humain, machine ou IA pour chacune, invente des machines… et lance 20 commandes.',gUsine]
+  ['sel','🎚️','Le sélecteur','Like, règle l\'algorithme et regarde le flux : boucle qui s\'emballe ou contre-réaction ?',gSel]
 ];
+// les épreuves s'ouvrent deux par deux : une paire s'ouvre quand les deux épreuves d'avant sont terminées
+// (découverte notée) ; les points varient trop d'une épreuve à l'autre pour servir de seuil. Code prof : tout ouvert.
+const prevPair=i=>{ const p=Math.floor(i/2); return p?[GAMES[2*p-2],GAMES[2*p-1]]:[]; };
+const isOpen=i=>D.prof||prevPair(i).every(g=>D.disc[g[0]]);
 function menu(){
   stopGame();
   main.innerHTML=`<h2>Techno Survivor</h2><p class="lead">Douze épreuves pour découvrir comment marche la technologie. À la fin de chacune, note ta découverte : on la reprendra ensemble en cours.</p>
-    <div class="games">${GAMES.map(([id,e,t,d],i)=>`<button class="gcard${D.disc[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.disc[id]?'✓ découverte notée':''}${D.best[id]?` · record ${D.best[id].toLocaleString('fr-FR')}`:''}</span></button>`).join('')}</div>
+    <div class="games">${GAMES.map(([id,e,t,d],i)=>!isOpen(i)?`<button class="gcard locked" data-i="${i}" aria-disabled="true"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s lk">🔒 Termine d'abord ${prevPair(i).filter(g=>!D.disc[g[0]]).map(g=>g[1]+' '+g[2]).join(' et ')}</span></button>`:`<button class="gcard${D.disc[id]?' done':''}" data-i="${i}"><span class="e">${e}</span><span class="t">${i+1} · ${t}</span><span class="d">${d}</span><span class="s">${D.disc[id]?'✓ découverte notée':''}${D.best[id]?` · record ${D.best[id].toLocaleString('fr-FR')}`:''}</span></button>`).join('')}</div>
     <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button></div>${SCORM?'<p class="lead" style="font-size:13px">✅ Ta progression et tes découvertes sont enregistrées sur ÉLÉA.</p>':''}`;
-  main.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>GAMES[+b.dataset.i][4]());
+  main.querySelectorAll('.gcard').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; if(isOpen(i)) GAMES[i][4](); else { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } });
   $('#notes').onclick=notes; scrollTo(0,0);
 }
 function notes(){
@@ -2537,7 +2565,9 @@ function notes(){
   const L=GAMES.map(([id,e,t])=>({e,t,d:D.disc[id]}));
   main.innerHTML=`<h2>📒 Mes découvertes</h2><p class="lead">Recopie-les dans ton cahier, ou copie-les pour ton professeur.</p>
     <ol class="notes">${L.map(({e,t,d})=>`<li><b>${e} ${t}</b><br>${d?`${d.q?`<span class="q">${esc(d.q)}</span><br>`:''}${esc(d.pick||'(pas de réponse)')}${d.txt?`<br>« ${esc(d.txt)} »`:''}`:'<span class="q">Pas encore fait.</span>'}</li>`).join('')}</ol>
-    <p>Total : <b>${D.pts} points</b></p><div class="row"><button class="btn ok" id="cpy">Copier le texte</button><button class="btn" id="back">Menu</button><button class="btn" id="rs">Tout effacer</button></div><p class="fb" id="nf"></p>`;
+    <p>Total : <b>${D.pts} points</b></p><div class="row"><button class="btn ok" id="cpy">Copier le texte</button><button class="btn" id="back">Menu</button><button class="btn" id="rs">Tout effacer</button></div><p class="fb" id="nf"></p>
+    <div class="row" style="margin-top:10px"><input id="pc" placeholder="Code prof" style="padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--deep);color:var(--fg);width:150px"><button class="btn" id="pcb">Tout ouvrir</button></div>`;
+  $('#pcb').onclick=()=>{ if($('#pc').value.trim().toUpperCase()==='SNT-PROF'){ D.prof=true; save(); $('#nf').className='fb good'; $('#nf').textContent='Toutes les épreuves sont ouvertes.'; } else { $('#nf').className='fb bad'; $('#nf').textContent='Code incorrect.'; } };
   const txt='Mes découvertes (SNT S1)\n\n'+L.map(({e,t,d})=>`${e} ${t}\n${d?`${d.q?d.q+'\n':''}→ ${d.pick||'-'}${d.txt?`\n« ${d.txt} »`:''}`:'(pas fait)'}`).join('\n\n');
   $('#cpy').onclick=async()=>{ try{ await navigator.clipboard.writeText(txt); $('#nf').className='fb good'; $('#nf').textContent='Copié !'; }catch(e){ $('#nf').className='fb bad'; $('#nf').textContent='Copie impossible ici : sélectionne le texte à la main.'; } };
   $('#back').onclick=menu;
