@@ -11,7 +11,7 @@ Une seule page HTML autonome, jouable sur ordinateur, tablette et téléphone.
 
 - **Comprendre le binaire** (tutoriel) : billes rangées en paquets de 10, puis tas qui doublent 1, 2, 4, 8, 16, cartes CS Unplugged, notation `0b`, électronique, petit défi.
 - **1 · Les billes 16-8-4-2-1**
-- **2 · Attaque binaire** (modes Attaque et Sauvetage avec escalier jusqu'au fromage : facile ; intermédiaire, l'eau monte ; difficile, l'eau monte et le fromage est de plus en plus haut)
+- **2 · Attaque binaire** (modes Pression : 3 vies, ça accélère ; Récompense : chaque bonne réponse est une brique de l'escalier vers le fromage, de passerelle en passerelle toujours plus haut ; Pression + Récompense : les passerelles, et l'eau monte). Aide en direct : les poids des bits à 1 s'allument et la somme s'affiche
 - **3 · Les colonnes** (modes boules et unités)
 - **4 · Le tableau hexa** (+ QCM)
 - **5 · Pixels et lumières**

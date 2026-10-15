@@ -119,10 +119,10 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .deadline{position:absolute;left:0;right:0;bottom:50px;height:2px;background:repeating-linear-gradient(90deg,var(--bad) 0 10px,transparent 10px 18px);opacity:.7}
 .weights{position:absolute;left:0;right:0;bottom:4px;display:flex;justify-content:center;gap:4px;font:500 12px var(--f-mono);color:var(--muted);pointer-events:none}
 .weights span{display:flex;flex-direction:column;align-items:center;min-width:32px;padding:1px 0;border:2px solid transparent;border-radius:12px}
-.weights span small{display:none} /* plus d'aide en direct : seuls les poids restent affichés */
 .weights span.on{border-color:var(--amber);color:var(--amber)}
 .weights span.on small{color:var(--amber)}
-.aide{position:absolute;left:0;right:0;bottom:54px;text-align:center;font:700 14px var(--f-mono);color:var(--amber);pointer-events:none;z-index:1}
+.aide{position:absolute;left:0;right:0;bottom:54px;text-align:center;font:700 14px var(--f-mono);color:var(--amber);pointer-events:none;z-index:4;text-shadow:0 1px 3px #000}
+.weights{z-index:4}
 .enemy.boss{padding:8px 16px;border-color:var(--bad);border-width:3px;z-index:11}
 .enemy.boss b{font-size:30px}
 .enemy.boss em{background:var(--bad);color:#fff}
@@ -138,6 +138,8 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 @keyframes belt{to{background-position:20px 0}}
 .cheese{position:absolute;font-size:28px;line-height:1;transform:translate(-50%,-100%);z-index:3;pointer-events:none}
 .critter.r{transform:translate(-50%,-100%) scaleX(-1)}
+.world{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.belt.l{border-radius:0 6px 6px 0;animation-direction:reverse}
 .bubble{position:absolute;transform:translate(-50%,-100%);z-index:4;pointer-events:none;background:#fff;color:#1a1300;font:700 14px var(--f-body);padding:4px 10px;border-radius:12px;white-space:nowrap}
 .bubble.good{background:var(--good);color:#06210f}
 .critter{position:absolute;font-size:34px;line-height:1;transform:translate(-50%,-100%);z-index:3;pointer-events:none;transition:left .3s,top .3s}
@@ -629,8 +631,8 @@ function showOverlay(html){ $('#overcard').innerHTML=html; $('#over').hidden=fal
 function hideOverlay(){ $('#over').hidden=true; }
 // niveaux qui proposent deux façons de jouer (le record est commun)
 const MODES={
-  1:{ list:[['a','Attaque : 3 vies, ça accélère'],['s','Sauvetage facile : un escalier jusqu\'au fromage, sans perdre de vie'],['m','Sauvetage intermédiaire : en plus, l\'eau monte'],['h','Sauvetage difficile : l\'eau monte et le fromage est de plus en plus haut']],
-      note:'En mode sauvetage, chaque bonne réponse donne une brique. Construis l\'escalier jusqu\'au fromage avant que le tapis roulant ne l\'emporte !', tag:{s:'[sauvetage facile] ',m:'[sauvetage intermédiaire] ',h:'[sauvetage difficile] '}, tuto:{s:'l1s',m:'l1m',h:'l1h'} },
+  1:{ list:[['a','Pression : 3 vies, ça accélère'],['s','Récompense : un escalier jusqu\'au fromage, de passerelle en passerelle, sans perdre de vie'],['m','Pression + Récompense : les passerelles, et l\'eau monte']],
+      note:'En mode récompense, chaque bonne réponse donne une brique. Construis l\'escalier jusqu\'au fromage avant que le tapis roulant ne l\'emporte, puis le suivant, plus haut !', tag:{s:'[récompense] ',m:'[pression + récompense] '}, tuto:{s:'l1s',m:'l1m'} },
   2:{ list:[['b','Boules : une boule = un bit'],['u','Unités : chaque bille vaut 1']],
       note:'En mode unités, le récipient 16 contient exactement 16 billes, le 8 en contient 8…', tag:{u:'[unités] '}, tuto:{u:'l2u'} },
   5:{ list:[['d','Étoile en décimal, blocs en binaire'],['b','Étoile en binaire, blocs en décimal'],['g','Grand puits : bloc 16 et étoiles jusqu\'à 31 dès le début, petites cases']],
@@ -882,8 +884,8 @@ function L0(){
 function L1(){
   const S={ en:[], bo:[], spawn:0.4, bonus:rand(6,9), wave:1, kills:0, freeze:0, combo:0, rush:1, since:0, boss:null, launch:4 };
   // mode sauvetage : pas de vies, pas de boss ; chaque bonne réponse pose une brique de l'escalier
-  const R = 's m h'.includes(G.mode||'x'), WATER = G.mode==='m'||G.mode==='h', CLIMB = G.mode==='h';
-  const TB = G.mode==='h' ? 5 : 6, MAXN = 7;   // secondes par brique avant que l'eau rattrape l'animal ; hauteur max en mode difficile
+  const R = G.mode==='s'||G.mode==='m', WATER = G.mode==='m';
+  const TB = 6, SEGN=[2,2,3,3,3,4,4,4];   // secondes par brique avant que l'eau rattrape la souris ; marches de chaque passerelle
   const ANIMALS=[['🐭','la souris',3],['🦉','la chouette',4],['🦔','le hérisson',5]];
   const BOSS_EVERY=20;
   function setRush(v){ S.rush=clamp(v,1,3); const e=stage.querySelector('.rush'); if(e){ e.textContent = S.rush>1.05 ? 'Vitesse ×'+S.rush.toFixed(1) : ''; e.classList.toggle('hot',S.rush>=2); } }
@@ -927,84 +929,95 @@ function L1(){
   }
   const shielded = o => o.boss && S.en.some(e=>e.sat===o);
   function dive(o){ o.sat=null; o.x0=o.tx=o.x; o.amp=0; o.vy=70+S.wave*6; o.el.classList.add('dive'); }
-  // l'escalier part du sol (l'animal est en bas à gauche) et monte jusqu'au tapis roulant où le fromage s'enfuit
-  // keep : mode difficile, on garde l'escalier déjà construit et on ajoute une marche plus haute
-  function stairs(keep){
-    const A=CLIMB?ANIMALS[0]:ANIMALS[S.ri], N=CLIMB?S.lvl:A[2], floor=H-52, sx=52;
-    const bw=Math.min(46,(W-sx-110)/((CLIMB?MAXN:N)+1)), bh=Math.min(28,(H-240)/((CLIMB?MAXN:N)+1));
-    stage.querySelectorAll('.slot,.belt,.cheese,.stairinfo,.bubble'+(keep?'':',.brick,.critter')).forEach(e=>e.remove());
-    const old=keep?S.bricks:[];
+  // l'escalier part du sol (l'animal est en bas à gauche) et monte jusqu'au tapis roulant où le fromage s'enfuit.
+  // Mode « l'eau monte » : après chaque fromage, la souris repart de la passerelle où elle a mangé et construit
+  // l'escalier suivant, une fois vers la gauche, une fois vers la droite ; la vue remonte avec elle.
+  // Tout est dessiné dans S.world (coordonnées du monde) ; S.cam décale la vue vers le bas quand on monte.
+  const colX=k=>S.dir>0 ? S.geo.sx+k*S.geo.bw : W-S.geo.sx-(k+1)*S.geo.bw;
+  const startX=()=>S.dir>0 ? S.geo.sx/2+4 : W-S.geo.sx/2-4;
+  function stairs(cont){
+    const A=ANIMALS[0], N=SEGN[S.seg], sx=52, nmax=Math.max(...SEGN);
+    const bw=Math.min(46,(W-sx-110)/(nmax+1)), bh=Math.min(28,(H-240)/(nmax+1));
+    if(!S.world) S.world=mk('div','world');
+    if(!cont){ S.world.innerHTML=''; S.base=H-52; S.dir=1; S.cam=0; S.critter=null; }
+    else { S.world.querySelectorAll('.slot,.stairinfo,.bubble').forEach(e=>e.remove()); S.base=S.geo.ly; S.dir=-S.dir; }
     S.slots=[]; S.bricks=[]; S.done=false; S.missed=0; S.anim=null; S.bubT=0;
+    const base=S.base, lx=sx+N*bw, ly=base-N*bh;
+    S.geo={bw,bh,N,sx,lx,ly,base};
     for(let k=0;k<N;k++) for(let r=0;r<=k;r++){
-      const x=sx+k*bw, y=floor-(r+1)*bh; S.slots.push({x,y});
-      const g=mk('div','slot'); g.style.cssText=`left:${x}px;top:${y}px;width:${bw}px;height:${bh}px`;
+      const x=colX(k), y=base-(r+1)*bh; S.slots.push({x,y});
+      const g=mk('div','slot',null,S.world); g.style.cssText=`left:${x}px;top:${y}px;width:${bw}px;height:${bh}px`;
     }
-    old.forEach((b,i)=>{ const sl=S.slots[i]; b.style.cssText=`left:${sl.x}px;top:${sl.y}px;width:${bw}px;height:${bh}px`; S.bricks.push(b); });
-    const lx=sx+N*bw, ly=floor-N*bh;
-    const B=mk('div','belt'); B.style.cssText=`left:${lx}px;top:${ly}px;width:${W-lx}px`;
-    S.geo={bw,bh,floor,N,sx,lx,ly};
-    if(!keep){ S.critter=mk('div','critter r',A[0]); S.cpos={x:sx/2+4,y:floor}; place(S.critter,S.cpos.x,S.cpos.y); }
-    else climb();
-    S.bubble=mk('div','bubble'); S.bubble.hidden=true;
-    S.info=mk('div','stairinfo'); S.info.style.cssText=`left:${lx}px;top:${ly-78}px;width:${W-lx}px`;
-    // le fromage traverse le tapis en un temps lié au nombre de briques qui manquent (il accélère avec le jeu)
-    const need=S.slots.length-S.bricks.length;
+    const B=mk('div','belt'+(S.dir<0?' l':''),null,S.world); B.style.cssText=S.dir>0?`left:${lx}px;top:${ly}px;width:${W-lx}px`:`left:0;top:${ly}px;width:${W-lx}px`;
+    if(!S.critter){ S.critter=mk('div','critter r',A[0],S.world); }
+    S.critter.classList.toggle('r',S.dir>0);
+    climb();
+    S.bubble=mk('div','bubble',null,S.world); S.bubble.hidden=true;
+    S.info=mk('div','stairinfo',null,S.world); S.info.style.cssText=`left:${S.dir>0?lx:0}px;top:${ly-78}px;width:${W-lx}px`;
+    // le fromage traverse le tapis en un temps lié au nombre de briques (il accélère avec le jeu)
+    const need=S.slots.length;
     S.cheeseV=(W-lx)/Math.max(22,need*4.5);
-    // l'eau : elle part un peu sous les pattes de l'animal et monte au rythme d'une brique toutes les TB secondes
+    // l'eau : elle reste où elle était (elle ne redescend pas), au plus 2,5 marches sous la souris,
+    // et monte au rythme d'une brique toutes les TB secondes
     if(WATER){
-      if(!S.water) S.water=mk('div','water');
-      const ah=floor-S.cpos.y; S.wl=ah-bh*1.2; S.wv=(N*bh-ah)/(need*TB); drawWater();
+      if(!S.water){ S.water=mk('div','water'); S.wy=base+bh*1.2; }
+      S.wy=Math.min(S.wy,base+bh*2.5); S.wv=N*bh/(need*TB); drawWater();
     }
     newCheese();
     stairInfo();
   }
-  // l'animal monte sur la dernière colonne complète de l'escalier
+  // l'animal se tient sur la dernière colonne complète de l'escalier (ou au départ)
   function climb(){
-    if(!S.geo) return; const {bw,bh,floor,sx}=S.geo; let c=0; while((c+1)*(c+2)/2<=S.bricks.length) c++;
-    S.cpos = c ? {x:sx+(c-1)*bw+bw/2, y:floor-c*bh} : {x:sx/2+4, y:floor};
+    const {bw,bh,base}=S.geo; let c=0; while((c+1)*(c+2)/2<=S.bricks.length) c++;
+    S.cpos = c ? {x:colX(c-1)+bw/2, y:base-c*bh} : {x:startX(), y:base};
     place(S.critter,S.cpos.x,S.cpos.y);
   }
-  function drawWater(){ if(S.water) S.water.style.height=Math.max(0,H-S.geo.floor+S.wl)+'px'; }
+  function camStep(dt){
+    if(!S.world) return; const t=(H-52)-S.base;
+    S.cam+=(t-S.cam)*Math.min(1,dt*3); if(Math.abs(t-S.cam)<.5) S.cam=t;
+    S.world.style.transform=`translateY(${S.cam}px)`;
+    if(WATER) drawWater();
+  }
+  function drawWater(){ if(S.water) S.water.style.height=Math.max(0,H-(S.wy+S.cam))+'px'; }
   function waterStep(dt,fz){
-    if(!fz) S.wl+=S.wv*dt;
-    drawWater();
-    const ah=S.geo.floor-S.cpos.y;
-    if(S.wl>ah+S.geo.bh*.3){
-      // l'eau rattrape l'animal : elle emporte 2 briques et redescend
+    if(!fz) S.wy-=S.wv*dt;
+    if(S.wy<S.cpos.y-S.geo.bh*.3){
+      // l'eau rattrape la souris : elle emporte 2 briques et redescend un peu
       const k=Math.min(2,S.bricks.length);
-      for(let i=0;i<k;i++){ const b=S.bricks.pop(); b.style.transition='top .6s ease-in, opacity .6s'; b.style.top=(H)+'px'; b.style.opacity='0'; setTimeout(()=>b.remove(),650); }
+      for(let i=0;i<k;i++){ const b=S.bricks.pop(); b.style.transition='top .6s ease-in, opacity .6s'; b.style.top=(S.geo.base+H)+'px'; b.style.opacity='0'; setTimeout(()=>b.remove(),650); }
       climb(); S.floods=(S.floods||0)+1;
-      S.wl=(S.geo.floor-S.cpos.y)-S.geo.bh*1.2;
-      say('Glouglou !'); floatTxt(S.cpos.x+40,S.cpos.y-50,k?`l'eau emporte ${k} brique${k>1?'s':''}`:'plouf !','bad'); flash('bad');
+      S.wy=S.cpos.y+S.geo.bh*1.2;
+      say('Glouglou !'); floatTxt(S.cpos.x+(S.dir>0?40:-40),S.cpos.y+S.cam-50,k?`l'eau emporte ${k} brique${k>1?'s':''}`:'plouf !','bad'); flash('bad');
       stairInfo();
     }
   }
   function newCheese(){
     if(S.cheese) S.cheese.el.remove();
-    const el=mk('div','cheese','🧀'); S.cheese={ el, x:S.geo.lx+18 }; place(el,S.cheese.x,S.geo.ly);
+    const el=mk('div','cheese','🧀',S.world); S.cheese={ el, x:S.dir>0?S.geo.lx+18:W-S.geo.lx-18 }; place(el,S.cheese.x,S.geo.ly);
   }
   function say(t,good){ S.bubble.textContent=t; S.bubble.className='bubble'+(good?' good':''); S.bubble.hidden=false; S.bubT=1.8; }
-  function stairInfo(){ const A=CLIMB?ANIMALS[0]:ANIMALS[S.ri]; S.info.innerHTML=`${CLIMB?`Fromage n°${S.lvl-1} / ${MAXN-1} : `:''}Nourris ${A[1]} !<br><b>${S.bricks.length} / ${S.slots.length}</b> briques${S.missed?` · fromages partis : ${S.missed}`:''}`; }
+  function stairInfo(){ const A=ANIMALS[0]; S.info.innerHTML=`Passerelle ${S.seg+1} / ${SEGN.length} : nourris ${A[1]} !<br><b>${S.bricks.length} / ${S.slots.length}</b> briques${S.missed?` · fromages partis : ${S.missed}`:''}`; }
   function addBrick(x,y){
     if(!R || S.done) return;
     const sl=S.slots[S.bricks.length]; if(!sl) return;
-    const b=mk('div','brick'); b.style.cssText=`left:${x-S.geo.bw/2}px;top:${y}px;width:${S.geo.bw}px;height:${S.geo.bh}px`;
+    const b=mk('div','brick',null,S.world); b.style.cssText=`left:${x-S.geo.bw/2}px;top:${y-S.cam}px;width:${S.geo.bw}px;height:${S.geo.bh}px`;
     S.bricks.push(b); void b.offsetWidth; b.style.left=sl.x+'px'; b.style.top=sl.y+'px';
-    stairInfo(); if(WATER) climb();
+    stairInfo(); climb();
     if(S.bricks.length===S.slots.length) rescue();
   }
   // animation pilotée par update() : elle s'arrête proprement pendant la pause
   function rescue(){
-    S.done=true; const {bw,bh,floor,N,sx,lx,ly}=S.geo;
-    const path=[]; for(let k=Math.max(0,Math.round((S.cpos.x-sx-bw/2)/bw));k<N;k++) path.push({x:sx+k*bw+bw/2, y:floor-(k+1)*bh}); path.push({x:lx+8, y:ly});
+    S.done=true; const {bw,bh,N,lx,ly,base}=S.geo;
+    const c=Math.round((base-S.cpos.y)/bh);
+    const path=[]; for(let k=c;k<N;k++) path.push({x:colX(k)+bw/2, y:base-(k+1)*bh}); path.push({x:S.dir>0?lx+8:W-lx-8, y:ly});
     S.anim={ path, i:0, t:0 };
   }
   function cheeseStep(dt, fz){
     const c=S.cheese; if(!c) return;
-    if(!fz) c.x+=S.cheeseV*dt*S.rush;
+    if(!fz) c.x+=S.dir*S.cheeseV*dt*S.rush;
     place(c.el,c.x,S.geo.ly);
-    if(c.x>W+20){
-      S.missed++; floatTxt((S.geo.lx+W)/2,S.geo.ly-30,'parti !','bad');
+    if(S.dir>0?c.x>W+20:c.x<-20){
+      S.missed++; floatTxt(S.dir>0?(S.geo.lx+W)/2:(W-S.geo.lx)/2,S.geo.ly+S.cam-30,'parti !','bad');
       say('J\'ai faim !'); newCheese(); stairInfo();
     }
   }
@@ -1012,19 +1025,18 @@ function L1(){
     const a=S.anim; a.t+=dt;
     if(a.i<a.path.length){ if(a.t>=.3){ a.t=0; const p=a.path[a.i++]; S.cpos={x:p.x,y:p.y}; place(S.critter,p.x,p.y); } return; }
     if(a.phase==null){ // course sur le tapis jusqu'au fromage
-      const c=S.cheese; S.cpos.x+=Math.min(280*dt, c.x-S.cpos.x); place(S.critter,S.cpos.x,S.geo.ly);
-      if(c.x-S.cpos.x<14){
+      const c=S.cheese, d=c.x-S.cpos.x; S.cpos.x+=Math.sign(d)*Math.min(280*dt,Math.abs(d)); place(S.critter,S.cpos.x,S.geo.ly);
+      if(Math.abs(c.x-S.cpos.x)<14){
         a.phase=1; a.t=0; c.el.remove(); S.cheese=null; say('Miam !',true);
-        const pts=Math.round((CLIMB?25*(S.lvl-1):60*(S.ri+1))*(WATER?1.5:1)/(1+S.missed));
-        addScore(pts,W/2,H*.35); flash('good'); banner(`Bravo, ${ANIMALS[S.ri][1]} a mangé le fromage !`,'good');
+        const pts=Math.round(40*S.geo.N*(WATER?1.5:1)/(1+S.missed));
+        addScore(pts,W/2,H*.35); flash('good'); banner(`Bravo, ${ANIMALS[0][1]} a mangé le fromage !`,'good');
       }
       return;
     }
     if(a.phase===1 && a.t>=1.6){
       S.anim=null;
-      if(CLIMB){ if(++S.lvl>MAXN){ banner('Tout en haut : la souris est rassasiée !','good'); S.endIn=1.2; } else { banner('Un autre fromage, encore plus haut !','good'); stairs(true); } }
-      else if(++S.ri>=ANIMALS.length){ banner('Tous les animaux sont rassasiés !','good'); S.endIn=1.2; }
-      else stairs();
+      if(++S.seg>=SEGN.length){ banner(WATER?'Tout en haut, hors de l\'eau : la souris est sauvée !':'Tout en haut : la souris est rassasiée !','good'); S.endIn=1.2; }
+      else { banner('La souris grimpe vers la passerelle suivante'+(WATER?'… et l\'eau monte toujours !':' !'),'good'); stairs(true); }
     }
   }
   function kill(o, good){
@@ -1079,12 +1091,14 @@ function L1(){
       Buf.allowed='0123456789'; Buf.max=8;
       setKeys('0123456789'.split('').map(c=>({label:c,k:c})).concat([{label:'⌫',k:'BACK',cls:'alt'},{label:'OK',k:'OK',cls:'ok'}]), 'Tape la conversion, puis OK');
       mk('div',R?'deadline ground':'deadline'); mk('div','rush');
-      if(R){ $('#lives').style.visibility='hidden'; S.ri=0; S.lvl=2; measure(); stairs(); }
+      if(R){ $('#lives').style.visibility='hidden'; S.ri=0; S.seg=0; measure(); stairs(); }
       S.wEl=mk('div','weights',[128,64,32,16,8,4,2,1].map(w=>`<span>${w}<small>0</small></span>`).join('')); S.aide=mk('div','aide'); S.lastV=null;
       banner(R ? 'Chaque bonne réponse donne une brique : construis l\'escalier jusqu\'au fromage !' : 'Convertis les nombres avant qu\'ils touchent la ligne rouge');
     },
     update(dt){
       if(R && S.cheese) cheeseStep(dt, S.freeze>0);
+      if(Buf.v!==S.lastV) aide();   // aide en direct : poids allumés + somme
+      if(R) camStep(dt);
       if(WATER && !S.done && S.geo) waterStep(dt, S.freeze>0);
       if(R && S.bubT>0){ place(S.bubble,clamp(S.cpos.x,52,W-52),S.cpos.y-40); if((S.bubT-=dt)<=0) S.bubble.hidden=true; }
       if(S.anim) animStep(dt);
@@ -1985,7 +1999,7 @@ const TUTOS = [
     { t:'<b>Les bonus</b> : certains nombres sont entourés de vert et portent une étiquette. Ils sont <b>plus difficiles</b> (plus de bits). Convertis-les pour gagner le bonus et des points en plus !',
       demo:()=>demoEl('enemy d2b carrier','<em>INDICE</em><b>203</b><small>→ en binaire</small>',W/2,H*.4) },
     { t:'<b>INDICE</b> affiche la réponse sous deux nombres. <b>GEL</b> arrête tout 4 secondes. <b>BOUM</b> détruit les deux nombres les plus proches de la ligne. <b>+1 ♥</b> rend une vie.' },
-    { t:'Enchaîne les bonnes réponses pour faire monter le <b>multiplicateur</b> de points (x2, x3…). Les poids des bits sont rappelés en bas : 128, 64, 32, 16, 8, 4, 2, 1.', el:'.weights' },
+    { t:'Enchaîne les bonnes réponses pour faire monter le <b>multiplicateur</b> de points (x2, x3…). Les poids des bits sont rappelés en bas : 128, 64, 32, 16, 8, 4, 2, 1. Quand tu tapes, les poids des bits à 1 <b>s\'allument</b> et la <b>somme</b> s\'affiche.', el:'.weights' },
     { t:'Toutes les '+20+' bonnes réponses, un <b>BOSS</b> arrive : un grand nombre protégé par des petits nombres qui tournent autour. De temps en temps, un satellite <b>fonce</b> vers la ligne ! Détruis les satellites pour briser le bouclier, puis convertis le boss : gros bonus.' },
     { t:'Atteins <b>'+UNLOCK[1]+' points</b> pour débloquer le niveau 3. Le bouton <b>?</b> relance ce tutoriel, <b>Pause</b> met le jeu en pause. C\'est parti !', el:'#helpbtn' }
   ],
@@ -2038,19 +2052,16 @@ TUTOS[0] = [
   { t:'Atteins <b>'+UNLOCK[0]+' points</b> pour débloquer le niveau 2, et <b>'+STAR[0]+'</b> pour l\'étoile ★. C\'est parti !', el:'#helpbtn' }
 ];
 TUTOS.l1s = [
-  { t:'<b>Mode sauvetage</b> : ce petit animal a faim ! Construis-lui un <b>escalier</b> pour qu\'il monte jusqu\'au fromage.', el:'.critter' },
+  { t:'<b>Mode récompense</b> : cette petite souris a faim ! Construis-lui un <b>escalier</b> pour qu\'il monte jusqu\'au fromage.', el:'.critter' },
   { t:'Mais le fromage est sur un <b>tapis roulant</b> qui l\'emporte ! S\'il sort de l\'écran avant que l\'animal arrive, un autre fromage revient, mais tu gagnes moins de points.', el:'.cheese' },
   { t:'Des nombres tombent. Ceux qui commencent par <b>0b</b> sont en binaire : écris-les en décimal. Les autres sont en décimal : écris-les en binaire.' },
   { t:'Chaque bonne réponse donne une <b>brique</b>. Ici, tu vois combien il en manque.', el:'.stairinfo' },
   { t:'Pas de vies à perdre : une erreur ne coûte rien, et un nombre qui tombe fait juste perdre une brique. En bas, les poids des bits sont rappelés : 128, 64, 32, 16, 8, 4, 2, 1.', el:'.weights' },
-  { t:'Nourris la souris, la chouette et le hérisson ! Les nombres verts donnent des bonus (le gel arrête aussi le tapis).' }
+  { t:'Quand la souris a mangé, elle repart de sa passerelle : construis l\'escalier suivant, <b>toujours plus haut</b>, jusqu\'à la passerelle '+8+'. Les nombres verts donnent des bonus (le gel arrête aussi le tapis).' }
 ];
 TUTOS.l1m = TUTOS.l1s.slice(0,4).concat([
-  { t:'<b>Attention, l\'eau monte !</b> L\'animal grimpe sur chaque marche terminée. Si l\'eau le rattrape, elle emporte 2 briques : réponds vite et juste.', el:'.water' },
-  { t:'Le gel arrête aussi l\'eau. Les points du fromage sont plus gros que dans le mode facile.' }]);
-TUTOS.l1h = TUTOS.l1s.slice(0,4).concat([
-  { t:'<b>Mode difficile</b> : quand la souris a mangé, un autre fromage arrive <b>une marche plus haut</b>. L\'escalier est gardé, il faut juste ajouter une colonne… de plus en plus haute !' },
-  { t:'Et <b>l\'eau monte</b> : si elle rattrape la souris, elle emporte 2 briques. Le gel arrête l\'eau et le tapis.', el:'.water' }]);
+  { t:'<b>Attention, l\'eau monte !</b> La souris grimpe sur chaque marche terminée. Si l\'eau la rattrape, elle emporte 2 briques : réponds vite et juste.', el:'.water' },
+  { t:'Quand la souris a mangé, elle repart de sa passerelle et tu construis l\'escalier suivant, <b>toujours plus haut</b>. Le gel arrête l\'eau et le tapis.' }]);
 TUTOS.l2u = [
   { t:'<b>Mode unités</b> : ici chaque bille vaut <b>1</b>. Le récipient 16 contient exactement <b>16 billes</b>, le 8 en contient 8, etc. Leur taille montre leur volume.', el:'.vessel' },
   { t:'Un récipient <b>plein</b> = bit à 1, un récipient <b>vide</b> = bit à 0. À moitié rempli, il ne compte pas : il faut le remplir ou le vider.', el:'.l2-sum' },
