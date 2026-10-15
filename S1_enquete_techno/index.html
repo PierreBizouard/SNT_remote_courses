@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>S1 · Techno Survivor</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v14 · 15/10/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v15 · 15/10/2026</div>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -136,6 +136,11 @@ body.paused .stage{filter:blur(14px)}
 .z1.angry .em{filter:drop-shadow(0 0 12px red)}
 .z1.dead{animation:die .5s forwards;pointer-events:none}
 .z1.flee{transition:opacity .4s;opacity:0;pointer-events:none}
+.zam{font:700 14px var(--f-body);color:#ffe14a;letter-spacing:1px}.zam i{font-style:normal}.zam small{color:var(--muted);letter-spacing:0;font-weight:400}
+.zrl{position:absolute;left:8px;bottom:8px;z-index:25;padding:8px 12px;font-size:14px}
+.zrl.urge{animation:blink .35s alternate infinite;background:#ffe14a;color:#2a1a08}
+.zitem{position:absolute;transform:translate(-50%,-50%);z-index:30;font-size:34px;background:none;border:0;cursor:pointer;filter:drop-shadow(0 0 8px #ffe14a);animation:pop .3s}
+.zmode{display:block;margin:8px auto 0;background:none;border:0;color:var(--muted);text-decoration:underline;font:13px var(--f-body);cursor:pointer}
 .zans{position:absolute;transform:translate(-50%,-50%);width:max-content;padding:7px 10px;background:#f2ead2;color:#2a1a08;border:2px solid #5a3a1a;border-radius:9px;font:700 13px/1.2 var(--f-body);text-align:center;cursor:crosshair;box-shadow:0 3px 0 #5a3a1a}
 .zans.no{text-decoration:line-through;opacity:.45;background:#d9b6b6}
 .zans.yes{background:var(--good)}
@@ -309,6 +314,24 @@ table.hist th{color:var(--muted);font-weight:500}
 .nw .tt{font:700 15px/1.3 var(--f-body)}
 .nw .tp{font:500 12px var(--f-mono);color:#6d688f}
 .nw .lk{min-width:54px;height:46px;border-radius:10px;border:2px solid #ff6aa8;background:#fff;font-size:22px}
+.nw .bb{display:flex;gap:6px}.nw .no{min-width:44px;height:46px;border-radius:10px;border:2px solid #9d96cc;background:#fff;font-size:18px}
+.btools{display:flex;gap:8px;justify-content:center;margin:10px 0}.bsearch{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}
+.bsearch .chip{padding:6px 10px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font:600 13px var(--f-body);cursor:pointer}
+.prof .tg{color:var(--good)}
+.slchart{margin:8px 0}.slchart svg{width:100%;display:block;border-radius:8px;margin-bottom:4px}
+.fst{background:linear-gradient(#141233,#1d1a44);height:min(66vh,560px);min-height:440px}
+.fpipes{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.fpipes .pp{fill:none;stroke:#4a4390;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}.fpipes .pp.yes{stroke:#2f6b52}.fpipes .pp.no{stroke:#7a3044}
+.fpipes .pl{font:800 11px var(--f-mono)}.fpipes .pl.yes{fill:var(--good)}.fpipes .pl.no{fill:var(--bad)}
+.fgate{position:absolute;transform:translate(-50%,-50%);z-index:4;padding:7px 9px;border-radius:12px;border:2px solid var(--cyan);background:#231d58;color:var(--fg);font:700 12px/1.25 var(--f-body);cursor:pointer;box-shadow:0 0 0 4px #141233}
+.fgate.empty{border-style:dashed;color:var(--amber);border-color:var(--amber)}
+.fgate.fy{animation:fy .5s}.fgate.fn{animation:fn .5s}
+@keyframes fy{30%{background:#1f6b4a}}@keyframes fn{30%{background:#7a2032}}
+.fbin{position:absolute;transform:translate(-50%,-50%);z-index:4;padding:6px 4px;min-height:52px;border-radius:10px;border:2px solid var(--line);background:#2b2560;color:var(--fg);font:700 12px/1.2 var(--f-body);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.fbin span{font-size:20px}.fbin.empty{border-style:dashed;color:var(--amber)}.fbin .fc{font:600 11px var(--f-mono);color:var(--muted)}
+.fit{position:absolute;transform:translate(-50%,-50%);z-index:6;max-width:150px;padding:4px 7px;border-radius:9px;background:#f6f4ff;color:#1b1838;font:600 11px/1.2 var(--f-body);text-align:center;box-shadow:0 3px 8px #0008;pointer-events:none}
+.fit b{display:block;font-size:12px}.fit span{display:block;color:#5d5890;font-size:10px}
+.ferr{font-size:14px}.ferr small{color:var(--muted)}
 .nw.target{outline:4px solid var(--good)}
 .prof{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:4px 12px;font:700 12px var(--f-mono)}
 .prof .g{height:8px;border-radius:4px;background:var(--deep);overflow:hidden}
@@ -533,17 +556,57 @@ ZQ.push(
   ['Pour voyager sur Internet, un message est découpé en…','Paquets',['Pixels','Fichiers PDF','Morceaux de câble']],
   ['Entre les continents, les données d\'Internet passent surtout par…','Des câbles sous-marins',['Des satellites','Des avions','Le Wi-Fi']]
 );
-function gZombie(){
-  head('🧟','Zombies QCM','Un zombie arrive avec <b>quatre réponses</b> autour de lui. <b>Tire</b> sur la bonne réponse. Un tir raté part à côté… et le zombie accélère !');
-  mk('div','hud','<span class="lives" id="zl"></span><span id="zn"></span>',main);
+/* Questions sur ce que les élèves connaissent déjà (le contenu du cours, ZQ, est gardé pour la révision) */
+const ZQC=[
+  ['Sur Google, les premiers résultats sont…','Classés par un algorithme (et parfois payés : « Sponsorisé »)',['Forcément les plus vrais','Tirés au hasard','Vérifiés un par un par des humains']],
+  ['ChatGPT peut-il inventer une source qui n\'existe pas ?','Oui, on appelle ça une « hallucination »',['Non, jamais','Seulement en anglais','Seulement s\'il est fatigué']],
+  ['Une IA comme ChatGPT a appris…','En lisant d\'énormes quantités de textes écrits par des humains',['Toute seule, sans aucune donnée','En allant à l\'école','En regardant la télé']],
+  ['Une IA dessine une main à 6 doigts. Pourquoi ?','Elle imite des images sans savoir ce qu\'est une main',['Elle fait exprès pour rire','Le fichier est abîmé','Elle a mal compté ses pixels']],
+  ['TikTok choisit tes vidéos surtout grâce à…','Le temps que tu passes sur chaque vidéo',['Ton âge seulement','Le hasard total','Ce que regardent tes parents']],
+  ['YouTube te recommande une vidéo « pour toi ». Son but :','Te garder le plus longtemps possible',['Te montrer la vidéo la plus vraie','Te faire réviser','Économiser ta batterie']],
+  ['Quand tu likes un post, tu…','Donnes une info sur tes goûts à l\'algorithme',['Ne fais rien de spécial','Payes le créateur','Supprimes les pubs']],
+  ['Une appli gratuite gagne souvent de l\'argent avec…','La pub et tes données',['Rien, c\'est un cadeau','Les impôts','Les dons des profs']],
+  ['Les « cookies » d\'un site servent à…','Retenir des infos sur toi et ta navigation',['Protéger des virus','Accélérer le Wi-Fi','Rien du tout']],
+  ['Pourquoi une notif arrive pile quand tu as lâché ton téléphone ?','Pour te faire revenir dans l\'appli',['Par pur hasard','Pour économiser la batterie','Parce que le réseau était lent']],
+  ['Snapchat : une photo « éphémère »…','Peut être capturée et gardée par celui qui la reçoit',['Disparaît de partout pour toujours','Ne peut jamais être partagée','Est effacée par la police']],
+  ['Tu supprimes une photo publiée sur Insta. Elle…','A pu être copiée ou capturée avant',['A disparu de partout','N\'a jamais été vue','Revient dans 24 h']],
+  ['Le cadenas 🔒 à côté de l\'adresse d\'un site veut dire…','La connexion est chiffrée',['Le site dit la vérité','Le site est gratuit','Le site est français']],
+  ['Un bon mot de passe, c\'est plutôt…','Une longue phrase que toi seul retiens',['Ta date de naissance','123456','Le prénom de ton chat']],
+  ['La voix d\'un proche (deepfake ?) te demande de l\'argent. Tu…','Rappelles la personne sur son vrai numéro',['Payes vite','Donnes ton code bancaire','Partages l\'audio']],
+  ['Une vidéo choc tourne partout. Le bon réflexe :','Chercher d\'où elle vient avant de partager',['La partager vite','Croire les commentaires','La liker pour l\'aider']],
+  ['Un influenceur montre un produit qu\'on lui a payé. Il doit…','Dire que c\'est une collaboration commerciale',['Ne rien dire','Le cacher en story','Le revendre']],
+  ['Cyberharcèlement : le numéro gratuit et anonyme, c\'est le…','3018',['112','17','3615']],
+  ['Le « cloud » (iCloud, Google Drive), c\'est…','Des ordinateurs dans d\'immenses bâtiments (data centers)',['Des données dans les nuages','Rien de physique','Ton téléphone uniquement']],
+  ['Le Wi-Fi transporte tes données grâce à…','Des ondes radio',['Des câbles invisibles','La lumière du soleil','Du son très aigu']],
+  ['Ton téléphone sait où tu es grâce…','Au GPS (satellites) et aux antennes',['À ton code PIN','Au haut-parleur','Au hasard']],
+  ['La plus grosse part de l\'impact écologique d\'un smartphone vient…','De sa fabrication',['De sa recharge','De tes SMS','De ton fond d\'écran']],
+  ['Google Traduction, Siri et ChatGPT ont en commun…','Ce sont des IA entraînées sur des exemples',['Ils sont français','Ils marchent sans électricité','Ils ne se trompent jamais']],
+  ['Ta playlist « Découvertes de la semaine » est faite par…','Un algorithme qui compare tes écoutes à celles des autres',['Un DJ qui te connaît','Le hasard','Ton opérateur téléphonique']]
+];
+function gZombie(cours){
+  const BANK=cours?ZQ:ZQC, MAG=5;
+  head('🧟','Zombies QCM',(cours?'<b>Révision du cours.</b> ':'')+'Un zombie arrive avec <b>quatre réponses</b> autour de lui. <b>Tire</b> sur la bonne. Chaque tir coûte une balle : <b>recharge</b> à temps ! Un tir raté part à côté… et le zombie accélère. Ramasse les 📦 et les ❤️.');
+  mk('div','hud','<span class="lives" id="zl"></span><span id="zam" class="zam"></span><span id="zn"></span>',main);
   const qb=mk('div','qbar',null,main);
   const st=mk('div','stage zst','<div class="barricade"></div><div class="turret">🔫</div>',main);
-  const QS=shuffle(ZQ.slice()).slice(0,12);
-  const S={ n:-1, lives:3, ok:0, miss:0, z:null, wait:0, over:false, W:0, H:0 };
+  const rb=mk('button','btn zrl','🔄 Recharger',st);
+  const sw=mk('button','zmode',cours?'↩︎ Version « ce que tu connais »':'📚 Version révision du cours',main);
+  sw.onclick=()=>{ stopGame(); gZombie(!cours); };
+  const QS=shuffle(BANK.slice()).slice(0,12);
+  const S={ n:-1, lives:3, ok:0, miss:0, streak:0, mag:MAG, res:15, rl:0, z:null, wait:0, over:false, W:0, H:0, items:[] };
   const g={ over:false };
   const measure=()=>{ S.W=st.clientWidth; S.H=st.clientHeight; };
-  const hudUp=()=>{ $('#zl').textContent='♥'.repeat(Math.max(0,S.lives))+'♡'.repeat(3-Math.max(0,S.lives)); $('#zn').textContent=`Question ${Math.min(S.n+1,QS.length)} / ${QS.length} · ${S.ok} abattus`; };
-  // les 4 réponses se placent aux coins du zombie
+  const hudUp=()=>{
+    $('#zl').textContent='♥'.repeat(Math.max(0,S.lives))+'♡'.repeat(Math.max(0,3-S.lives));
+    $('#zam').innerHTML=(S.rl>0?'<b>recharge…</b>':'<i>'+'▮'.repeat(S.mag)+'</i>'+'▯'.repeat(MAG-S.mag))+` <small>réserve ${S.res}</small>`;
+    $('#zn').textContent=`Q ${Math.min(S.n+1,QS.length)}/${QS.length} · ${S.ok} abattus`;
+    rb.classList.toggle('urge',S.mag===0&&S.res>0&&S.rl<=0); rb.disabled=S.rl>0||S.mag===MAG||S.res===0;
+  };
+  function reload(){
+    if(S.over||G.pause||S.rl>0||S.mag===MAG||S.res===0) return;
+    S.rl=1.1; floatTxt(st,S.W/2,S.H-80,'Rechargement…','#ffe14a'); hudUp();
+  }
+  rb.addEventListener('pointerdown',ev=>{ ev.preventDefault(); reload(); });
   const SLOT=[[-1,-1],[1,-1],[-1,1],[1,1]];
   function wave(){
     if(S.z) S.z.el.remove(); S.n++;
@@ -559,40 +622,60 @@ function gZombie(){
     const dx=Math.min(S.W*.27,170), dy=46;
     z.el.querySelectorAll('.zans').forEach((b,i)=>{ b.style.left=(SLOT[i][0]*dx)+'px'; b.style.top=(SLOT[i][1]*dy)+'px'; b.style.maxWidth=Math.min(S.W*.42,200)+'px'; });
   }
+  // objets à ramasser : caisse de balles ou cœur
+  function drop(kind){
+    const e=mk('button','zitem',kind==='ammo'?'📦':'❤️',st);
+    const it={ e, kind, t:4.5, x:rand(40,S.W-40), y:rand(S.H*.35,S.H-110) }; place(e,it.x,it.y); S.items.push(it);
+    e.addEventListener('pointerdown',ev=>{ ev.preventDefault(); if(it.t<=0||G.pause) return; it.t=0; e.remove();
+      if(kind==='ammo'){ S.res+=4; floatTxt(st,it.x,it.y-30,'+4 balles','#ffe14a'); } else { S.lives=Math.min(3,S.lives+1); floatTxt(st,it.x,it.y-30,'+1 ♥','#ff8aa8'); }
+      hudUp(); });
+  }
   function shoot(z,i,b){
     if(S.over||G.pause||z.done||b.classList.contains('no')) return;
+    if(S.rl>0) return floatTxt(st,z.x,z.y-70,'Tu recharges !','#ffe14a');
+    if(S.mag<=0){ shake(st); return floatTxt(st,z.x,z.y-70,S.res?'Clic… chargeur vide ! Recharge !':'Plus de balles ! Cherche une 📦','#ffe14a'); }
+    S.mag--; hudUp();
     const zx=z.x, zy=z.y;
     if(z.ans[i]===z.good){
-      z.done=true; S.ok++;
+      z.done=true; S.ok++; S.streak++;
       laser(st,S.W/2,S.H-30,zx,zy,'#6ee7a0'); b.classList.add('yes');
       addPts(10+Math.max(0,Math.round((1-zy/S.H)*10)),zx,zy-50,st);
       const sp=mk('div','splat',null,st); place(sp,zx,zy+10); setTimeout(()=>sp.remove(),1500);
       z.el.classList.add('dead'); S.wait=1;
+      if(S.streak%3===0 && S.lives<3) drop('life');
+      else if(S.res+S.mag<8 || Math.random()<.35) drop('ammo');
     } else {
-      // le tir part à côté et le zombie accélère
-      S.miss++; b.classList.add('no');
+      S.miss++; S.streak=0; b.classList.add('no');
       const side=(Math.random()<.5?-1:1)*rand(50,80);
       laser(st,S.W/2,S.H-30,zx+side,zy-20,'#ff5a5a');
       z.vy*=1.45; z.el.classList.add('angry'); floatTxt(st,zx,zy-70,'Raté ! GRRR, il accélère !','#ff5a5a'); shake(st);
     }
+    hudUp();
   }
   function bite(){
-    const z=S.z; z.done=true; S.lives--; hudUp(); shake(document.body);
+    const z=S.z; z.done=true; S.lives--; S.streak=0; hudUp(); shake(document.body);
     const b=mk('div','blood',null,st);
     for(let k=0;k<9;k++){ const i=mk('i',null,null,b); const s=rand(60,160); Object.assign(i.style,{width:s+'px',height:s+'px',left:rand(-5,85)+'%',top:rand(-5,70)+'%'}); }
     setTimeout(()=>b.remove(),2300);
     floatTxt(st,S.W/2,S.H/2,'Mordu ! Réponse : '+z.good,'#ffd0d0');
     z.el.classList.add('flee'); S.wait=1.8;
+    if(S.mag+S.res<3) drop('ammo');
   }
   function finish(){
-    S.over=g.over=true;
+    S.over=g.over=true; sw.remove();
     D.best.zombie=Math.max(D.best.zombie||0,S.ok); save();
     const win=S.lives>0;
-    endCard(win?'Tu as survécu !':'Dévoré…', win?`${S.ok} zombies abattus sur ${QS.length}, ${S.miss} tirs ratés. Il te reste ${S.lives} ♥.`:`Les zombies ont franchi la barricade. ${S.ok} abattus avant la fin.`, gZombie, null);
+    endCard(win?'Tu as survécu !':'Dévoré…', (win?`${S.ok} zombies abattus sur ${QS.length}, ${S.miss} tirs ratés. Il te reste ${S.lives} ♥.`:`Les zombies ont franchi la barricade. ${S.ok} abattus avant la fin.`)+(cours?'':'<br>Google, TikTok, ChatGPT… tu les utilises tous les jours. Mais sais-tu vraiment comment ils marchent ?'), ()=>gZombie(cours),
+      ()=>discovery('zombie','Les outils que tu utilises tous les jours (Google, TikTok, ChatGPT, Snapchat…) :',
+        ['Fonctionnent avec des algorithmes, des données (souvent les tiennes) et des machines bien réelles','Sont magiques : impossible de comprendre comment ils marchent','Sont neutres et gratuits, sans rien en échange'],0,
+        'Derrière chaque appli il y a des nombres, des algorithmes qui trient et choisissent, tes données, et des ordinateurs bien physiques. Tout le chapitre va ouvrir le capot !'));
   }
   g.update=dt=>{
     if(S.over) return;
     if(!S.W) measure();
+    if(S.rl>0 && (S.rl-=dt)<=0){ const k=Math.min(MAG-S.mag,S.res); S.mag+=k; S.res-=k; hudUp(); }
+    for(const it of S.items){ if(it.t>0 && (it.t-=dt)<=0) it.e.remove(); else if(it.t>0 && it.t<1.2) it.e.style.opacity=.4+.6*Math.abs(Math.sin(it.t*12)); }
+    S.items=S.items.filter(it=>it.t>0);
     if(S.wait>0){ if((S.wait-=dt)<=0){ if(S.lives<=0) return finish(); wave(); } return; }
     const z=S.z; if(!z||z.done) return;
     z.y+=z.vy*dt; z.ph+=dt*2.5; z.x=S.W/2+Math.sin(z.ph)*Math.min(30,S.W*.05);
@@ -1244,29 +1327,46 @@ const ADJ=(a,b)=>{ const d=Math.abs(a-b); return Math.min(d,TOP.length-d); };
 function gBubble(){
   stopGame();
   head('🫧','La bulle','Ton fil te propose 3 nouvelles à chaque tour. <b>Like</b> celle qui t\'intéresse le plus : l\'algorithme apprend ce que tu aimes… Joue 12 tours.');
-  const w=TOP.map(()=>1), seen=new Set();
-  let round=0, mission=null;
-  const box=mk('div',null,`<div class="hud"><span id="br"></span><span class="likes" id="bl"></span></div><div id="bgoal"></div><div class="feed3" id="bf3"></div>
+  const w=TOP.map(()=>1), seen=new Set(), MAXA=20;
+  let round=0, mission=null, last=[];
+  const box=mk('div',null,`<div class="hud"><span id="br"></span><span class="likes" id="bl"></span></div><div id="bgoal"></div><div class="feed3" id="bf3"></div><div id="btools"></div>
     <div class="card"><p style="margin:0 0 6px"><b style="color:var(--cyan)">Ce que l'algorithme pense de toi</b></p><div class="prof" id="bprof"></div></div>`,main);
-  const prof=()=>{ const mx=Math.max(...w); $('#bprof').innerHTML=TOP.map((t,i)=>`<div>${t[0]} ${t[1]}<div class="g"><div style="width:${Math.round(w[i]/mx*100)}%"></div></div></div>`).join(''); };
-  // tirage pondéré de 3 thèmes différents
+  const prof=()=>{ const mx=Math.max(...w); $('#bprof').innerHTML=TOP.map((t,i)=>`<div${mission&&i===mission.t?' class="tg"':''}>${t[0]} ${t[1]}${mission&&i===mission.t?' 🎯':''}<div class="g"><div style="width:${Math.round(w[i]/mx*100)}%"></div></div></div>`).join(''); };
+  // probabilité d'apparaître : surtout le profil, un tout petit peu d'exploration
+  const proba=()=>{ const s=w.reduce((a,b)=>a+b,0); return w.map(v=>.97*v/s+.03/TOP.length); };
   function draw(){
-    const idx=TOP.map((_,i)=>i), out=[];
-    for(let k=0;k<3;k++){ let s=idx.reduce((a,i)=>a+w[i],0), r=Math.random()*s; let c=idx[0]; for(const i of idx){ r-=w[i]; if(r<=0){ c=i; break; } } out.push(c); idx.splice(idx.indexOf(c),1); }
+    const p=proba(), idx=TOP.map((_,i)=>i), out=[];
+    for(let k=0;k<3;k++){ let s=idx.reduce((a,i)=>a+p[i],0), r=Math.random()*s; let c=idx[0]; for(const i of idx){ r-=p[i]; if(r<=0){ c=i; break; } } out.push(c); idx.splice(idx.indexOf(c),1); }
     return out;
   }
-  function like(t){
-    // boucle de rétroaction : le thème liké et ses voisins montent, le reste baisse
-    TOP.forEach((_,i)=>{ const d=ADJ(i,t); w[i]*= d===0?2.4 : d===1?1.5 : .8; });
-    const s=w.reduce((a,b)=>a+b,0); w.forEach((v,i)=>w[i]=v/s*TOP.length);
+  const norm=()=>{ const s=w.reduce((a,b)=>a+b,0); w.forEach((v,i)=>w[i]=Math.max(.02,v/s*TOP.length)); };
+  // boucle de rétroaction : le thème liké et ses voisins montent, le reste baisse
+  function like(t){ TOP.forEach((_,i)=>{ const d=ADJ(i,t); w[i]*= d===0?2 : d===1?1.35 : .85; }); norm(); }
+  function nope(t){ TOP.forEach((_,i)=>{ const d=ADJ(i,t); w[i]*= d===0?.2 : d===1?.75 : 1.05; }); norm(); }
+  function search(t){ TOP.forEach((_,i)=>{ const d=ADJ(i,t); w[i]*= d===0?1.8 : d===1?1.2 : .95; }); norm(); }
+  const chance=()=>{ const p=proba()[mission.t]; return Math.round((1-Math.pow(1-p,3))*100); };
+  function act(kind){
+    mission.acts++; mission.log[kind]++;
+    if(mission.acts>=MAXA) return failMission();
+    prof(); show();
   }
   function show(){
-    const ts=draw();
-    if(mission){ const near=ts.includes(mission.t); $('#br').textContent=`Mission : ${mission.likes} like${mission.likes>1?'s':''} utilisé${mission.likes>1?'s':''} (objectif ${mission.par})`;
-      if(near) return found(ts); }
-    else $('#br').textContent=`Tour ${round+1} / 12`;
-    $('#bf3').innerHTML=ts.map(t=>{ const a=ART[t].map((x,k)=>[x,k]).filter(([,k])=>!seen.has(t+'-'+k)); const [title,k]=a.length?pick(a):[ART[t][0],0]; return `<div class="nw" data-t="${t}" data-k="${k}"><span class="ic">${TOP[t][0]}</span><span><span class="tt">${title}</span><br><span class="tp">${TOP[t][1]}</span></span><button class="lk" aria-label="J'aime">❤</button></div>`; }).join('');
-    $('#bf3').querySelectorAll('.nw').forEach(n=>{ seen.add(n.dataset.t+'-'+n.dataset.k); n.querySelector('.lk').onclick=()=>{ like(+n.dataset.t); prof(); if(mission){ mission.likes++; if(mission.likes>=15) return failMission(); } else round++; if(!mission && round>=12) return reveal(); show(); }; });
+    let ts=draw(); for(let k=0;k<30 && mission && mission.acts===0 && ts.includes(mission.t);k++) ts=draw(); last=ts;
+    if(mission){
+      $('#br').innerHTML=`Mission : ${mission.acts} action${mission.acts>1?'s':''} (objectif ${mission.par}, max ${MAXA}) · chance de voir 🎯 : <b>${chance()} %</b>`;
+      if(ts.includes(mission.t)) return found(ts);
+    } else $('#br').textContent=`Tour ${round+1} / 12`;
+    $('#bf3').innerHTML=ts.map(t=>{ const a=ART[t].map((x,k)=>[x,k]).filter(([,k])=>!seen.has(t+'-'+k)); const [title,k]=a.length?pick(a):[ART[t][0],0]; return `<div class="nw" data-t="${t}" data-k="${k}"><span class="ic">${TOP[t][0]}</span><span><span class="tt">${title}</span><br><span class="tp">${TOP[t][1]}</span></span><span class="bb">${mission?'<button class="no" aria-label="Pas intéressé" title="Pas intéressé">🚫</button>':''}<button class="lk" aria-label="J\'aime">❤</button></span></div>`; }).join('');
+    $('#bf3').querySelectorAll('.nw').forEach(n=>{ const t=+n.dataset.t; seen.add(t+'-'+n.dataset.k);
+      n.querySelector('.lk').onclick=()=>{ like(t); prof(); if(mission) return act('like'); round++; if(round>=12) return reveal(); show(); };
+      const no=n.querySelector('.no'); if(no) no.onclick=()=>{ nope(t); act('nope'); };
+    });
+  }
+  function tools(){
+    $('#btools').innerHTML=`<div class="btools"><button class="btn" id="bsr">🔍 Chercher un sujet</button><button class="btn" id="brf">🔄 Actualiser</button></div><div class="bsearch" id="bsl" hidden>${TOP.map((t,i)=>`<button class="chip" data-t="${i}">${t[0]} ${t[1]}</button>`).join('')}</div>`;
+    $('#bsr').onclick=()=>{ $('#bsl').hidden=!$('#bsl').hidden; };
+    $('#brf').onclick=()=>act('refresh');
+    $('#bsl').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ const t=+c.dataset.t; $('#bsl').hidden=true; search(t); floatTxt(document.body,innerWidth/2,innerHeight/2,`🔍 « ${TOP[t][1]} »`,'var(--cyan)'); act('search'); });
   }
   // fin de la phase libre : tout ce que tu n'as pas vu
   function reveal(){
@@ -1278,30 +1378,31 @@ function gBubble(){
       <p class="lead" style="margin-top:8px">En vert : ce que l'algorithme t'a montré. En gris : tout le reste du monde.</p><div class="row"><button class="btn ok" id="bm">Mission : sortir de ta bulle ▶</button></div>`,main).scrollIntoView({behavior:'smooth'});
     $('#bm').onclick=startMission;
   }
-  // mission : faire apparaître une nouvelle éloignée de ton profil en un minimum de likes
+  // mission : faire apparaître dans le fil un sujet très éloigné de ton profil
   function startMission(){
-    main.querySelectorAll('.card:not(:last-of-type)').forEach(()=>{});
     const top=w.indexOf(Math.max(...w)), far=(top+6)%TOP.length, k=randi(0,2);
-    mission={ t:far, k, likes:0, par:ADJ(top,far)-1 };
+    mission={ t:far, k, acts:0, par:4, log:{like:0,nope:0,search:0,refresh:0} };
     main.querySelectorAll('.card').forEach(c=>{ if(!c.contains($('#bprof'))) c.remove(); });
-    $('#bgoal').innerHTML=`<div class="goal">🎯 Mission : fais apparaître dans ton fil l'article « ${ART[far][k]} » (${TOP[far][0]} ${TOP[far][1]}).<br><span style="font-weight:400">C'est très loin de ton profil. Objectif : en <b>${mission.par} likes</b> ou moins. Astuce : like des sujets de plus en plus proches.</span></div>`;
-    show(); scrollTo(0,0);
+    $('#bgoal').innerHTML=`<div class="goal">🎯 Mission : fais apparaître dans ton fil l'article « ${ART[far][k]} » (${TOP[far][0]} ${TOP[far][1]}).<br><span style="font-weight:400">C'est très loin de ton profil : avec des likes seulement, tu restes coincé. Tu as maintenant d'autres outils, comme sur les vraies applis : <b>❤ J'aime</b>, <b>🚫 Pas intéressé</b>, <b>🔍 Chercher</b>, <b>🔄 Actualiser</b>. Objectif : en <b>${mission.par} actions</b> ou moins. Surveille la chance de voir 🎯.</span></div>`;
+    tools(); prof(); show(); scrollTo(0,0);
   }
   function found(ts){
-    const t=mission.t, others=ts.filter(x=>x!==t);
+    const t=mission.t;
+    $('#btools').innerHTML='';
     $('#bf3').innerHTML=`<div class="nw target"><span class="ic">${TOP[t][0]}</span><span><span class="tt">${ART[t][mission.k]}</span><br><span class="tp">${TOP[t][1]} · 🎯 trouvé !</span></span><span></span></div>`;
-    const good=mission.likes<=mission.par, pts=Math.max(5,40-Math.max(0,mission.likes-mission.par)*6); addPts(pts);
+    const good=mission.acts<=mission.par, pts=Math.max(5,40-Math.max(0,mission.acts-mission.par)*5); addPts(pts);
     D.best.bubble=Math.max(D.best.bubble||0,pts); save();
-    mk('div','card',`<p class="fb ${good?'good':''}">${good?'Mission réussie':'Mission accomplie'} en ${mission.likes} like${mission.likes>1?'s':''} (objectif ${mission.par}) : +${pts} points.</p><p>Pour sortir de ta bulle, tu as dû <b>changer volontairement</b> ce que tu likes, pas à pas. L'algorithme, lui, ne t'y aurait jamais emmené tout seul.</p>`,main);
+    const L=mission.log;
+    mk('div','card',`<p class="fb ${good?'good':''}">${good?'Mission réussie':'Mission accomplie'} en ${mission.acts} action${mission.acts>1?'s':''} (objectif ${mission.par}) : +${pts} points.</p><p>Tu as utilisé : ❤ ${L.like} · 🚫 ${L.nope} · 🔍 ${L.search} · 🔄 ${L.refresh}.</p><p>Pour sortir de ta bulle, il faut <b>agir volontairement</b> : chercher d'autres sujets, dire « pas intéressé », liker autre chose. Actualiser ou continuer à liker ce qu'on te propose ne suffit presque jamais : l'algorithme ne t'y emmène pas tout seul.</p>`,main);
     endDisc();
   }
-  function failMission(){ mk('div','card','<p class="fb bad">15 likes et toujours rien : la bulle est solide ! Essaie de liker des sujets voisins, un par un.</p>',main); endDisc(); }
+  function failMission(){ $('#btools').innerHTML=''; mk('div','card',`<p class="fb bad">${MAXA} actions et toujours rien : la bulle est solide ! As-tu essayé 🔍 Chercher et 🚫 Pas intéressé ?</p>`,main); endDisc(); }
   function endDisc(){
     discovery('bubble','Pourquoi ton fil ne te montre qu\'une partie des nouvelles ?',[
       'Parce qu\'il n\'existe pas d\'autres nouvelles',
       'Parce que l\'algorithme te propose ce qui ressemble à ce que tu as déjà aimé : chaque like renforce ta bulle',
       'Parce que les journalistes choisissent pour toi'],1,
-      'C\'est une <b>boucle de rétroaction</b> : tu likes, l\'algorithme te montre plus de la même chose, tu likes encore… Ton fil se referme sur ton profil : c\'est une <b>bulle de filtres</b>. En sortir demande un effort volontaire.');
+      'C\'est une <b>boucle de rétroaction</b> : tu likes, l\'algorithme te montre plus de la même chose, tu likes encore… Ton fil se referme sur ton profil : c\'est une <b>bulle de filtres</b>. En sortir demande un effort volontaire : chercher, dire « pas intéressé », varier.');
   }
   prof(); show();
 }
@@ -2249,12 +2350,43 @@ function playSel(MY){
       <label>🧯 Anti-répétition <small>freine un thème qui prend trop de place</small><input type="range" id="sl-a" min="0" max="100" value="0"></label></div>
       <div class="slg"><span>🎯 Le flux te ressemble</span><div class="dpg"><i id="sl-m"></i></div><b id="sl-mv"></b></div>
       <div class="slg"><span>🌈 Diversité du flux</span><div class="dpg"><i id="sl-v" style="background:var(--cyan)"></i></div><b id="sl-vv"></b></div>
+      <div class="slchart"><div class="dpt">📈 Part de chaque thème dans le flux</div><svg id="sl-c1" viewBox="0 0 300 120" aria-label="Courbes des thèmes"></svg>
+        <div class="dpt">🎯 Ressemblance et 🌈 diversité</div><svg id="sl-c2" viewBox="0 0 300 80" aria-label="Courbes ressemblance et diversité"></svg></div>
       <div class="slhist" id="sl-h"></div>
       <div class="slprof" id="sl-p"></div>
       <div class="slloop"><div id="sl-lp">➕ <b>Boucle qui s'emballe</b> : tu likes → l'algorithme renforce ce thème → il en montre plus → tu likes plus</div><div id="sl-lm">➖ <b>Contre-réaction</b> : un thème prend trop de place → l'anti-répétition le freine → le flux se rééquilibre</div></div>
     </div>`,main);
   const z=mk('div',null,null,main);
-  const S={ prof:TH.map(()=>1), it:[], hist:[], likes:0, t:0, spawn:0, m:0, hold:0, fav:null, favL:0, mt:0, over:false, log:[] };
+  const S={ prof:TH.map(()=>1), it:[], hist:[], likes:0, t:0, spawn:0, m:0, hold:0, fav:null, favL:0, mt:0, over:false, log:[], ser:[], st:0 };
+  // courbes : part de chaque thème, ressemblance et diversité, sur les 40 dernières secondes
+  const SEUIL=.22, NS=80;
+  function charts(){
+    const P=S.ser, x=i=>4+i*(292/(NS-1)), a=val('#sl-a');
+    const y1=v=>112-v*104;
+    let s=`<rect width="300" height="120" fill="#0b0a1c"/>`;
+    [.25,.5,.75].forEach(v=>s+=`<line x1="0" x2="300" y1="${y1(v)}" y2="${y1(v)}" stroke="#2a2550"/>`);
+    s+=`<line x1="0" x2="300" y1="${y1(SEUIL)}" y2="${y1(SEUIL)}" stroke="#ff5a5a" stroke-dasharray="5 4" opacity="${.25+.75*a}"/><text x="296" y="${y1(SEUIL)-3}" font-size="9" fill="#ff8a8a" text-anchor="end" opacity="${.3+.7*a}">seuil anti-répétition${a>0?'':' (éteint)'}</text>`;
+    TH.forEach((t,k)=>{ if(!P.length) return; s+=`<polyline fill="none" stroke="${t[2]}" stroke-width="${MY.includes(k)?2.6:1.6}" stroke-linejoin="round" ${MY.includes(k)?'':'stroke-dasharray="3 2"'} points="${P.map((p,i)=>`${x(i).toFixed(1)},${y1(p.sh[k]).toFixed(1)}`).join(' ')}"/>`; });
+    if(P.length){ const L=P[P.length-1], i=P.length-1;
+      TH.forEach((t,k)=>{ s+=`<text x="${Math.min(x(i)+3,282)}" y="${y1(L.sh[k])+4}" font-size="11">${t[0]}</text>`;
+        // la contre-réaction en action : flèche qui pousse vers le bas
+        if(a>0 && L.sh[k]>SEUIL) s+=`<text x="${Math.min(x(i)-10,270)}" y="${y1(L.sh[k])-6}" font-size="${9+8*a}" fill="#ff5a5a" text-anchor="middle">▼</text>`; }); }
+    $('#sl-c1').innerHTML=s;
+    const y2=v=>74-v*68;
+    let u=`<rect width="300" height="80" fill="#0b0a1c"/>`;
+    const tgt=S.ms===0?[[.85,'#ffb547']]:S.ms===2?[[.55,'#ffb547'],[.75,'#5ce1e6']]:[];
+    tgt.forEach(([v,c])=>u+=`<line x1="0" x2="300" y1="${y2(v)}" y2="${y2(v)}" stroke="${c}" stroke-dasharray="4 4" opacity=".7"/>`);
+    if(P.length){
+      u+=`<polyline fill="none" stroke="#ffb547" stroke-width="2.4" points="${P.map((p,i)=>`${x(i).toFixed(1)},${y2(p.m).toFixed(1)}`).join(' ')}"/>`;
+      u+=`<polyline fill="none" stroke="#5ce1e6" stroke-width="2.4" points="${P.map((p,i)=>`${x(i).toFixed(1)},${y2(p.d).toFixed(1)}`).join(' ')}"/>`;
+      // moments où l'on a touché le sélecteur
+      P.forEach((p,i)=>{ if(p.ev) u+=`<line x1="${x(i)}" x2="${x(i)}" y1="2" y2="78" stroke="#fff" opacity=".35"/><text x="${x(i)+2}" y="10" font-size="9" fill="#ddd">${p.ev}</text>`; });
+    }
+    u+=`<text x="4" y="78" font-size="9" fill="#ffb547">ressemblance</text><text x="70" y="78" font-size="9" fill="#5ce1e6">diversité</text>`;
+    $('#sl-c2').innerHTML=u;
+  }
+  let pendEv='';
+  [['#sl-r','🔁'],['#sl-d','🎲'],['#sl-a','🧯']].forEach(([id,e])=>$(id).addEventListener('change',()=>{ pendEv=e; }));
   const g={ over:false };
   const val=id=>+$(id).value/100;
   const flux=$('#sl-f');
@@ -2318,7 +2450,7 @@ function playSel(MY){
     mk('div','card',`<h3 style="margin:0 0 6px">Deux boucles</h3>
       <ul><li><b>Mission 1</b> : tes likes ont renforcé tes thèmes, qui sont revenus plus souvent, que tu as likés encore plus… C'est une <b>boucle de rétroaction positive</b> : elle <b>amplifie</b>. Résultat : un flux qui te ressemble, mais une diversité qui s'effondre (c'est la bulle).</li>
       <li><b>Mission 2</b> : le thème que tu voulais n'apparaissait presque plus, donc tu ne pouvais pas le liker, donc il n'apparaissait pas… Pour en sortir il faut de la <b>découverte</b> : du hasard qui casse la boucle.</li>
-      <li><b>Mission 3</b> : l'anti-répétition est une <b>contre-réaction</b> (rétroaction négative) : plus un thème prend de place, plus elle le freine. Elle <b>stabilise</b>, comme un thermostat ou la transpiration qui fait baisser la température du corps.</li></ul>
+      <li><b>Mission 3</b> : l'anti-répétition est une <b>contre-réaction</b> (rétroaction négative) : plus un thème prend de place, plus elle le freine. Sur les courbes, tu l'as vue : le thème qui dépasse le seuil est poussé vers le bas (▼), les courbes se resserrent au lieu de s'écarter. Elle <b>stabilise</b>, comme un thermostat ou la transpiration qui fait baisser la température du corps.</li></ul>
       <p>Les vrais réseaux règlent ces boutons pour que tu restes le plus longtemps possible. Depuis 2023, en Europe, le règlement sur les services numériques (DSA) oblige les très grandes plateformes à proposer au moins un fil qui n'est <b>pas</b> basé sur ton profil.</p>
       <div class="row"><button class="btn" id="sl-a2">Rejouer</button><button class="btn ok" id="sl-dd">Noter ma découverte</button></div>`,z);
     $('#sl-a2').onclick=gSel;
@@ -2339,6 +2471,7 @@ function playSel(MY){
     // l'algorithme oublie lentement ce qu'on ne like plus
     const r=val('#sl-r'); S.prof=S.prof.map(p=>Math.max(.15,p*(1-dt*.015*(.3+r))));
     gauges();
+    if((S.st-=dt)<=0){ S.st=.5; S.ser.push({ sh:TH.map((_,k)=>share(k)), m:S.m, d:S.div||0, ev:pendEv }); pendEv=''; if(S.ser.length>NS) S.ser.shift(); charts(); }
     if(S.ms===0 && S.hist.length>=12 && S.m>=.85) done();
     else if(S.ms===1){ mission(); if(S.favL>=3) done(); else if(S.mt>25 && !S.hinted){ S.hinted=1; hint(`Ton flux ne te montre presque plus ${TH[S.fav][1]}… quel bouton du sélecteur changer ?`); } }
     else if(S.ms===2){ if(S.m>=.55 && S.div>=.75) S.hold+=dt; else S.hold=Math.max(0,S.hold-1.5*dt); mission(); if(S.hold>=10) done(); else if(S.mt>30 && !S.hinted){ S.hinted=1; hint('Essaie l\'anti-répétition : c\'est une contre-réaction.'); } }
@@ -2441,6 +2574,173 @@ function usineSim(M,chain,N=20,rnd=Math.random){
   res.time=Math.round(res.time/N*10)/10; res.cost=Math.round(res.cost); res.sat=Math.round(res.sat/N);
   return res;
 }
+/* =========================================================
+   12 bis · L'USINE À FILTRES : des conditions qui envoient chaque objet sur un chemin
+   ========================================================= */
+// arbre : {g:i, yes:…, no:…} pour un filtre, {leaf:i} pour une sortie ; it : [emoji, texte, propriétés, bonne sortie]
+const FLV=[
+  { e:'📧', t:'Le filtre anti-spam', story:'Ta boîte mail reçoit 12 messages. Choisis le filtre qui envoie les arnaques dans les spams.',
+    tree:{g:0,yes:{leaf:0},no:{leaf:1}}, goal:12,
+    bins:[['📥','Réception'],['🗑️','Spam']],
+    conds:[['c','👤 Dans mes contacts ?'],['l','🔗 Contient un lien ?'],['m','🔠 Écrit en MAJUSCULES ?']],
+    tags:{c:['👤 contact','❔ inconnu'],l:['🔗 lien'],m:['🔠 MAJUSCULES']},
+    it:[['👩','Maman : on mange à 19 h ?',{c:1},0],['😂','Léo : regarde cette vidéo',{c:1,l:1},0],['🎁','VOUS AVEZ GAGNÉ UN IPHONE',{m:1,l:1},1],['📦','Votre colis est bloqué, cliquez ici',{l:1},1],
+      ['📐','Prof : le DS est décalé à jeudi',{c:1},0],['🏦','Votre compte sera fermé, confirmez',{l:1},1],['⚽','Club : ENTRAÎNEMENT ANNULÉ',{c:1,m:1},0],['💸','Gagnez 500 € par jour depuis chez vous',{},1],
+      ['🎮','Ton pote : le lien du serveur',{c:1,l:1},0],['❤️','Rencontre près de chez toi',{l:1},1],['🧾','URGENT : AMENDE À PAYER',{m:1},1],['🎂','Mamie : JOYEUX ANNIVERSAIRE',{c:1,m:1},0],['🚚','Livraison : choisissez un créneau',{l:1},1]] },
+  { e:'🛡️', t:'La modération des posts', story:'Un réseau social reçoit 12 posts. Les insultes doivent disparaître, les posts très signalés passent devant un humain, le reste est publié.',
+    tree:{g:0,yes:{leaf:0},no:{g:1,yes:{leaf:1},no:{leaf:2}}}, goal:12,
+    bins:[['✅','Publié'],['❌','Supprimé'],['👀','Vérifié par un humain']],
+    conds:[['i','🤬 Contient une insulte ?'],['s','🚩 Signalé 3 fois ou plus ?'],['p','📷 Contient une photo ?'],['k','❤️ Plus de 1 000 likes ?']],
+    tags:{i:['🤬 insulte'],s:['🚩 signalé'],p:['📷 photo'],k:['❤️ 1k+']},
+    it:[['🌅','Coucher de soleil au lycée',{p:1,k:1},0],['😡','Insulte sous une vidéo',{i:1},1],['📢','Rumeur sur un élève',{s:1},2],['🤬','Insulte + photo moqueuse',{i:1,p:1,s:1},1],
+      ['🎵','Mon nouveau son',{k:1},0],['🧪','Astuce pour le contrôle de SVT',{},0],['🤳','Photo d\'un élève sans son accord',{p:1,s:1},2],['🐶','Mon chien fait du skate',{p:1,k:1,s:0},0],
+      ['🗯️','Clash avec insultes',{i:1,k:1},1],['📰','Fausse info qui tourne',{s:1,k:1},2],['🏀','Résultat du match',{p:1},0],['💬','Commentaire insultant signalé',{i:1,s:1},1]] },
+  { e:'📦', t:'Le tri des colis', story:'12 colis arrivent à l\'entrepôt. France : moins de 5 kg avec le facteur, plus lourd en camion. Étranger : train en Europe, avion hors d\'Europe.',
+    tree:{g:0,yes:{g:1,yes:{leaf:0},no:{leaf:1}},no:{g:2,yes:{leaf:2},no:{leaf:3}}}, goal:12,
+    bins:[['🚚','Camion'],['📮','Facteur'],['✈️','Avion'],['🚆','Train']],
+    conds:[['fr','🇫🇷 Livré en France ?'],['kg','⚖️ Plus de 5 kg ?'],['he','🌍 Hors d\'Europe ?'],['fg','🥚 Fragile ?'],['rg','🟥 Carton rouge ?']],
+    tags:{fr:['🇫🇷 France'],kg:['⚖️ lourd','⚖️ léger'],he:['🌍 hors Europe'],fg:['🥚 fragile'],rg:['🟥 rouge']},
+    it:[['📦','Lyon, 2 kg',{fr:1},1],['📦','Lille, 12 kg',{fr:1,kg:1},0],['📦','Berlin, 3 kg',{},3],['📦','Tokyo, 8 kg',{he:1,kg:1},2],['📦','Madrid, 20 kg',{kg:1,rg:1},3],['📦','Brest, 1 kg',{fr:1,fg:1},1],
+      ['📦','Nantes, 7 kg',{fr:1,kg:1,fg:1},0],['📦','New York, 1 kg',{he:1,rg:1},2],['📦','Rome, 4 kg',{fg:1},3],['📦','Dakar, 6 kg',{he:1,kg:1,fg:1},2],['📦','Paris, 3 kg',{fr:1,rg:1},1],['📦','Montréal, 2 kg',{he:1},2]] },
+  { e:'🕵️', t:'Le détecteur de fausses infos', story:'Dernier défi : 12 infos circulent. Trie-les en Fiable, Fausse info ou À vérifier. Peut-on tout trier avec des filtres ?',
+    tree:{g:0,yes:{leaf:0},no:{g:1,yes:{leaf:1},no:{leaf:2}}}, goal:8,
+    bins:[['✅','Fiable'],['❌','Fausse info'],['🔎','À vérifier par un humain']],
+    conds:[['src','📰 Source connue ?'],['maj','🔠 Titre en MAJUSCULES ?'],['img','🖼️ Avec une image ?'],['vir','🔥 Très partagée ?']],
+    tags:{src:['📰 source connue','❔ source inconnue'],maj:['🔠 MAJUSCULES'],img:['🖼️ image'],vir:['🔥 virale']},
+    it:[['🌡️','Météo : canicule annoncée',{src:1,img:1},0],['👽','DES ALIENS À MARSEILLE',{maj:1,img:1,vir:1},1],['🎓','Parcoursup : dates officielles',{src:1},0],['🦈','REQUIN DANS LA SEINE',{maj:1,vir:1},1],
+      ['🧪','Une étude dit que le chocolat rend intelligent',{vir:1},2],['📺','Compte d\'un média piraté : fausse annonce',{src:1,vir:1},1],['🎭','Article parodique d\'un site connu',{src:1,img:1},1],['📸','Témoin : incendie dans mon quartier',{img:1},2],
+      ['🏟️','Le stade rouvre lundi',{src:1},0],['🤖','Photo d\'un pape en doudoune (IA)',{img:1,vir:1},1],['📱','Nouvelle loi sur les portables au lycée',{vir:1},2],['⚠️','ALERTE : COUPURE D\'EAU DEMAIN',{maj:1},2]] }
+];
+function gUsineMenu(){
+  stopGame();
+  head('🏭','L\'usine','Deux usines pour comprendre comment on automatise une tâche.');
+  const box=mk('div','games',`<button class="gcard" id="um-f"><span class="e">🔀</span><span class="t">L'usine à filtres <small style="color:var(--good)">nouveau</small></span><span class="d">Choisis les conditions de chaque filtre : chaque objet prend un chemin différent. Spams, modération, colis, fausses infos.</span><span class="s">${D.best.filtre?`record ${D.best.filtre} / ${FLV.length} niveaux`:''}</span></button>
+    <button class="gcard" id="um-t"><span class="e">🏭</span><span class="t">L'usine à tâches</span><span class="d">Découpe une mission en boîtes, choisis humain, machine ou IA pour chacune, invente des machines.</span><span class="s"></span></button>`,main);
+  $('#um-f').onclick=()=>gFiltre(0);
+  $('#um-t').onclick=gUsine;
+}
+function gFiltre(lv){
+  stopGame();
+  const L=FLV[lv];
+  head('🔀',`L'usine à filtres · ${lv+1}/${FLV.length}`,`${L.e} <b>${L.t}</b>. ${L.story}<br><small>Touche un <b>filtre ❓</b> pour choisir sa question, touche une <b>sortie</b> pour choisir où elle mène, puis lance la machine.</small>`);
+  mk('div','hud','<span id="fl-n"></span><span id="fl-s"></span>',main);
+  const st=mk('div','stage fst','<svg class="fpipes" id="fl-p"></svg>',main);
+  const ctl=mk('div','row c',`<button class="btn ok" id="fl-go">▶ Lancer 12 objets</button>`,main);
+  const out=mk('div',null,null,main);
+  // structure de l'arbre : positions des filtres et des sorties
+  const gates=[], leaves=[];
+  (function walk(n,d,par,side){
+    if(n.leaf!=null){ const o={ k:leaves.length, d, par, side, bin:null }; leaves.push(o); n.o=o; return; }
+    const o={ k:n.g, d, par, side, cond:null, n }; gates[n.g]=o; n.o=o;
+    walk(n.yes,d+1,o,'yes'); walk(n.no,d+1,o,'no');
+  })(L.tree,0,null,null);
+  const depth=Math.max(...leaves.map(l=>l.d));
+  leaves.forEach((l,i)=>{ l.x=(i+.5)/leaves.length; l.y=.88; });
+  (function px(n){ if(n.leaf!=null) return [n.o.x]; const xs=[...px(n.yes),...px(n.no)]; n.o.x=(Math.min(...xs)+Math.max(...xs))/2; n.o.y=.13+n.o.d*(.62/Math.max(1,depth)); return xs; })(L.tree);
+  const S={ W:0, H:0, run:false, items:[], q:[], spawn:0, done:0, ok:0, errs:[], over:false };
+  const g={ over:false };
+  const condOf=id=>L.conds.find(c=>c[0]===id);
+  gates.forEach(o=>{ o.el=mk('button','fgate',null,st); o.el.onclick=()=>{ if(!S.run) pickCond(o); }; });
+  leaves.forEach(o=>{ o.el=mk('button','fbin',null,st); o.el.onclick=()=>{ if(!S.run) pickBin(o); }; });
+  function paint(){
+    gates.forEach(o=>{ const c=condOf(o.cond); o.el.innerHTML=c?esc(c[1]):'❓ Choisir un filtre'; o.el.classList.toggle('empty',!c); });
+    leaves.forEach(o=>{ const b=L.bins[o.bin]; o.el.innerHTML=b?`<span>${b[0]}</span>${esc(b[1])}<b class="fc" id="fc${o.k}"></b>`:'❓ Sortie'; o.el.classList.toggle('empty',!b); });
+    const ready=gates.every(o=>o.cond)&&leaves.every(o=>o.bin!=null);
+    $('#fl-go').disabled=!ready||S.run;
+    $('#fl-n').textContent=`Niveau ${lv+1} · objectif ${L.goal===12?'12 / 12':`${L.goal} / 12 au moins`}`;
+  }
+  function layout(){
+    S.W=st.clientWidth; S.H=st.clientHeight;
+    const P=o=>[o.x*S.W,o.y*S.H];
+    gates.concat(leaves).forEach(o=>{ const [x,y]=P(o); place(o.el,x,y); o.el.style.maxWidth=Math.min(S.W/leaves.length*1.7,220)+'px'; });
+    leaves.forEach(o=>{ o.el.style.width=Math.min(S.W/leaves.length-8,170)+'px'; });
+    let s=`<line x1="${S.W/2}" y1="0" x2="${gates[0].x*S.W}" y2="${gates[0].y*S.H}" class="pp"/>`;
+    gates.concat(leaves).forEach(o=>{ if(!o.par) return; const [x1,y1]=P(o.par), [x2,y2]=P(o);
+      s+=`<polyline points="${x1},${y1} ${x2},${y1+(y2-y1)*.35} ${x2},${y2}" class="pp ${o.side}"/>`;
+      s+=`<text x="${(x1+x2)/2+(o.side==='yes'?-4:4)}" y="${y1+(y2-y1)*.35-6}" class="pl ${o.side}" text-anchor="${o.side==='yes'?'end':'start'}">${o.side==='yes'?'OUI':'NON'}</text>`; });
+    $('#fl-p').setAttribute('viewBox',`0 0 ${S.W} ${S.H}`); $('#fl-p').innerHTML=s;
+  }
+  function pickCond(o){
+    overlay(`<h2>Quelle question pour ce filtre ?</h2><p>Si la réponse est <b style="color:var(--good)">OUI</b>, l'objet part à gauche. Si c'est <b style="color:var(--bad)">NON</b>, à droite.</p><div class="opts">${L.conds.map(c=>`<button class="opt" data-c="${c[0]}">${esc(c[1])}</button>`).join('')}</div>`);
+    document.querySelectorAll('#ovc [data-c]').forEach(b=>b.onclick=()=>{ o.cond=b.dataset.c; $('#ov').hidden=true; paint(); });
+  }
+  function pickBin(o){
+    overlay(`<h2>Où mène cette sortie ?</h2><div class="opts">${L.bins.map((b,i)=>`<button class="opt" data-b="${i}">${b[0]} ${esc(b[1])}</button>`).join('')}</div>`);
+    document.querySelectorAll('#ovc [data-b]').forEach(b=>b.onclick=()=>{ o.bin=+b.dataset.b; $('#ov').hidden=true; paint(); });
+  }
+  const tagsOf=p=>Object.entries(L.tags).map(([k,t])=>p[k]?t[0]:t[1]||'').filter(Boolean);
+  // le chemin d'un objet : on pose chaque question, OUI à gauche, NON à droite
+  function route(p){
+    const pts=[[S.W/2,-30]], ans=[], gs=[]; let n=L.tree;
+    while(n.leaf==null){ gs.push(n.o); pts.push([n.o.x*S.W,n.o.y*S.H]); const y=!!p[n.o.cond]; ans.push(y); const nx=y?n.yes:n.no; pts.push([nx.o.x*S.W,n.o.y*S.H+(nx.o.y-n.o.y)*S.H*.35]); n=nx; }
+    pts.push([n.o.x*S.W,n.o.y*S.H-12]);
+    return { pts, ans, gs, leaf:n.o };
+  }
+  function launch(){
+    S.run=true; S.q=shuffle(L.it.slice()).slice(0,12); S.done=0; S.ok=0; S.errs=[]; S.spawn=0; out.innerHTML='';
+    leaves.forEach(l=>l.cnt=[0,0]); paint(); layout(); $('#fl-s').textContent='0 ✓ · 0 ✗';
+  }
+  function spawn(){
+    const [e,t,p,good]=S.q.shift();
+    const el=mk('div','fit',`<b>${e} ${esc(t)}</b><span>${tagsOf(p).join(' ')}</span>`,st);
+    const r=route(p);
+    S.items.push({ el, p, good, t, e, r, seg:0, f:0, gi:0 });
+  }
+  function arrive(o){
+    o.el.remove(); S.done++;
+    const ok=o.r.leaf.bin===o.good; if(ok) S.ok++; else S.errs.push(o);
+    const [x,y]=[o.r.leaf.x*S.W,o.r.leaf.y*S.H];
+    floatTxt(st,x,y-40,ok?'✓':'✗ '+L.bins[o.good][0],ok?'var(--good)':'var(--bad)');
+    if(!ok) shake(o.r.leaf.el);
+    o.r.leaf.cnt[ok?0:1]++; const c=$('#fc'+o.r.leaf.k); if(c) c.textContent=` ${o.r.leaf.cnt[0]}✓${o.r.leaf.cnt[1]?' '+o.r.leaf.cnt[1]+'✗':''}`;
+    $('#fl-s').textContent=`${S.ok} ✓ · ${S.done-S.ok} ✗`;
+    if(S.done>=12) result();
+  }
+  function result(){
+    S.run=false; paint();
+    const win=S.ok>=L.goal, last=lv===FLV.length-1;
+    addPts(S.ok*2);
+    if(win){ D.best.filtre=Math.max(D.best.filtre||0,lv+1); save(); }
+    out.innerHTML='';
+    mk('div','card',`<h3 style="margin:0 0 6px">${S.ok} / 12 bien triés ${win?'🎉':''}</h3>
+      ${S.errs.length?`<ul class="ferr">${S.errs.map(o=>`<li>${o.e} ${esc(o.t)} → arrivé dans ${L.bins[o.r.leaf.bin].join(' ')}, il fallait ${L.bins[o.good].join(' ')}<br><small>${o.r.ans.map((a,i)=>`${esc(condOf(pathGates(o)[i]).at(1))} ${a?'OUI':'NON'}`).join(' → ')}</small></li>`).join('')}</ul>`:'<p>Aucune erreur : ta machine trie parfaitement.</p>'}
+      ${lv===FLV.length-1?`<p><b>Impossible d'avoir 12 / 12 ici.</b> Un compte connu peut être piraté, un site sérieux peut publier une parodie, une info vraie peut venir d'un inconnu. Les filtres ne regardent que des <b>indices</b>, pas le <b>sens</b>. D'où la sortie « à vérifier par un humain ».</p>`:''}
+      <div class="row">${win&&!last?`<button class="btn ok" id="fl-nx">Niveau suivant ▶</button>`:''}${win&&last?`<button class="btn ok" id="fl-dd">Noter ma découverte</button>`:''}<button class="btn" id="fl-re">${win?'Rejouer ce niveau':'Modifier mes filtres'}</button></div>`,out).scrollIntoView({behavior:'smooth'});
+    if($('#fl-nx')) $('#fl-nx').onclick=()=>gFiltre(lv+1);
+    $('#fl-re').onclick=()=>{ out.innerHTML=''; scrollTo(0,0); };
+    if($('#fl-dd')) $('#fl-dd').onclick=()=>{ S.over=g.over=true; main.querySelectorAll('.stage,.hud,.row.c').forEach(e=>e.remove()); out.innerHTML='';
+      discovery('usine','Comment fonctionne un filtre automatique (anti-spam, modération, tri) ?',[
+        'Il pose des questions (oui ou non) et chaque réponse envoie l\'objet sur un chemin différent',
+        'Il comprend le sens de chaque message comme un humain',
+        'Il ne se trompe jamais une fois réglé'],0,
+        'Un filtre, c\'est un <b>algorithme</b> : une suite de tests « si… alors… sinon… » rangés en <b>arbre de décision</b>. L\'ordre des questions compte, et chaque chemin peut avoir ses propres questions. Mais un filtre ne regarde que des indices : pour les cas ambigus, il faut encore un humain.'); };
+  }
+  const pathGates=o=>o.r.gs.map(x=>x.cond);
+  $('#fl-go').onclick=()=>{ if(!S.run) launch(); };
+  g.update=dt=>{
+    if(S.over) return;
+    if(!S.W) layout();
+    if(S.run && S.q.length && (S.spawn-=dt)<=0){ spawn(); S.spawn=1.25; }
+    const sp=Math.max(120,S.H*.33);
+    for(const o of S.items.slice()){
+      let mv=sp*dt;
+      while(mv>0 && o.seg<o.r.pts.length-1){
+        const a=o.r.pts[o.seg], b=o.r.pts[o.seg+1], len=Math.hypot(b[0]-a[0],b[1]-a[1])||1, left=len*(1-o.f);
+        if(mv<left){ o.f+=mv/len; mv=0; } else { mv-=left; o.seg++; o.f=0;
+          // l'objet vient de passer un filtre : on affiche la réponse
+          if(o.seg%2===1 && o.seg<o.r.pts.length-1){ const ans=o.r.ans[(o.seg-1)/2], go=o.r.gs[(o.seg-1)/2]; if(go){ go.el.classList.remove('fy','fn'); void go.el.offsetWidth; go.el.classList.add(ans?'fy':'fn'); } } }
+      }
+      const a=o.r.pts[o.seg], b=o.r.pts[Math.min(o.seg+1,o.r.pts.length-1)];
+      place(o.el,a[0]+(b[0]-a[0])*o.f,a[1]+(b[1]-a[1])*o.f);
+      if(o.seg>=o.r.pts.length-1){ S.items.splice(S.items.indexOf(o),1); arrive(o); }
+    }
+  };
+  const onR=()=>{ if(!S.run) layout(); };
+  addEventListener('resize',onR);
+  g.stop=()=>removeEventListener('resize',onR);
+  startGame(g); paint(); layout();
+}
+
 function gUsine(){ playUsine(0,[]); }
 function playUsine(mi,hist){
   stopGame();
@@ -2539,9 +2839,9 @@ const GAMES=[
   ['scribe','✍️','CyberSpeedScribe','Recopie des symboles, en tracé puis en pixels, à toute vitesse… puis recopie tes propres copies. Lesquels s\'abîment ?',gScribe],
   ['feed','📱','Le fil d\'actu','Republier ou pas ? Regarde les émotions se propager et le monde changer.',gFeed],
   ['dopa','🧠','La boucle de dopamine','Fais défiler un fil et regarde ta dopamine en direct : pourquoi est-ce si dur d\'arrêter ?',gDopa],
-  ['usine','🏭','L\'usine à tâches','Découpe une mission en boîtes, choisis humain, machine ou IA pour chacune, invente des machines… et lance 20 commandes.',gUsine],
+  ['usine','🔀','L\'usine à filtres','Des filtres OUI / NON envoient chaque objet sur un chemin : spams, modération, colis, fausses infos. Bonus : l\'usine à tâches.',gUsineMenu],
   ['box','⬛','La boîte noire','Des nombres entrent, d\'autres sortent. Trouve la règle cachée et prouve-la.',()=>gBox(0)],
-  ['zombie','🧟','Zombies QCM','Un zombie arrive avec quatre réponses autour de lui. Tire sur la bonne : un tir raté le fait accélérer !',gZombie],
+  ['zombie','🧟','Zombies QCM','IA, Google, TikTok… ce que tu crois savoir. Tire sur la bonne réponse, gère tes balles et tes vies !',gZombie],
   ['octo','🐙','La pieuvre laser','Une pieuvre géante attaque ton réseau. Guide les paquets jusqu\'aux tourelles (adresses IPv4) pour lancer des missiles : arbre, étoile, anneau, maillé, sous-réseaux.',gOcto],
   ['bubble','🫧','La bulle','Like ce qui te plaît… et découvre tout ce que l\'algorithme ne t\'a jamais montré.',gBubble],
   ['likes','❤️','Les likes','Publie, gagne des likes, garde ta flamme… et découvre ce qui fait vraiment marcher un post.',gLikes],
