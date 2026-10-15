@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Binaire Attack</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v39 · 15/10/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v40 · 15/10/2026</div>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=JetBrains+Mono:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&family=Press+Start+2P&display=swap">
@@ -274,11 +274,11 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   background:radial-gradient(circle,#fff6d0,#ffb547 70%);clip-path:polygon(50% 0,61% 34%,98% 35%,68% 57%,79% 92%,50% 71%,21% 92%,32% 57%,2% 35%,39% 34%);color:#1a1300;z-index:2}
 .pu .sn{position:absolute;left:calc(var(--cs) / 2 - 3px);top:calc(var(--cs) / 2);transform:translate(-50%,-40%);padding:1px 4px;border-radius:6px;background:#1a1300e6;color:#ffd27a;font:700 var(--sf,14px)/1.1 var(--f-mono);white-space:nowrap;z-index:3}
 .pu .sn small{font-size:.6em;opacity:.7}
-.pu .sn.big{font-size:calc(var(--sf,14px) * 1.9);padding:2px 7px;border:2px solid var(--amber);box-shadow:0 0 12px rgba(255,181,71,.7);z-index:4}
-.pu .sig{position:absolute;left:-3px;bottom:-7px;padding:1px 5px;border-radius:7px;background:#1a1300;color:var(--amber);border:1px solid var(--amber);font:700 11px/1.2 var(--f-mono);white-space:nowrap;z-index:3}
+.pu .sn.big{font-size:calc(var(--sf,14px) * 1.3);padding:1px 5px;border:2px solid var(--amber);box-shadow:0 0 12px rgba(255,181,71,.7);z-index:4}
+.pu .sig{position:absolute;left:-3px;bottom:-6px;padding:0 4px;border-radius:6px;background:#1a1300;color:var(--amber);border:1px solid var(--amber);font:700 calc(var(--sf,14px) * .62)/1.2 var(--f-mono);white-space:nowrap;z-index:3}
 .pu.starred.v1 .t{display:none}
 .pu .star.hot{animation:pulse .35s infinite alternate}
-.pu .fuse{position:absolute;right:-2px;top:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font:700 10px/18px var(--f-mono);text-align:center;z-index:3}
+.pu .fuse{display:none;position:absolute;right:-2px;top:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font:700 10px/18px var(--f-mono);text-align:center;z-index:3}
 .pu.ghost{opacity:.18;z-index:4;transition:none}
 .pu.const{border-color:var(--amber);box-shadow:0 0 10px rgba(255,181,71,.5),inset 0 -4px 0 #0003}
 .pu.const::after{content:"";position:absolute;inset:0;border-radius:6px;pointer-events:none;background-image:radial-gradient(circle,#fff 0 1.2px,transparent 1.8px),radial-gradient(circle,#ffd76a 0 1.6px,transparent 2.3px),radial-gradient(circle,#fff 0 .9px,transparent 1.5px);background-size:17px 19px,23px 21px,13px 15px;background-position:3px 4px,9px 11px,6px 2px;animation:twk 1.6s infinite alternate}
@@ -1742,7 +1742,7 @@ function L4(){
 
 
 /* =========================================================
-   JEU SECRET — Détonateurs (façon Puyo Puyo)
+   JEU SECRET — Binabina (ex-Détonateurs) (façon Puyo Puyo)
    Les blocs ont une TAILLE égale à leur valeur : 1 = 1 case, 2 = 2 cases,
    4 = carré de 4 cases, 8 = 8 cases, 16 = 4x4 ou 2x8. Tout est soumis à la gravité.
    Le détonateur est une étoile ⭐ fixée sur un bloc qui tombe : elle explose quand
@@ -1926,7 +1926,7 @@ function L6(){
     S.phase='resolve'; S.rt=.3; S.chain=0;
   }
   // ---- affichage ----
-  function starInfo(b,s){ const st=b.el.querySelector('.star'); if(!st) return; st.classList.toggle('hot',b.star.t<8); b.el.querySelector('.sn').classList.toggle('hot',b.star.t<8); b.el.querySelector('.sn').classList.toggle('big',!!(s&&s[2]>1)); { const sn=b.el.querySelector('.sn'), h=BIN?binL(b.star.n):String(b.star.n); if(sn.innerHTML!==h) sn.innerHTML=h; } const sg=b.el.querySelector('.sig'); sg.innerHTML=s==null?'':'Σ '+(BIN?binL(s[0]):s[0])+(s[2]>1?' 🔗':''); sg.hidden=s==null; b.el.querySelector('.fuse').textContent=Math.ceil(b.star.t); }
+  function starInfo(b,s){ const st=b.el.querySelector('.star'); if(!st) return;  b.el.querySelector('.sn').classList.toggle('big',!!(s&&s[2]>1)); { const sn=b.el.querySelector('.sn'), h=BIN?binL(b.star.n):String(b.star.n); if(sn.innerHTML!==h) sn.innerHTML=h; } const sg=b.el.querySelector('.sig'); sg.innerHTML=s==null?'':'Σ '+(BIN?binL(s[0]):s[0])+(s[2]>1?' 🔗':''); sg.hidden=s==null; b.el.querySelector('.fuse').textContent=Math.ceil(b.star.t); }
   function render(){
     for(const b of S.B) place(el(b),...XY(b.x,b.y));
     const GR=groups(), cst=new Set(); GR.forEach(gr=>gr.L.forEach(o=>{ if(!o.star) cst.add(o); }));
@@ -1966,8 +1966,7 @@ function L6(){
     },
     update(dt){
       if(S.over) return;
-      for(const sb of stars()){ sb.star.t-=dt; if(sb.star.t<=0 && S.phase!=='resolve'){ misfire(sb); render(); return; } }
-      if(S.p && S.p.star) S.p.star.t=Math.max(5,S.p.star.t-dt*.5);
+      // pas de compte à rebours : l'étoile attend tranquillement (demande de Pierre)
       if(S.phase==='resolve'){
         S.rt-=dt; if(S.rt>0) return;
         if(step()){ S.rt=.3; render(); return; }
@@ -2036,14 +2035,14 @@ const TUTOS = [
   ]
 ];
 TUTOS[5] = [
-  { t:'Bravo, tu as trouvé le <b>jeu secret</b> ! Le <b>détonateur</b> est une étoile ⭐ fixée sur un bloc qui tombe. Elle porte un nombre.', el:'.pu.starred' },
+  { t:'Bravo, tu as trouvé le <b>jeu secret</b> ! Dans <b>Binabina</b>, une étoile ⭐ est fixée sur un bloc qui tombe. Elle porte un nombre.', el:'.pu.starred' },
   { t:'Chaque bloc a la <b>taille de sa valeur</b> : le 1 occupe 1 case, le 2 occupe 2 cases, le 4 forme un carré de 4 cases, le 8 un rectangle de 8 cases, le 16 un carré 4x4 ou une barre 2x8. Compte les cases !' },
   { t:'L\'étoile explose quand <b>son bloc</b> et les blocs qui le touchent (de proche en proche) font <b>exactement</b> son nombre de cases. Exemple : étoile 13 sur un bloc 4 : il manque 9 = 8 + 1.' },
   { t:'Selon le mode, l\'étoile est écrite en décimal et les blocs en binaire (<b>0b</b>100 = 4), ou l\'inverse.' },
   { t:'Deux blocs <b>identiques</b> côte à côte (ou l\'un sur l\'autre) fusionnent : 1 + 1 = 2, 2 + 2 = 4… C\'est la <b>retenue</b> du binaire : 0b1 + 0b1 = 0b10.' },
   { t:'Tout tombe : un bloc posé <b>à moitié dans le vide</b> se casse en deux moitiés qui tombent : 4 = 2 + 2, 2 = 1 + 1.' },
   { t:'Un bloc qui touche une étoile devient <b>constellé</b> ✨ : il fait partie de son groupe. Si <b>deux étoiles</b> touchent le même groupe, leurs nombres <b>s\'additionnent</b> (⭐ 5 + ⭐ 6 = 11) ; si le groupe se coupe en deux, chaque étoile repart avec <b>la moitié</b> (11 ÷ 2 = 5, en binaire on enlève le dernier chiffre).' },
-  { t:'Dans l\'étoile, <b>Σ</b> compte les cases déjà réunies. Trop de cases ? Le groupe se <b>pétrifie</b> en <b>pierres grises</b> qui ne comptent plus. La pastille rouge est la <b>mèche</b> : à zéro, le groupe se pétrifie aussi et tu perds une vie.' },
+  { t:'Dans l\'étoile, <b>Σ</b> compte les cases déjà réunies. Trop de cases ? Le groupe se <b>pétrifie</b> en <b>pierres grises</b> qui ne comptent plus.' },
   { t:'L\'explosion détruit aussi les blocs <b>autour du groupe</b> : au moins 1 case, 2 cases à partir de 16, 3 cases à partir de 32. Une pierre <b>collée</b> au groupe se brise tout de suite ; à <b>2 cases</b>, il faut 2 explosions ; à <b>3 cases</b>, il en faut 3 (sa barre de vie le montre).' },
   { t:'Deux étoiles dans le même groupe <b>additionnent leurs nombres</b> : une étoile 5 et une étoile 9 réunies demandent 14 cases. Plus difficile, mais beaucoup plus de points !' },
   { t:'◀ ▶ déplacent le bloc, ⟳ change sa forme, ▼ le descend, <b>Lâcher</b> le fait tomber. Au doigt : touche à côté du bloc pour le déplacer, touche le bloc pour le tourner, glisse vers le bas pour le lâcher. Si le puits déborde, la partie s\'arrête.', el:'#keys' }
@@ -2138,7 +2137,7 @@ const LEVELS = [
   { name:'Les colonnes 16-8-4-2-1', desc:'Remplis les bons récipients pour écrire le nombre en binaire sur 5 bits. Deux modes : une boule par bit, ou une bille par unité.', make:L2 },
   { name:'Le tableau hexa', desc:'Binaire ↔ hexadécimal sur 4 ou 8 bits. Le tableau de conversion s\'enfuit, se salit et attaque.', make:L3 },
   { name:'Pixels et lumières', desc:'Révèle une image codée en hexa, convertis un de ses octets, puis colorie-la en mélangeant les lumières RVB.', make:L4 },
-  { name:'Détonateurs', desc:'Façon Puyo Puyo : des blocs de 1, 2, 4, 8 cases tombent, une étoile-détonateur est fixée sur l\'un d\'eux. Réunis exactement son nombre de cases ! Les blocs égaux fusionnent (1 + 1 = 10), ceux dans le vide se cassent.', make:L6 }
+  { name:'Binabina', desc:'Façon Puyo Puyo : des blocs de 1, 2, 4, 8 cases tombent, une étoile est fixée sur l\'un d\'eux. Réunis exactement son nombre de cases ! Les blocs égaux fusionnent (1 + 1 = 10), ceux dans le vide se cassent.', make:L6 }
 ];
 function renderMenu(){
   const ns=nStars();
