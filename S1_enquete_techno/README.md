@@ -29,3 +29,7 @@ Chaque jeu se termine par « Ta découverte » : un choix + une phrase de l'él�
 ## Ordre et déblocage (15/10/2026)
 
 Ordre : inventions, CyberSpeedScribe, fil d'actu, dopamine, usine (à filtres, puis à tâches), boîte noire, puis zombies, pieuvre, bulle, likes, réseau, sélecteur. Les épreuves s'ouvrent deux par deux : une paire s'ouvre quand les deux épreuves précédentes ont leur découverte notée (les autres sont floutées). Bouton « 🔑 Mode enseignant » sur l'accueil (mot de passe `SNT-PROF`) : tout ouvert, bouton pour quitter. La pieuvre a 6 réseaux, dont « Deux sous-réseaux » avec des zones colorées.
+
+## Photos des inventions
+
+Les photos de l'épreuve « Les inventions » viennent de Wikipédia et Wikimedia Commons (licences libres) ; auteurs et licences dans `photos/credits.json` et dans le jeu (lien « 📷 Crédits photos »). Elles sont intégrées dans la page (aucun chargement externe). Pour les régénérer : modifier `tools/photos.py`, pousser ; l'action GitHub « photos des inventions » dépose le résultat sur la branche `photos`.

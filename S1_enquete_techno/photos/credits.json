@@ -63,11 +63,11 @@
   "file": "Puffing_Billy_steam_engine.JPG"
  },
  "Voiture à moteur à explosion": {
-  "art": "Carl_Benz",
+  "art": "Benz_Velo",
   "path": "S1_enquete_techno/photos/09.jpg",
-  "artist": "Unknown (same photo credited to various stock photo agencies. The copyright is also claimed by the Mercedes-Benz Public ",
-  "license": "Public domain",
-  "file": "Carl_Benz_circa_1920.jpg"
+  "artist": "MOHADASE",
+  "license": "CC BY-SA 4.0",
+  "file": "Benz-velo.jpg"
  },
  "Télégraphe à bras (Chappe)": {
   "art": "Optical_telegraph",
@@ -196,11 +196,11 @@
   "file": "Vinilos_distintos_tamaños.jpg"
  },
  "CD audio": {
-  "art": "fr:Disque_compact",
+  "art": "CD-ROM",
   "path": "S1_enquete_techno/photos/28.png",
   "artist": "",
   "license": "",
-  "file": "langfr-500px-Compact_Disc_wordmark.svg.png"
+  "file": "500px-Compact_Disc_wordmark.svg.png"
  },
  "Musique en MP3": {
   "art": "Portable_media_player",
