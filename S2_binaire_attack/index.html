@@ -272,6 +272,9 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .pu .star.hot{animation:pulse .35s infinite alternate}
 .pu .fuse{position:absolute;right:-2px;top:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font:700 10px/18px var(--f-mono);text-align:center;z-index:3}
 .pu.ghost{opacity:.18;z-index:4;transition:none}
+.pu.const{border-color:var(--amber);box-shadow:0 0 10px rgba(255,181,71,.5),inset 0 -4px 0 #0003}
+.pu.const::after{content:"";position:absolute;inset:0;border-radius:6px;pointer-events:none;background-image:radial-gradient(circle,#fff 0 1.2px,transparent 1.8px),radial-gradient(circle,#ffd76a 0 1.6px,transparent 2.3px),radial-gradient(circle,#fff 0 .9px,transparent 1.5px);background-size:17px 19px,23px 21px,13px 15px;background-position:3px 4px,9px 11px,6px 2px;animation:twk 1.6s infinite alternate}
+@keyframes twk{from{opacity:.45}to{opacity:1}}
 .pu.pop{animation:pupop .32s forwards;z-index:9}
 @keyframes pupop{40%{transform:scale(1.35)}100%{transform:scale(0);opacity:0}}
 .pu.merge{animation:pumerge .3s}
@@ -1715,12 +1718,28 @@ function L6(){
   function neigh(b,g){ const s=new Set(); for(let y=b.y;y<b.y+b.h;y++) for(let x=b.x;x<b.x+b.w;x++) for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){ const X=x+dx, Y=y+dy; if(X<0||X>=COLS||Y<0||Y>=ROWS) continue; const o=g[Y][X]; if(o&&o!==b) s.add(o); } return s; }
   // vie d'une pierre : 1 pour un bloc 1, 2 pour un 2, 3 pour un 4, 4 pour un 8, 5 pour un 16
   const hpOf=v=>1+Math.log2(v);
+  let SID=0;
   const stars=()=>S.B.filter(b=>b.star&&!b.stone);
   const starB=()=>stars()[0];
   // groupes : chaque étoile avec les blocs qui la touchent ; deux étoiles dans le même groupe additionnent leurs nombres
   function groups(){
     const g=occ(), out=[], done=new Set();
-    for(const sb of stars()){ if(done.has(sb)) continue; const cl=cluster(sb,g); const st=cl.L.filter(o=>o.star); st.forEach(o=>done.add(o)); out.push({ L:cl.L, sum:cl.sum, st, n:st.reduce((a,o)=>a+o.star.n,0) }); }
+    for(const sb of stars()){ if(done.has(sb)) continue; const cl=cluster(sb,g); const st=cl.L.filter(o=>o.star); st.forEach(o=>done.add(o)); out.push({ L:cl.L, sum:cl.sum, st, n:0 }); }
+    // constellation : les étoiles d'un même groupe partagent un seul nombre (la somme) ;
+    // si le groupe se coupe, chaque morceau garde sa part (deux étoiles qui se séparent : le nombre est divisé par deux)
+    for(const gr of out){
+      const key=gr.st.map(o=>o.star.id).sort((a,b)=>a-b).join('-');
+      if(gr.st.every(o=>o.star.gid===key)){ gr.n=gr.st[0].star.n; continue; }
+      const by={}; gr.st.forEach(o=>{ const k=o.star.gid||String(o.star.id); (by[k]=by[k]||{ n:o.star.n, size:o.star.gs||1, c:0 }).c++; });
+      const parts=Object.values(by); let n=0, cut=null;
+      for(const x of parts){ if(x.c>=x.size) n+=x.n; else { const h=Math.floor(x.n*x.c/x.size); cut=[x.n,h,x.size/x.c]; n+=h; } }
+      n=Math.max(1,n); const t=Math.max(...gr.st.map(o=>o.star.t));
+      gr.st.forEach(o=>Object.assign(o.star,{ n, gid:key, gs:gr.st.length, t }));
+      gr.n=n;
+      if(S.cs&&gr.st[0].el){ const o=gr.st[0], [x,y]=XY(o.x+.5,o.y);
+        if(parts.length>1) floatTxt(x,y,'⭐ '+parts.map(p=>nameOf(p.c<p.size?Math.floor(p.n*p.c/p.size):p.n)).join(' + ⭐ ')+' = '+nameOf(n),'good');
+        else if(cut) floatTxt(x,y,`⭐ ${nameOf(cut[0])} ÷ ${cut[2]} = ${nameOf(cut[1])}`,'bad'); }
+    }
     return out;
   }
   // le groupe de l'étoile : son bloc + tous les blocs qui le touchent, de proche en proche
@@ -1744,7 +1763,7 @@ function L6(){
       const pop=x=>x.toString(2).split('1').length-1, mp=S.nb<3?2:S.nb<8?3:4;
       const b=mkBlock(pick([1,1,2,4])); let n;
       do{ n=randi(b.v+1,S.maxT); }while(pop(n)>mp||pop(n)<2);
-      b.star={ n, t:fuse() }; return b;
+      b.star={ n, t:fuse(), id:++SID }; return b;
     }
     return weight();
   }
@@ -1801,7 +1820,7 @@ function L6(){
       let w=a.w, h=a.h;
       if(a.y===b.y && a.x+a.w===b.x) w*=2; else if(a.x===b.x && a.y+a.h===b.y) h*=2; else continue;
       const v=a.v*2; if(!SHAPES[v].some(([W,H])=>W===w&&H===h)) continue;
-      const eb=el(b); a.v=v; a.w=w; a.h=h; a.star=a.star&&b.star?{ n:a.star.n+b.star.n, t:Math.max(a.star.t,b.star.t) }:a.star||b.star; redraw(a); a.el.classList.add('merge'); place(a.el,...XY(a.x,a.y));
+      const eb=el(b); a.v=v; a.w=w; a.h=h; a.star=a.star&&b.star?{ n:a.star.gid&&a.star.gid===b.star.gid?a.star.n:a.star.n+b.star.n, t:Math.max(a.star.t,b.star.t), id:a.star.id, gid:String(a.star.id), gs:1 }:a.star||b.star; redraw(a); a.el.classList.add('merge'); place(a.el,...XY(a.x,a.y));
       eb.classList.add('pop'); setTimeout(()=>eb.remove(),320); S.B.splice(S.B.indexOf(b),1);
       const [x,y]=XY(a.x+a.w/2,a.y); floatTxt(x,y,BIN?`${v/2} + ${v/2} = ${v}`:`0b${(v/2).toString(2)} + 0b${(v/2).toString(2)} = 0b${v.toString(2)}`,'good'); addScore(2);
       return true;
@@ -1828,7 +1847,7 @@ function L6(){
       const sh=mk('div','pu-shock'); sh.style.setProperty('--sz',((Math.max(x1-x0,y1-y0)+2*rad)*S.cs)+'px'); place(sh,cx,cy); setTimeout(()=>sh.remove(),460);
       const nst=around.filter(o=>o.stone&&gone.has(o)).length;
       addScore((15+gr.L.length*10+Math.round(Math.min(...gr.st.map(o=>o.star.t)))+around.length*4)*S.chain*gr.st.length,cx,cy);
-      banner(`${gr.st.length>1?gr.st.map(o=>nameOf(o.star.n)).join(' ⭐ ')+' → ':''}${nameOf(n)} = ${gr.L.map(o=>o.v).sort((a,b)=>b-a).map(nameOf).join(' + ')}${nst?` · ${nst} pierre${nst>1?'s':''} brisée${nst>1?'s':''}`:''}`,'good');
+      banner(`${gr.st.length>1?gr.st.length+' étoiles liées ⭐ ':''}${nameOf(n)} = ${gr.L.map(o=>o.v).sort((a,b)=>b-a).map(nameOf).join(' + ')}${nst?` · ${nst} pierre${nst>1?'s':''} brisée${nst>1?'s':''}`:''}`,'good');
       S.nb++; if(S.nb===6){ S.maxT=31; setTimeout(()=>banner('Nouveau : le bloc 16 et des étoiles jusqu\'à 31 !','good'),1700); }
     }
     gone.forEach(kill);
@@ -1849,10 +1868,12 @@ function L6(){
     S.phase='resolve'; S.rt=.3; S.chain=0;
   }
   // ---- affichage ----
-  function starInfo(b,s){ const st=b.el.querySelector('.star'); if(!st) return; st.classList.toggle('hot',b.star.t<8); b.el.querySelector('.sn').classList.toggle('hot',b.star.t<8); const sg=b.el.querySelector('.sig'); sg.innerHTML=s==null?'':'Σ '+(BIN?binL(s[0]):s[0])+(s[2]>1?' / '+(BIN?binL(s[1]):s[1]):''); sg.hidden=s==null; b.el.querySelector('.fuse').textContent=Math.ceil(b.star.t); }
+  function starInfo(b,s){ const st=b.el.querySelector('.star'); if(!st) return; st.classList.toggle('hot',b.star.t<8); b.el.querySelector('.sn').classList.toggle('hot',b.star.t<8); const sg=b.el.querySelector('.sig'); sg.innerHTML=s==null?'':'Σ '+(BIN?binL(s[0]):s[0])+(s[2]>1?' 🔗':''); sg.hidden=s==null; b.el.querySelector('.fuse').textContent=Math.ceil(b.star.t); }
   function render(){
     for(const b of S.B) place(el(b),...XY(b.x,b.y));
-    for(const gr of groups()) gr.st.forEach(o=>starInfo(o,[gr.sum,gr.n,gr.st.length]));
+    const GR=groups(), cst=new Set(); GR.forEach(gr=>gr.L.forEach(o=>{ if(!o.star) cst.add(o); }));
+    for(const b of S.B) if(b.el) b.el.classList.toggle('const',cst.has(b));
+    for(const gr of GR) gr.st.forEach(o=>starInfo(o,[gr.sum,gr.n,gr.st.length]));
     if(S.ghost){ S.ghost.remove(); S.ghost=null; }
     const p=S.p;
     if(p){
@@ -1963,6 +1984,7 @@ TUTOS[5] = [
   { t:'Selon le mode, l\'étoile est écrite en décimal et les blocs en binaire (<b>0b</b>100 = 4), ou l\'inverse.' },
   { t:'Deux blocs <b>identiques</b> côte à côte (ou l\'un sur l\'autre) fusionnent : 1 + 1 = 2, 2 + 2 = 4… C\'est la <b>retenue</b> du binaire : 0b1 + 0b1 = 0b10.' },
   { t:'Tout tombe : un bloc posé <b>à moitié dans le vide</b> se casse en deux moitiés qui tombent : 4 = 2 + 2, 2 = 1 + 1.' },
+  { t:'Un bloc qui touche une étoile devient <b>constellé</b> ✨ : il fait partie de son groupe. Si <b>deux étoiles</b> touchent le même groupe, leurs nombres <b>s\'additionnent</b> (⭐ 5 + ⭐ 6 = 11) ; si le groupe se coupe en deux, chaque étoile repart avec <b>la moitié</b> (11 ÷ 2 = 5, en binaire on enlève le dernier chiffre).' },
   { t:'Dans l\'étoile, <b>Σ</b> compte les cases déjà réunies. Trop de cases ? Le groupe se <b>pétrifie</b> en <b>pierres grises</b> qui ne comptent plus. La pastille rouge est la <b>mèche</b> : à zéro, le groupe se pétrifie aussi et tu perds une vie.' },
   { t:'L\'explosion détruit aussi les blocs <b>autour du groupe</b> : au moins 1 case, 2 cases à partir de 16, 3 cases à partir de 32. Chaque pierre a une <b>barre de vie</b> : chaque explosion proche l\'abîme (plus fort si le nombre est grand), et elle se brise quand sa barre est vide. Les grosses pierres résistent plus longtemps.' },
   { t:'Deux étoiles dans le même groupe <b>additionnent leurs nombres</b> : une étoile 5 et une étoile 9 réunies demandent 14 cases. Plus difficile, mais beaucoup plus de points !' },
