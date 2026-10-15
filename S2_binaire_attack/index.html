@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Binaire Attack</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v41 · 15/10/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v42 · 15/10/2026</div>
 <!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
 <button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 62px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
 <script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
@@ -425,6 +425,7 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .lw-bits span.one{color:var(--amber)} .lw-bits span.zero{color:var(--line)}
 .lw-log{margin:0;padding:0;list-style:none;font:500 14px/1.5 var(--f-mono);max-width:62ch;min-height:4.5em}
 .lw-log li.on{color:var(--amber)} .lw-log li.off{color:var(--muted)}
+.lw-casc{display:block;margin:0 auto;background:var(--deep);border:1px solid var(--line);border-radius:12px;touch-action:manipulation}
 .lw-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
 @media (max-width:480px){ .lw-nav .lw-w{display:none} .lw-dots{gap:4px;flex-wrap:nowrap} .lw-dots i{width:7px;height:7px} .lw-nav .btn{padding:0 12px;white-space:nowrap} }
 </style>
@@ -2199,6 +2200,8 @@ const Learn=(()=>{
       x:'Une activité « CS Unplugged » : cinq cartes portent <b>16, 8, 4, 2 et 1 points</b> (chacune le double de la suivante). On montre certaines cartes et on en retourne d\'autres. <b>Pour lire</b> un nombre, on compte les points visibles. <b>Pour écrire</b> un nombre, on part de la plus grande carte : si elle ne dépasse pas ce qu\'il reste, on la montre et on enlève sa valeur ; sinon on la laisse retournée. Touche les cartes, ou regarde un exemple.' },
     { t:'Le binaire', N:23, B:2, min:5, packed:true, ctl:'pack',
       x:`Avec des tas qui doublent, chaque case contient <b>0 ou 1</b> tas : deux chiffres suffisent. C'est le <b>binaire</b> (la base 2). 23 = 16 + 4 + 2 + 1 : on écrit 1 dans les cases 16, 4, 2 et 1, et 0 dans la case 8, soit 10111. Mais attention : « 10111 » pourrait aussi se lire « dix mille cent onze » en décimal, ou être un nombre en hexadécimal ! Pour savoir dans quelle base il est écrit, on met devant un petit préfixe, comme en Python : ${py('0b')} pour le <b>binaire</b> (${py('0b10111')}), ${py('0x')} pour l'<b>hexadécimal</b> (base 16, ${py('0x17')}), et rien pour le <b>décimal</b> (23). Ces trois écritures désignent le même nombre de billes.` },
+    { t:'La cascade : l\'algorithme de conversion', ctl:'cascade', N:0,
+      x:'On verse toutes les billes dans le récipient <b>16</b>. S\'il se remplit, il devient <b style="color:var(--good)">vert</b> et le <b>trop-plein</b> coule dans le récipient 8. S\'il ne se remplit pas, il devient <b style="color:var(--bad)">rouge</b> et <b>se vide</b> dans le récipient suivant. Et ainsi de suite jusqu\'au récipient 1. Vert = 1, rouge = 0 : on vient d\'écrire le nombre en binaire !' },
     { t:'À toi : choisis billes et paquets', N:45, B:2, min:1, packed:true, ctl:'free',
       x:'Change le nombre de billes, et range-les en paquets de 10 ou en tas de 2. C\'est toujours la même quantité de billes, écrite de deux façons : en décimal et en binaire.' },
     { t:'Pourquoi l\'électronique compte en binaire', N:23, B:2, min:5, packed:true, ctl:'leds',
@@ -2310,9 +2313,107 @@ const Learn=(()=>{
       const paint=()=>{ ctl.innerHTML=ledsHTML(st.N,true)+signalSVG(); bindLeds(ctl,()=>st.N,n=>{ st.N=n; st.packed=true; paint(); draw(); }); };
       paint();
     } else if(c==='cards'){ cards(my); }
+    else if(c==='cascade'){ cascade(my); }
     else if(c==='quiz'){ Q={i:0,ok:0}; quiz(); }
   }
 
+  // la cascade (idée de Pierre) : les billes remplissent le récipient 16 ; plein = vert, le trop-plein coule dans le suivant ;
+  // pas plein = rouge, il se vide dans le suivant… c'est l'algorithme de conversion en binaire
+  function cascade(my){
+    const CAP=[16,8,4,2,1], COLS=[4,4,2,2,1];
+    ctl.innerHTML=`<div class="lw-quiz" style="padding:0;width:100%">
+      <canvas class="lw-casc" id="lw-cv" aria-label="Cascade de récipients 16, 8, 4, 2, 1"></canvas>
+      <ul class="lw-log" id="lw-cl"></ul>
+      <div class="lw-row"><span>Nombre :</span>${[27,19,22,13].map(v=>`<button class="btn" data-n="${v}">${v}</button>`).join('')}<button class="btn" data-n="r">Au hasard</button></div>
+      <div class="lw-row"><button class="btn ok" id="lw-cgo">▶ Verser</button><button class="btn" id="lw-cpred">🔮 Je devine d'abord</button></div></div>`;
+    const cv=$('#lw-cv'), cx=cv.getContext('2d'), log=$('#lw-cl');
+    let N=27, R=null, pred=null, run=0, W=0, H=0, geo=[];
+    function size(){
+      const w=Math.min(ctl.clientWidth||360,620), dpr=devicePixelRatio||1;
+      // récipients en escalier : chacun un peu plus bas et à droite du précédent, sans se toucher
+      const slot=w/5.2, b=Math.min(12,(slot*.84-8)/8), dy=Math.min(30,w*.06);
+      geo=CAP.map((c,i)=>{ const cols=COLS[i], rows=c/cols, gw=cols*b*2+8, gh=rows*b*2+8, x=slot*(i+.6)-gw/2, top=78+i*dy;
+        return { x, top, w:gw, h:gh, b, cols, cx:x+gw/2 }; });
+      const h=Math.round(Math.max(...geo.map(g=>g.top+g.h))+56);
+      cv.width=w*dpr; cv.height=h*dpr; cv.style.width=w+'px'; cv.style.height=h+'px'; cx.setTransform(dpr,0,0,dpr,0,0); W=w; H=h;
+    }
+    const fresh=()=>({ c:[0,0,0,0,0], land:[0,0,0,0,0], st:['','','','',''], src:N, origin:-1, spill:null, cur:0, fly:[], t:0, done:false });
+    function slotXY(i,k){ const g=geo[i], col=k%g.cols, row=Math.floor(k/g.cols); return [g.x+4+g.b+col*g.b*2, g.top+g.h-4-g.b-row*g.b*2]; }
+    // point de départ d'une bille : le grand nombre, le bord du récipient qui déborde, ou le robinet de celui qui se vide
+    function fromXY(o,over){ if(o<0) return [geo[0].cx, 34]; const g=geo[o]; return over?[g.x+g.w,g.top]:[g.x+g.w-4,g.top+g.h]; }
+    function say(t,cls){ log.insertAdjacentHTML('beforeend',`<li class="${cls||''}">${t}</li>`); }
+    function step(){
+      // une bille part : soit du tas (ou d'un récipient rouge qui se vide), soit on décide vert/rouge
+      if(R.cur>=5){ return false; }
+      const i=R.cur;
+      if(R.c[i]===CAP[i]) return false;
+      if(R.src>0){
+        const k=R.c[i]++; R.src--;
+        if(R.origin>=0){ R.c[R.origin]--; R.land[R.origin]--; }
+        const [x0,y0]=R.spill!=null?fromXY(R.spill,true):fromXY(R.origin,false), [x1,y1]=slotXY(i,k);
+        R.fly.push({ x0,y0,x1,y1,t:0,i });
+        if(R.c[i]===CAP[i]){ R.st[i]='g'; const rest=R.src; say(`Récipient <b>${CAP[i]}</b> plein : <b class="gold">vert</b>.${rest?` Il reste ${rest} bille${rest>1?'s':''} : ${rest>1?'elles débordent':'elle déborde'} dans le récipient ${CAP[i+1]||''}.`:' Il ne reste plus de bille.'}`,'on'); R.cur++; R.spill=i; }
+        return true;
+      }
+      // plus de billes qui arrivent et récipient pas plein : rouge, il se vide dans le suivant
+      R.st[i]='r'; R.spill=null; const n=R.c[i];
+      say(`Récipient <b>${CAP[i]}</b> pas plein (${n} bille${n>1?'s':''}) : <b style="color:var(--bad)">rouge</b>.${n&&i<4?` Il se vide dans le récipient ${CAP[i+1]}.`:''}`,'off');
+      R.cur++; if(n && i<4){ R.src=n; R.origin=i; } else { R.src=0; R.origin=-1; }
+      return true;
+    }
+    function draw(){
+      cx.clearRect(0,0,W,H);
+      // grand nombre et billes restantes
+      cx.font=`700 ${Math.min(40,W*.09)}px JetBrains Mono, monospace`; cx.textAlign='center'; cx.fillStyle='#ffb547';
+      const left=R&&R.origin<0?R.src:(R?0:N);
+      cx.textAlign='center'; cx.fillText(String(N),geo[0].cx,40); cx.font='500 12px JetBrains Mono, monospace'; cx.fillStyle='#9d96cc';
+      cx.fillText(R&&!R.done?`${left} bille${left>1?'s':''} à verser`:'billes',geo[0].cx,58);
+      geo.forEach((g,i)=>{
+        const s=R?R.st[i]:'', col=s==='g'?'#6ee7a0':s==='r'?'#ff5a5a':'#5a5390';
+        if(i<4){ const n=geo[i+1]; cx.strokeStyle='#3a3468'; cx.lineWidth=3; cx.beginPath(); cx.moveTo(g.x+g.w,g.top); cx.lineTo(n.cx,n.top-6); cx.stroke();
+          cx.beginPath(); cx.moveTo(g.x+g.w-4,g.top+g.h); cx.quadraticCurveTo(g.x+g.w+8,g.top+g.h+14,n.x+4,n.top-4); cx.setLineDash([3,4]); cx.stroke(); cx.setLineDash([]); }
+        cx.fillStyle=s==='g'?'rgba(110,231,160,.18)':s==='r'?'rgba(255,90,90,.15)':'rgba(255,255,255,.04)'; cx.fillRect(g.x,g.top,g.w,g.h);
+        cx.strokeStyle=col; cx.lineWidth=3; cx.beginPath(); cx.moveTo(g.x,g.top-4); cx.lineTo(g.x,g.top+g.h); cx.lineTo(g.x+g.w,g.top+g.h); cx.lineTo(g.x+g.w,g.top-4); cx.stroke();
+        const land=R?R.land[i]:0;
+        for(let k=0;k<land;k++){ const [x,y]=slotXY(i,k); ball(x,y,g.b-1,i); }
+        cx.font=`700 ${Math.min(18,W*.045)}px JetBrains Mono, monospace`; cx.fillStyle='#ece8ff'; cx.textAlign='center'; cx.fillText(CAP[i],g.cx,g.top+g.h+20);
+        const bit=s==='g'?'1':s==='r'?'0':'';
+        if(R&&R.done){ cx.font=`700 ${Math.min(26,W*.06)}px JetBrains Mono, monospace`; cx.fillStyle=s==='g'?'#6ee7a0':'#ff5a5a'; cx.fillText(bit,g.cx,g.top+g.h+46); }
+        if(pred){ const p=pred[i]; cx.font='700 14px JetBrains Mono, monospace'; cx.fillStyle=p===''?'#9d96cc':'#ffe14a'; cx.fillText(p===''?'?':p==='1'?'devine : 1':'devine : 0',g.cx,g.top-12); }
+      });
+      if(R) R.fly.forEach(f=>{ const t=f.t, x=f.x0+(f.x1-f.x0)*t, y=f.y0+(f.y1-f.y0)*t-Math.sin(t*Math.PI)*24; ball(x,y,geo[f.i].b-1,f.i); });
+    }
+    function ball(x,y,r,i){ cx.fillStyle=['#ffb547','#5ce1e6','#b69cff','#ff6aa8','#6ee7a0'][i]; cx.beginPath(); cx.arc(x,y,Math.max(2,r),0,Math.PI*2); cx.fill(); }
+    function finish(){
+      R.done=true; const bits=R.st.map(s=>s==='g'?1:0), parts=CAP.filter((c,i)=>bits[i]);
+      say(`Vert = 1, rouge = 0 : ${N} = ${parts.join(' + ')} = ${py('0b'+bits.join(''))}`,'on');
+      if(pred){ const ok=pred.filter((p,i)=>p===String(bits[i])).length; say(`Tu avais deviné juste pour <b>${ok} récipient${ok>1?'s':''} sur 5</b>${ok===5?' : bravo !':'.'}`,ok===5?'on':''); }
+      eq.innerHTML=`${N} = ${parts.join(' + ')} → ${py('0b'+bits.join(''))}`;
+    }
+    function play(){
+      const me=++run; R=fresh(); log.innerHTML=`<li>On verse <b>${N}</b> billes dans le récipient 16.</li>`; eq.innerHTML='';
+      let last=performance.now(), acc=0;
+      const loop=now=>{
+        if(my!==token||me!==run) return;
+        const dt=Math.min(.05,(now-last)/1000); last=now; acc+=dt;
+        R.fly.forEach(f=>{ f.t=Math.min(1,f.t+dt*2.6); if(f.t>=1&&!f.done){ f.done=true; R.land[f.i]++; } });
+        R.fly=R.fly.filter(f=>!f.done);
+        // une bille toutes les 90 ms ; on attend que les billes aient atterri avant de juger un récipient
+        if(acc>.09){ acc=0; if(R.src>0||!R.fly.length){ if(!step() && !R.fly.length && !R.done){ finish(); } } }
+        draw();
+        if(!R.done) requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }
+    ctl.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{ run++; N=b.dataset.n==='r'?randi(1,31):+b.dataset.n; R=null; pred=null; log.innerHTML=''; eq.innerHTML=''; draw(); });
+    $('#lw-cgo').onclick=()=>play();
+    $('#lw-cpred').onclick=()=>{ run++; R=null; pred=['','','','','']; log.innerHTML='<li>Touche chaque récipient : finira-t-il <b class="gold">plein (1)</b> ou <b>pas plein (0)</b> ? Puis appuie sur « Verser ».</li>'; draw(); };
+    cv.addEventListener('pointerdown',e=>{ if(!pred||(R&&!R.done)) return; const r=cv.getBoundingClientRect(), x=e.clientX-r.left;
+      const i=geo.findIndex(g=>x>=g.x-12&&x<=g.x+g.w+12); if(i<0) return; pred[i]=pred[i]==='1'?'0':'1'; R=null; draw(); });
+    const onR=()=>{ if(my!==token) return removeEventListener('resize',onR); size(); draw(); };
+    addEventListener('resize',onR);
+    size(); draw();
+  }
   // cartes binaires façon CS Unplugged : retourner, lire, et conversion pas à pas (la plus grande carte d'abord)
   function cards(my){
     let n=0;
@@ -2389,12 +2490,12 @@ const Learn=(()=>{
     st={ N:S.N, B:S.B, packed:S.packed, hide:S.hide, min:S.min, ctl:S.ctl, nobin:S.nobin };
     $('#lw-title').textContent=(step+1)+'. '+S.t;
     $('#lw-text').innerHTML=S.x; $('#lw-text').hidden=!S.x;
-    tab.classList.toggle('off', S.ctl==='quiz' || S.ctl==='cards'); eq.hidden = S.ctl==='quiz';
+    tab.classList.toggle('off', S.ctl==='quiz' || S.ctl==='cards' || S.ctl==='cascade'); eq.hidden = S.ctl==='quiz';
     $('#lw-prev').disabled=step===0;
     $('#lw-next').textContent = step===STEPS.length-1 ? 'Terminer' : 'Suivant ▶';
     $('#lw-dots').innerHTML=STEPS.map((_,k)=>`<i class="${k<=step?'on':''}"></i>`).join('');
     controls();
-    if(S.ctl!=='quiz' && S.ctl!=='cards') draw();
+    if(S.ctl!=='quiz' && S.ctl!=='cards' && S.ctl!=='cascade') draw();
     box.scrollTop=0;
   }
   function open(){
