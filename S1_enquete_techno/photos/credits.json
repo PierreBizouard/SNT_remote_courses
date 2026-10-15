@@ -2,265 +2,274 @@
  "Écriture": {
   "art": "Cuneiform",
   "path": "S1_enquete_techno/photos/00.png",
-  "artist": "",
-  "license": "",
-  "file": "Xerxes_Cuneiform_Van.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Bjørn Christian Tørrissen",
+  "license": "CC BY-SA 3.0",
+  "file": "Xerxes_Cuneiform_Van.JPG"
  },
  "Imprimerie": {
   "art": "Printing_press",
   "path": "S1_enquete_techno/photos/01.png",
-  "artist": "",
-  "license": "",
-  "file": "Gutenberg_press.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "International Printing Museum",
+  "license": "CC0",
+  "file": "Gutenberg_press.png"
  },
  "Machine à écrire": {
   "art": "Typewriter",
   "path": "S1_enquete_techno/photos/02.png",
-  "artist": "",
-  "license": "",
-  "file": "MEK_II-371.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "GodeNehler",
+  "license": "CC BY-SA 4.0",
+  "file": "MEK_II-371.jpg"
  },
  "Web": {
-  "art": "CERN_httpd",
-  "path": "S1_enquete_techno/photos/03.png",
+  "art": "NeXTcube",
+  "path": "S1_enquete_techno/photos/03.jpg",
   "artist": "",
-  "license": "",
-  "file": "Httpd48x.gif?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "license": "CC BY-SA 3.0",
+  "file": "NeXTcube.jpg"
  },
  "Smartphone": {
   "art": "IPhone_(1st_generation)",
   "path": "S1_enquete_techno/photos/04.png",
   "artist": "",
   "license": "",
-  "file": "250px-IPhone_1st_Gen.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "file": "250px-IPhone_1st_Gen.svg.png"
  },
  "Maîtrise du feu": {
   "art": "Campfire",
   "path": "S1_enquete_techno/photos/05.png",
-  "artist": "",
-  "license": "",
-  "file": "Campfire_Pinecone.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Emeldil at English Wikipedia\n\n(Original text: Pavan Srinath)",
+  "license": "CC BY-SA 3.0",
+  "file": "Campfire_Pinecone.png"
  },
  "Roue": {
   "art": "Ljubljana_Marshes_Wooden_Wheel",
   "path": "S1_enquete_techno/photos/06.png",
   "artist": "",
   "license": "",
-  "file": "3840px-Ljubljana_Marshes_Wheel_with_axle_(oldest_wooden_wheel_yet_discovered).jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "file": "3840px-Ljubljana_Marshes_Wheel_with_axle_(oldest_wooden_wheel_yet_discovered).jpg"
  },
  "Machine à vapeur": {
   "art": "Watt_steam_engine",
   "path": "S1_enquete_techno/photos/07.png",
-  "artist": "",
-  "license": "",
-  "file": "Maquina_vapor_Watt_ETSIIM.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Nicolás Pérez",
+  "license": "CC BY-SA 3.0",
+  "file": "Maquina_vapor_Watt_ETSIIM.jpg"
  },
  "Train à vapeur": {
   "art": "Puffing_Billy_(locomotive)",
   "path": "S1_enquete_techno/photos/08.png",
-  "artist": "",
-  "license": "",
-  "file": "Puffing_Billy_steam_engine.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "The original uploader was William M. Connolley at English Wikipedia.",
+  "license": "CC BY-SA 3.0",
+  "file": "Puffing_Billy_steam_engine.JPG"
  },
  "Voiture à moteur à explosion": {
-  "err": "no image",
-  "art": "Benz_Patent_Motorwagen"
+  "art": "Carl_Benz",
+  "path": "S1_enquete_techno/photos/09.jpg",
+  "artist": "Unknown (same photo credited to various stock photo agencies. The copyright is also claimed by the Mercedes-Benz Public ",
+  "license": "Public domain",
+  "file": "Carl_Benz_circa_1920.jpg"
  },
  "Télégraphe à bras (Chappe)": {
   "art": "Optical_telegraph",
   "path": "S1_enquete_techno/photos/10.png",
-  "artist": "",
-  "license": "",
-  "file": "OptischerTelegraf.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Lokilech at German Wikipedia",
+  "license": "CC BY-SA 3.0",
+  "file": "OptischerTelegraf.jpg"
  },
  "Télégraphe électrique": {
   "art": "Electrical_telegraph",
   "path": "S1_enquete_techno/photos/11.png",
-  "artist": "",
-  "license": "",
-  "file": "Cooke_and_Wheatstone_electric_telegraph.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Geni",
+  "license": "CC BY-SA 4.0",
+  "file": "Cooke_and_Wheatstone_electric_telegraph.jpg"
  },
  "Téléphone": {
   "art": "Candlestick_telephone",
   "path": "S1_enquete_techno/photos/12.png",
   "artist": "",
-  "license": "",
-  "file": "Western_Electric_deskstand-Candlestick-telephone-w-subset-kbrose-2022-11-22.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "license": "CC BY-SA 4.0",
+  "file": "Western_Electric_deskstand-Candlestick-telephone-w-subset-kbrose-2022-11-22.jpg"
  },
  "Radio": {
   "art": "Crystal_radio",
   "path": "S1_enquete_techno/photos/13.png",
-  "artist": "",
-  "license": "",
-  "file": "Kristallradio.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Holger.Ellgaard",
+  "license": "CC BY-SA 3.0",
+  "file": "Kristallradio.JPG"
  },
  "ARPANET (ancêtre d'Internet)": {
   "art": "Interface_Message_Processor",
   "path": "S1_enquete_techno/photos/14.png",
-  "artist": "",
-  "license": "",
-  "file": "ARPANET_first_router_2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Steve Jurvetson from Menlo Park, USA",
+  "license": "CC BY 2.0",
+  "file": "ARPANET_first_router_2.jpg"
  },
  "Machine à calculer de Pascal": {
   "art": "Pascal's_calculator",
   "path": "S1_enquete_techno/photos/15.png",
   "artist": "",
   "license": "",
-  "file": "3840px-Pascaline-CnAM_823-1-IMG_1506-black.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "file": "3840px-Pascaline-CnAM_823-1-IMG_1506-black.jpg"
  },
  "Calcul en binaire": {
   "art": "Gottfried_Wilhelm_Leibniz",
   "path": "S1_enquete_techno/photos/16.png",
   "artist": "",
   "license": "",
-  "file": "3840px-Christoph_Bernhard_Francke_-_Bildnis_des_Philosophen_Leibniz_(ca._1695).jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "file": "3840px-Christoph_Bernhard_Francke_-_Bildnis_des_Philosophen_Leibniz_(ca._1695).jpg"
  },
  "Cartes perforées (métier Jacquard)": {
   "art": "Jacquard_machine",
   "path": "S1_enquete_techno/photos/17.png",
-  "artist": "",
-  "license": "",
-  "file": "A_la_mémoire_de_J.M._Jacquard.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Michel Marie Carquillat (tisseur) d'après Claude Bonnefond",
+  "license": "Public domain",
+  "file": "A_la_mémoire_de_J.M._Jacquard.jpg"
  },
  "Premier ordinateur": {
   "art": "ENIAC",
   "path": "S1_enquete_techno/photos/18.png",
-  "artist": "",
-  "license": "",
-  "file": "ENIAC_Penn1.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "The original uploader was TexasDex at English Wikipedia.",
+  "license": "CC BY-SA 3.0",
+  "file": "ENIAC_Penn1.jpg"
  },
  "Microprocesseur": {
   "art": "Intel_4004",
   "path": "S1_enquete_techno/photos/19.png",
   "artist": "",
   "license": "",
-  "file": "3840px-Intel_C4004.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "file": "3840px-Intel_C4004.jpg"
  },
  "Peintures dans les grottes": {
   "art": "Chauvet_Cave",
   "path": "S1_enquete_techno/photos/20.png",
-  "artist": "",
-  "license": "",
-  "file": "Paintings_from_the_Chauvet_cave_(museum_replica).jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "HTO",
+  "license": "Public domain",
+  "file": "Paintings_from_the_Chauvet_cave_(museum_replica).jpg"
  },
  "Photographie": {
   "art": "View_from_the_Window_at_Le_Gras",
   "path": "S1_enquete_techno/photos/21.png",
   "artist": "",
   "license": "",
-  "file": "3840px-Untitled_(point_de_vue),_Niépce_1827_—_HRC_2020_(cropped).jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "file": "3840px-Untitled_(point_de_vue),_Niépce_1827_—_HRC_2020_(cropped).jpg"
  },
  "Cinéma": {
   "art": "Cinématographe",
   "path": "S1_enquete_techno/photos/22.png",
-  "artist": "",
-  "license": "",
-  "file": "Institut_Lumière_-_CINEMATOGRAPHE_Camera.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Victorgrigas",
+  "license": "CC BY-SA 4.0",
+  "file": "Institut_Lumière_-_CINEMATOGRAPHE_Camera.jpg"
  },
  "Télévision": {
   "art": "Mechanical_television",
   "path": "S1_enquete_techno/photos/23.png",
-  "artist": "",
-  "license": "",
-  "file": "Science_and_Invention_Television_1928.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Unknown authorUnknown author",
+  "license": "Public domain",
+  "file": "Science_and_Invention_Television_1928.jpg"
  },
  "Appareil photo numérique": {
   "art": "Digital_camera",
   "path": "S1_enquete_techno/photos/24.png",
-  "artist": "",
-  "license": "",
-  "file": "Canon_PowerShot_A95_-_front_and_back.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Fir0002 (composite version by Matt57)",
+  "license": "GFDL 1.2",
+  "file": "Canon_PowerShot_A95_-_front_and_back.jpg"
  },
  "Flûte en os": {
-  "err": "no image",
-  "art": "Paleolithic_flutes"
+  "art": "Divje_Babe_flute",
+  "path": "S1_enquete_techno/photos/25.jpg",
+  "artist": "Petar Milošević",
+  "license": "CC BY-SA 4.0",
+  "file": "Divje_Babe_flute_(Late_Pleistocene_flute).jpg"
  },
  "Microphone": {
   "art": "Microphone",
   "path": "S1_enquete_techno/photos/26.png",
-  "artist": "",
-  "license": "",
-  "file": "Shure_mikrofon_55S.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Holger.Ellgaard",
+  "license": "CC BY-SA 3.0",
+  "file": "Shure_mikrofon_55S.jpg"
  },
  "Disque vinyle": {
   "art": "Phonograph_record",
   "path": "S1_enquete_techno/photos/27.png",
-  "artist": "",
-  "license": "",
-  "file": "Vinilos_distintos_tamaños.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Banfield",
+  "license": "CC BY-SA 3.0",
+  "file": "Vinilos_distintos_tamaños.jpg"
  },
  "CD audio": {
-  "art": "Compact_disc",
+  "art": "fr:Disque_compact",
   "path": "S1_enquete_techno/photos/28.png",
   "artist": "",
   "license": "",
-  "file": "500px-Compact_Disc_wordmark.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "file": "langfr-500px-Compact_Disc_wordmark.svg.png"
  },
  "Musique en MP3": {
   "art": "Portable_media_player",
   "path": "S1_enquete_techno/photos/29.png",
-  "artist": "",
-  "license": "",
-  "file": "Archos.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Michiel1972 at Dutch Wikipedia",
+  "license": "CC BY-SA 3.0",
+  "file": "Archos.jpg"
  },
  "Pile électrique (Volta)": {
-  "art": "Voltaic_pile",
-  "path": "S1_enquete_techno/photos/30.png",
-  "artist": "",
-  "license": "",
-  "file": "960px-Voltaic_pile.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "art": "fr:Pile_voltaïque",
+  "path": "S1_enquete_techno/photos/30.jpg",
+  "artist": "Luigi Chiesa",
+  "license": "CC BY-SA 3.0",
+  "file": "Pila_di_Volta_01.jpg"
  },
  "Batterie rechargeable au plomb": {
   "art": "Lead–acid_battery",
   "path": "S1_enquete_techno/photos/31.png",
-  "artist": "",
-  "license": "",
-  "file": "Photo-CarBattery.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "No machine-readable author provided. Shaddack assumed (based on copyright claims).",
+  "license": "Public domain",
+  "file": "Photo-CarBattery.jpg"
  },
  "Ampoule électrique": {
   "art": "Incandescent_light_bulb",
   "path": "S1_enquete_techno/photos/32.png",
-  "artist": "",
-  "license": "",
-  "file": "Gluehlampe_01_KMJ.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "KMJ, alpha masking by Edokter",
+  "license": "CC BY-SA 3.0",
+  "file": "Gluehlampe_01_KMJ.png"
  },
  "Centrale électrique": {
   "art": "Pearl_Street_Station",
   "path": "S1_enquete_techno/photos/33.png",
-  "artist": "",
-  "license": "",
-  "file": "PearlStreetStation.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Earl Morter",
+  "license": "Public domain",
+  "file": "PearlStreetStation.jpg"
  },
  "Batterie lithium-ion": {
   "art": "Lithium-ion_battery",
   "path": "S1_enquete_techno/photos/34.png",
-  "artist": "",
-  "license": "",
-  "file": "Li_ion_laptop_battery.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Kristoferb",
+  "license": "CC BY-SA 3.0",
+  "file": "Li_ion_laptop_battery.jpg"
  },
  "Automate joueur d'échecs (truqué !)": {
-  "err": "no image",
-  "art": "The_Turk"
+  "art": "Mechanical_Turk",
+  "path": "S1_enquete_techno/photos/35.jpg",
+  "artist": "Joseph Racknitz",
+  "license": "Public domain",
+  "file": "Racknitz_-_The_Turk_3.jpg"
  },
  "Ordinateur champion d'échecs": {
   "art": "Deep_Blue_(chess_computer)",
   "path": "S1_enquete_techno/photos/36.png",
-  "artist": "",
-  "license": "",
-  "file": "Deep_Blue.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "James the photographer",
+  "license": "CC BY 2.0",
+  "file": "Deep_Blue.jpg"
  },
  "Assistant vocal": {
   "art": "IPhone_4S",
   "path": "S1_enquete_techno/photos/37.png",
-  "artist": "",
-  "license": "",
-  "file": "IPhone_4S_No_shadow.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  "artist": "Zach Vega",
+  "license": "CC BY-SA 3.0",
+  "file": "IPhone_4S_No_shadow.png"
  },
  "ChatGPT": {
   "art": "ChatGPT",
   "path": "S1_enquete_techno/photos/38.png",
   "artist": "",
   "license": "",
-  "file": "960px-OpenAI_logo_2025_(symbol).svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  "file": "960px-OpenAI_logo_2025_(symbol).svg.png"
  }
 }

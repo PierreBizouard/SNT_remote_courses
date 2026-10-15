@@ -2,11 +2,11 @@
 import json, os, re, time, urllib.request, urllib.parse, urllib.error, html
 T={
  'Écriture':'Cuneiform','Imprimerie':'Printing_press','Machine à écrire':'Typewriter','Web':'NeXTcube','Smartphone':'IPhone_(1st_generation)',
- 'Maîtrise du feu':'Campfire','Roue':'Ljubljana_Marshes_Wooden_Wheel','Machine à vapeur':'Watt_steam_engine','Train à vapeur':'Puffing_Billy_(locomotive)','Voiture à moteur à explosion':'Carl_Benz',
+ 'Maîtrise du feu':'Campfire','Roue':'Ljubljana_Marshes_Wooden_Wheel','Machine à vapeur':'Watt_steam_engine','Train à vapeur':'Puffing_Billy_(locomotive)','Voiture à moteur à explosion':'Benz_Velo',
  'Télégraphe à bras (Chappe)':'Optical_telegraph','Télégraphe électrique':'Electrical_telegraph','Téléphone':'Candlestick_telephone','Radio':'Crystal_radio',"ARPANET (ancêtre d'Internet)":'Interface_Message_Processor',
  'Machine à calculer de Pascal':"Pascal's_calculator",'Calcul en binaire':'Gottfried_Wilhelm_Leibniz','Cartes perforées (métier Jacquard)':'Jacquard_machine','Premier ordinateur':'ENIAC','Microprocesseur':'Intel_4004',
  'Peintures dans les grottes':'Chauvet_Cave','Photographie':'View_from_the_Window_at_Le_Gras','Cinéma':'Cinématographe','Télévision':'Mechanical_television','Appareil photo numérique':'Digital_camera',
- 'Flûte en os':'Divje_Babe_flute','Microphone':'Microphone','Disque vinyle':'Phonograph_record','CD audio':'fr:Disque_compact','Musique en MP3':'Portable_media_player',
+ 'Flûte en os':'Divje_Babe_flute','Microphone':'Microphone','Disque vinyle':'Phonograph_record','CD audio':'CD-ROM','Musique en MP3':'Portable_media_player',
  'Pile électrique (Volta)':'fr:Pile_voltaïque','Batterie rechargeable au plomb':'Lead–acid_battery','Ampoule électrique':'Incandescent_light_bulb','Centrale électrique':'Pearl_Street_Station','Batterie lithium-ion':'Lithium-ion_battery',
  "Automate joueur d'échecs (truqué !)":'Mechanical_Turk','Ordinateur champion d\'échecs':'Deep_Blue_(chess_computer)','Assistant vocal':'IPhone_4S','ChatGPT':'ChatGPT'
 }
