@@ -28,4 +28,4 @@ Chaque jeu se termine par « Ta découverte » : un choix + une phrase de l'él�
 
 ## Ordre et déblocage (15/10/2026)
 
-Ordre : inventions, CyberSpeedScribe, fil d'actu, dopamine, usine (à filtres, puis à tâches), boîte noire, puis zombies, pieuvre, bulle, likes, réseau, sélecteur. Les épreuves s'ouvrent deux par deux : une paire s'ouvre quand les deux épreuves précédentes ont leur découverte notée (les autres sont floutées). Code prof `SNT-PROF` (page « Mes découvertes ») : tout ouvert. La pieuvre a 6 réseaux, dont « Deux sous-réseaux » avec des zones colorées.
+Ordre : inventions, CyberSpeedScribe, fil d'actu, dopamine, usine (à filtres, puis à tâches), boîte noire, puis zombies, pieuvre, bulle, likes, réseau, sélecteur. Les épreuves s'ouvrent deux par deux : une paire s'ouvre quand les deux épreuves précédentes ont leur découverte notée (les autres sont floutées). Bouton « 🔑 Mode enseignant » sur l'accueil (mot de passe `SNT-PROF`) : tout ouvert, bouton pour quitter. La pieuvre a 6 réseaux, dont « Deux sous-réseaux » avec des zones colorées.
