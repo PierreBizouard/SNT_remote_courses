@@ -1,158 +1,266 @@
 {
  "Écriture": {
-  "err": "HTTP Error 400: Use thumbnail sizes listed on https://w.wiki/GHai",
-  "art": "Cuneiform"
+  "art": "Cuneiform",
+  "path": "S1_enquete_techno/photos/00.png",
+  "artist": "",
+  "license": "",
+  "file": "Xerxes_Cuneiform_Van.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Imprimerie": {
-  "err": "HTTP Error 400: Use thumbnail sizes listed on https://w.wiki/GHai",
-  "art": "Printing_press"
+  "art": "Printing_press",
+  "path": "S1_enquete_techno/photos/01.png",
+  "artist": "",
+  "license": "",
+  "file": "Gutenberg_press.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Machine à écrire": {
-  "err": "HTTP Error 400: Use thumbnail sizes listed on https://w.wiki/GHai",
-  "art": "Typewriter"
+  "art": "Typewriter",
+  "path": "S1_enquete_techno/photos/02.png",
+  "artist": "",
+  "license": "",
+  "file": "MEK_II-371.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Web": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "CERN_httpd"
+  "art": "CERN_httpd",
+  "path": "S1_enquete_techno/photos/03.png",
+  "artist": "",
+  "license": "",
+  "file": "Httpd48x.gif?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Smartphone": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "IPhone_(1st_generation)"
+  "art": "IPhone_(1st_generation)",
+  "path": "S1_enquete_techno/photos/04.png",
+  "artist": "",
+  "license": "",
+  "file": "250px-IPhone_1st_Gen.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  },
  "Maîtrise du feu": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Campfire"
+  "art": "Campfire",
+  "path": "S1_enquete_techno/photos/05.png",
+  "artist": "",
+  "license": "",
+  "file": "Campfire_Pinecone.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Roue": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Ljubljana_Marshes_Wooden_Wheel"
+  "art": "Ljubljana_Marshes_Wooden_Wheel",
+  "path": "S1_enquete_techno/photos/06.png",
+  "artist": "",
+  "license": "",
+  "file": "3840px-Ljubljana_Marshes_Wheel_with_axle_(oldest_wooden_wheel_yet_discovered).jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  },
  "Machine à vapeur": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Watt_steam_engine"
+  "art": "Watt_steam_engine",
+  "path": "S1_enquete_techno/photos/07.png",
+  "artist": "",
+  "license": "",
+  "file": "Maquina_vapor_Watt_ETSIIM.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Train à vapeur": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Puffing_Billy_(locomotive)"
+  "art": "Puffing_Billy_(locomotive)",
+  "path": "S1_enquete_techno/photos/08.png",
+  "artist": "",
+  "license": "",
+  "file": "Puffing_Billy_steam_engine.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Voiture à moteur à explosion": {
   "err": "no image",
-  "art": "Benz_Patent-Motorwagen"
+  "art": "Benz_Patent_Motorwagen"
  },
  "Télégraphe à bras (Chappe)": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Optical_telegraph"
+  "art": "Optical_telegraph",
+  "path": "S1_enquete_techno/photos/10.png",
+  "artist": "",
+  "license": "",
+  "file": "OptischerTelegraf.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Télégraphe électrique": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Electrical_telegraph"
+  "art": "Electrical_telegraph",
+  "path": "S1_enquete_techno/photos/11.png",
+  "artist": "",
+  "license": "",
+  "file": "Cooke_and_Wheatstone_electric_telegraph.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Téléphone": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Candlestick_telephone"
+  "art": "Candlestick_telephone",
+  "path": "S1_enquete_techno/photos/12.png",
+  "artist": "",
+  "license": "",
+  "file": "Western_Electric_deskstand-Candlestick-telephone-w-subset-kbrose-2022-11-22.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Radio": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Crystal_radio"
+  "art": "Crystal_radio",
+  "path": "S1_enquete_techno/photos/13.png",
+  "artist": "",
+  "license": "",
+  "file": "Kristallradio.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "ARPANET (ancêtre d'Internet)": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Interface_Message_Processor"
+  "art": "Interface_Message_Processor",
+  "path": "S1_enquete_techno/photos/14.png",
+  "artist": "",
+  "license": "",
+  "file": "ARPANET_first_router_2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Machine à calculer de Pascal": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Pascal's_calculator"
+  "art": "Pascal's_calculator",
+  "path": "S1_enquete_techno/photos/15.png",
+  "artist": "",
+  "license": "",
+  "file": "3840px-Pascaline-CnAM_823-1-IMG_1506-black.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  },
  "Calcul en binaire": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Gottfried_Wilhelm_Leibniz"
+  "art": "Gottfried_Wilhelm_Leibniz",
+  "path": "S1_enquete_techno/photos/16.png",
+  "artist": "",
+  "license": "",
+  "file": "3840px-Christoph_Bernhard_Francke_-_Bildnis_des_Philosophen_Leibniz_(ca._1695).jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  },
  "Cartes perforées (métier Jacquard)": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Jacquard_machine"
+  "art": "Jacquard_machine",
+  "path": "S1_enquete_techno/photos/17.png",
+  "artist": "",
+  "license": "",
+  "file": "A_la_mémoire_de_J.M._Jacquard.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Premier ordinateur": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "ENIAC"
+  "art": "ENIAC",
+  "path": "S1_enquete_techno/photos/18.png",
+  "artist": "",
+  "license": "",
+  "file": "ENIAC_Penn1.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Microprocesseur": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Intel_4004"
+  "art": "Intel_4004",
+  "path": "S1_enquete_techno/photos/19.png",
+  "artist": "",
+  "license": "",
+  "file": "3840px-Intel_C4004.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  },
  "Peintures dans les grottes": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Chauvet_Cave"
+  "art": "Chauvet_Cave",
+  "path": "S1_enquete_techno/photos/20.png",
+  "artist": "",
+  "license": "",
+  "file": "Paintings_from_the_Chauvet_cave_(museum_replica).jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Photographie": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "View_from_the_Window_at_Le_Gras"
+  "art": "View_from_the_Window_at_Le_Gras",
+  "path": "S1_enquete_techno/photos/21.png",
+  "artist": "",
+  "license": "",
+  "file": "3840px-Untitled_(point_de_vue),_Niépce_1827_—_HRC_2020_(cropped).jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  },
  "Cinéma": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Cinématographe"
+  "art": "Cinématographe",
+  "path": "S1_enquete_techno/photos/22.png",
+  "artist": "",
+  "license": "",
+  "file": "Institut_Lumière_-_CINEMATOGRAPHE_Camera.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Télévision": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Mechanical_television"
+  "art": "Mechanical_television",
+  "path": "S1_enquete_techno/photos/23.png",
+  "artist": "",
+  "license": "",
+  "file": "Science_and_Invention_Television_1928.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Appareil photo numérique": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Digital_camera"
+  "art": "Digital_camera",
+  "path": "S1_enquete_techno/photos/24.png",
+  "artist": "",
+  "license": "",
+  "file": "Canon_PowerShot_A95_-_front_and_back.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Flûte en os": {
-  "err": "HTTP Error 429: Too Many Requests",
+  "err": "no image",
   "art": "Paleolithic_flutes"
  },
  "Microphone": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Microphone"
+  "art": "Microphone",
+  "path": "S1_enquete_techno/photos/26.png",
+  "artist": "",
+  "license": "",
+  "file": "Shure_mikrofon_55S.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Disque vinyle": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Phonograph_record"
+  "art": "Phonograph_record",
+  "path": "S1_enquete_techno/photos/27.png",
+  "artist": "",
+  "license": "",
+  "file": "Vinilos_distintos_tamaños.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "CD audio": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Compact_disc"
+  "art": "Compact_disc",
+  "path": "S1_enquete_techno/photos/28.png",
+  "artist": "",
+  "license": "",
+  "file": "500px-Compact_Disc_wordmark.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  },
  "Musique en MP3": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Portable_media_player"
+  "art": "Portable_media_player",
+  "path": "S1_enquete_techno/photos/29.png",
+  "artist": "",
+  "license": "",
+  "file": "Archos.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Pile électrique (Volta)": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Voltaic_pile"
+  "art": "Voltaic_pile",
+  "path": "S1_enquete_techno/photos/30.png",
+  "artist": "",
+  "license": "",
+  "file": "960px-Voltaic_pile.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  },
  "Batterie rechargeable au plomb": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Lead–acid_battery"
+  "art": "Lead–acid_battery",
+  "path": "S1_enquete_techno/photos/31.png",
+  "artist": "",
+  "license": "",
+  "file": "Photo-CarBattery.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Ampoule électrique": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Incandescent_light_bulb"
+  "art": "Incandescent_light_bulb",
+  "path": "S1_enquete_techno/photos/32.png",
+  "artist": "",
+  "license": "",
+  "file": "Gluehlampe_01_KMJ.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Centrale électrique": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Pearl_Street_Station"
+  "art": "Pearl_Street_Station",
+  "path": "S1_enquete_techno/photos/33.png",
+  "artist": "",
+  "license": "",
+  "file": "PearlStreetStation.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Batterie lithium-ion": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Lithium-ion_battery"
+  "art": "Lithium-ion_battery",
+  "path": "S1_enquete_techno/photos/34.png",
+  "artist": "",
+  "license": "",
+  "file": "Li_ion_laptop_battery.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Automate joueur d'échecs (truqué !)": {
-  "err": "HTTP Error 429: Too Many Requests",
+  "err": "no image",
   "art": "The_Turk"
  },
  "Ordinateur champion d'échecs": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "Deep_Blue_(chess_computer)"
+  "art": "Deep_Blue_(chess_computer)",
+  "path": "S1_enquete_techno/photos/36.png",
+  "artist": "",
+  "license": "",
+  "file": "Deep_Blue.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "Assistant vocal": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "IPhone_4S"
+  "art": "IPhone_4S",
+  "path": "S1_enquete_techno/photos/37.png",
+  "artist": "",
+  "license": "",
+  "file": "IPhone_4S_No_shadow.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
  },
  "ChatGPT": {
-  "err": "HTTP Error 429: Too Many Requests",
-  "art": "ChatGPT"
+  "art": "ChatGPT",
+  "path": "S1_enquete_techno/photos/38.png",
+  "artist": "",
+  "license": "",
+  "file": "960px-OpenAI_logo_2025_(symbol).svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
  }
 }
