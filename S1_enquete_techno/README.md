@@ -20,3 +20,7 @@ Séance d'introduction SNT en version ultra-ludique : les élèves font les déc
 Chaque jeu se termine par « Ta découverte » : un choix + une phrase de l'élève. La page « Mes découvertes » récapitule tout et se copie pour l'envoyer au professeur. Les réponses restent sur l'appareil (localStorage).
 
 `enquete-calme.html` : première version, plus calme, en 6 missions (frise, avant -5000, iceberg, panne, love or hate, copie).
+
+## ÉLÉA (Moodle)
+
+`techno-survivor-scorm.zip` : paquet SCORM 1.2 à déposer comme activité SCORM. Note sur 100 = part des 12 épreuves dont la découverte est notée (statut « terminé » à 12/12). Chaque découverte est envoyée comme deux interactions (réponse au QCM, correcte ou non, et phrase de l'élève) : elles se lisent dans le rapport des interactions de l'activité. La progression est gardée sur ÉLÉA.
