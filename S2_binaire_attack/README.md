@@ -13,7 +13,7 @@ Une seule page HTML autonome, jouable sur ordinateur, tablette et téléphone.
 - **1 · Les billes 16-8-4-2-1**
 - **2 · Attaque binaire** (modes Pression : 3 vies, ça accélère ; Récompense : chaque bonne réponse est une brique de l'escalier vers le fromage, de passerelle en passerelle toujours plus haut ; Pression + Récompense : les passerelles, et l'eau monte). Aide en direct : les poids des bits à 1 s'allument et la somme s'affiche
 - **3 · Les colonnes** (modes boules et unités)
-- **4 · Le tableau hexa** (+ QCM)
+- **4 · Le tableau hexa** (+ QCM), avec un 2e mode « Droits d'accès » : chmod en octal (rwx = 4+2+1), demandes vertes à laisser passer, rouges à refuser, corrections chmod u/g/o +/- r/w/x
 - **5 · Pixels et lumières**
 - Jeu secret **Binabina** (5 étoiles, hors note), façon Puyo Puyo : les blocs ont la taille de leur valeur (1, 2, 4, 8 cases ; 16 = 4x4 ou 2x8) et tombent par gravité. Une étoile-détonateur est fixée sur un bloc : elle explose quand son groupe fait exactement son nombre de cases. Blocs identiques alignés : fusion (1 + 1 = 10) ; bloc à moitié dans le vide : il se casse en deux. Trop de cases : le groupe se pétrifie en pierres grises, que le souffle brise (au moins 1 case autour du groupe, plus pour les grands nombres) : collée au groupe, une pierre casse tout de suite ; à 2 cases il faut 2 explosions ; à 3 cases, 3. Les blocs qui touchent une étoile deviennent constellés ✨. Deux étoiles dans le même groupe additionnent leurs nombres (somme affichée en grand) ; si le groupe se coupe, chaque étoile repart avec la moitié (division entière par 2). Mode « grand puits » (12x20, petites cases) : bloc 16 et étoiles jusqu'à 31 dès le début.
 

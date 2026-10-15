@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Binaire Attack</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v42 · 15/10/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v43 · 15/10/2026</div>
 <!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
 <button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 62px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
 <script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
@@ -263,6 +263,38 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
 
 
+.lc .pq{white-space:normal;width:min(96%,620px);pointer-events:auto;padding:5px 10px}
+.pq .pre{color:var(--muted);font-size:.72em}
+.pq .g{color:var(--good);font-weight:700} .pq .r{color:var(--bad);font-weight:700}
+.psym{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.psym button{font:700 15px var(--f-mono);color:var(--fg);background:var(--deep);border:2px solid var(--cyan);border-radius:8px;padding:6px 4px;cursor:pointer}
+.psym kbd{font:600 11px var(--f-body);color:var(--muted);margin-right:6px}
+.ptab{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
+.pcol{background:var(--deep);border:2px solid var(--line);border-radius:8px;padding:3px 6px;text-align:center;min-width:88px}
+.pcol.ask{border-color:var(--amber)}
+.pcol>b{display:block;font-size:11px;color:var(--muted);white-space:nowrap}
+.pbits{display:flex;gap:3px;justify-content:center}
+.pbits span{display:flex;flex-direction:column;width:24px;border-radius:5px;background:#0006;border:1px solid var(--line);opacity:.45}
+.pbits span.on{opacity:1;background:var(--cyan);color:var(--ink);border-color:var(--cyan)}
+.pbits i{font:700 15px var(--f-mono);font-style:normal}
+.pbits small{font-size:10px}
+.pcol em{display:block;font:700 18px var(--f-mono);font-style:normal;color:var(--amber)}
+.pfile{position:absolute;left:4px;z-index:8;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:4px;border:2px solid var(--pink);border-radius:10px;background:rgba(255,106,168,.12);overflow:hidden}
+.pfile b{font-size:12px;overflow-wrap:anywhere}
+.pfile small{font-size:10px;color:var(--muted)}
+.plane{position:absolute;left:0;right:0;height:0;z-index:9}
+.plane::before{content:'';position:absolute;left:0;right:0;top:0;border-top:1px dashed var(--line)}
+.preq{position:absolute;left:0;top:0;display:flex;align-items:center;gap:4px;max-width:min(240px,62vw);padding:3px 8px;border-radius:8px;font-size:12px;line-height:1.15;border:2px solid;background:var(--panel);white-space:normal;transition:opacity .3s}
+.preq i{font-style:normal;font-size:16px}
+.preq.ok{border-color:var(--good)} .preq.no{border-color:var(--bad)}
+.preq.no span{color:#ffc4c4}
+.preq.bad{animation:ppulse .7s infinite alternate}
+.preq.intrus{background:var(--bad);color:#fff}
+.preq.denied{background:#7a1f1f;color:#fff}
+.preq.pass,.preq.block{opacity:0;transition:opacity .5s .5s}
+.preq.intrus,.preq.denied{z-index:2;animation:ppulse .5s infinite alternate}
+.pmark{position:absolute;right:-8px;top:-10px;font-size:16px}
+@keyframes ppulse{from{filter:brightness(1)}to{filter:brightness(1.6)}}
 .l3-q.turbo{left:0;top:0;transform:none}
 /* ---------- bonus : détonateurs (façon Puyo Puyo) ---------- */
 .pu-well{position:absolute;border:2px solid var(--line);border-top:2px dashed var(--bad);border-radius:0 0 10px 10px;background:rgba(8,6,20,.45)}
@@ -652,6 +684,8 @@ const MODES={
       note:'En mode récompense, chaque bonne réponse donne une brique. Construis l\'escalier jusqu\'au fromage avant que le tapis roulant ne l\'emporte, puis le suivant, plus haut !', short:{a:'Pression',s:'Récompense',m:'Pression + Récompense'}, tag:{s:'[récompense] ',m:'[pression + récompense] '}, tuto:{s:'l1s',m:'l1m'} },
   2:{ list:[['b','Boules : une boule = un bit'],['u','Unités : chaque bille vaut 1']],
       note:'En mode unités, le récipient 16 contient exactement 16 billes, le 8 en contient 8…', short:{b:'Boules',u:'Unités'}, tag:{u:'[unités] '}, tuto:{u:'l2u'} },
+  3:{ list:[['t','Tableau hexa : binaire ↔ hexadécimal'],['c','Droits d\'accès : chmod en octal (rwx), comme sous Linux']],
+      note:'Sous Linux et BSD, chaque fichier a 3 chiffres de droits (0 à 7) : propriétaire, groupe, autres. Chaque chiffre = 3 bits r w x = 4 + 2 + 1.', short:{t:'Tableau',c:'Droits'}, tag:{c:'[droits] '}, tuto:{c:'l3c'} },
   5:{ list:[['d','Étoile en décimal, blocs en binaire'],['b','Étoile en binaire, blocs en décimal'],['g','Grand puits : bloc 16 et étoiles jusqu\'à 31 dès le début, petites cases']],
       note:'Exemple : une étoile 13 sur un bloc 4 explose quand on lui colle un 8 et un 1.', short:{d:'Décimal',b:'Binaire',g:'Grand puits'}, tag:{b:'[binaire] ',g:'[grand puits] '}, tuto:{} }
 };
@@ -1339,6 +1373,7 @@ const QCM_T=20; // secondes pour répondre au QCM (le chrono de la conversion es
 function nextQcm(){ if(!qcmDeck.length) qcmDeck=shuffle(QCM_BANK.slice()); return qcmDeck.pop(); }
 
 function L3(){
+  if(G.mode==='c') return LC();
   const S={ lvl:0, q:null, tmax:16, tl:16, t:0, order:[...Array(16).keys()], tab:{x:20,y:70,vx:46,vy:34},
             blur:false, stains:0, fx:rand(7,10), qwait:0, bq:rand(22,32), qcm:null, shuf:rand(14,20), lunge:0 };
   let qEl, bar, tb, tabEl, gridEl, stainEl, qcmEl;
@@ -1463,6 +1498,161 @@ function L3(){
     },
     key(k){
       if(S.qcm){ if(k>='1'&&k<='4') answer(+k-1); return; }
+      if(k==='OK') fire(); else if(k==='BACK') Buf.back(); else if(k.length===1) Buf.push(k);
+    }
+  };
+}
+
+/* =========================================================
+   NIVEAU 4, mode « droits d'accès » (idée de Pierre) : chmod sous Linux / BSD.
+   Chaque chiffre octal (0 à 7) = 3 bits r w x = 4 + 2 + 1, pour le propriétaire, le groupe et les autres.
+   Les demandes vertes doivent passer, les rouges doivent être refusées : jamais 000.
+   ========================================================= */
+// [fichier, est un dossier ?, propriétaire, groupe, autres, droits visés (octal), 9 demandes u r,w,x · g r,w,x · o r,w,x]
+const PERMS=[
+  ['📄 notes_trimestre.ods',0,['🧑‍🏫','M. Martin'],['👩‍🏫','profs'],['🧑‍🎓','élèves'],0o640,
+    ['relire ses notes','corriger une note','🦠 lancé comme programme','préparer le conseil','changer les notes d\'un collègue','🦠 lancé comme programme','lire les notes de tous','changer sa note','🦠 lancé comme programme']],
+  ['🎮 jeu_snt.py',0,['🧑‍💻','Léa'],['👥','équipe projet'],['🌍','tout le lycée'],0o755,
+    ['lire son code','améliorer le jeu','lancer le jeu','lire le code','modifier sans Léa','lancer le jeu','lire le code','🦹 glisser un virus','jouer au jeu']],
+  ['📁 projet/',1,['🧑‍💻','Léa'],['👥','équipe projet'],['🌍','autres'],0o750,
+    ['lister les fichiers','créer un fichier','entrer dans le dossier','lister les fichiers','effacer les fichiers','entrer dans le dossier','🕵️ lister les fichiers','🦹 déposer un fichier','🕵️ entrer fouiller']],
+  ['🔑 cle_ssh',0,['🧑‍💻','Sam'],['👥','utilisateurs'],['🌍','autres'],0o600,
+    ['utiliser sa clé','remplacer sa clé','🦠 lancée comme programme','🕵️ copier la clé','🦹 changer la clé','🦠 lancée comme programme','🕵️ voler la clé','🦹 changer la clé','🦠 lancée comme programme']],
+  ['🌐 index.html',0,['🧑‍💻','webmestre'],['🖥️','serveur web'],['🌍','visiteurs'],0o644,
+    ['relire la page','mettre à jour','🦠 lancée comme programme','envoyer la page','🦹 défigurer le site','🦠 lancée comme programme','afficher la page','🦹 défigurer le site','🦠 lancée comme programme']],
+  ['📜 sauvegarde.sh',0,['🛠️','admin'],['🛠️','admins'],['🧑‍🎓','élèves'],0o770,
+    ['relire le script','corriger le script','lancer la sauvegarde','relire le script','corriger le script','lancer la sauvegarde','🕵️ lire les mots de passe','🦹 saboter le script','🦹 lancer la sauvegarde']],
+  ['📁 rendus_devoirs/',1,['🧑‍🏫','prof'],['🧑‍🎓','classe'],['🌍','autres'],0o730,
+    ['voir les copies','ranger les copies','entrer dans le dossier','🕵️ voir les copies des autres','déposer sa copie','entrer pour déposer','🕵️ voir les copies','🦹 déposer un faux','🕵️ entrer fouiller']],
+  ['📄 reglement.pdf',0,['📋','CPE'],['👩‍🏫','profs'],['🧑‍🎓','élèves'],0o644,
+    ['relire le règlement','mettre à jour','🦠 lancé comme programme','lire le règlement','changer seul le règlement','🦠 lancé comme programme','lire le règlement','🦹 réécrire le règlement','🦠 lancé comme programme']],
+  ['🖨️ imprimer.py',0,['🧑‍💻','technicien'],['👩‍🏫','profs'],['🧑‍🎓','élèves'],0o751,
+    ['lire le code','corriger le code','lancer une impression','lire le code','🦹 changer le code','lancer une impression','🕵️ lire le mot de passe caché','🦹 changer le code','lancer une impression']],
+  ['📁 photos_voyage/',1,['🧑‍🎓','Inès'],['👨‍👩‍👧','famille'],['🌍','autres'],0o750,
+    ['lister ses photos','ajouter des photos','entrer dans le dossier','regarder les photos','effacer des photos','entrer dans le dossier','🕵️ lister les photos','🦹 déposer un fichier','🕵️ entrer fouiller']],
+  ['📄 archive_bac.pdf',0,['📋','secrétariat'],['👩‍🏫','profs'],['🧑‍🎓','élèves'],0o444,
+    ['relire l\'archive','💥 effacer par erreur','🦠 lancée comme programme','lire l\'archive','💥 modifier l\'archive','🦠 lancée comme programme','lire l\'archive','🦹 falsifier l\'archive','🦠 lancée comme programme']],
+  ['📁 cdi_partage/',1,['📚','documentaliste'],['👩‍🏫','profs'],['🧑‍🎓','élèves'],0o775,
+    ['lister les documents','ajouter un document','entrer dans le dossier','lister les documents','ajouter un document','entrer dans le dossier','lister les documents','🦹 effacer les documents','entrer dans le dossier']]
+];
+const PCLS=['propriétaire','groupe','autres'], PACT=[['r','👁️','lire'],['w','✏️','écrire'],['x','▶️','exécuter']];
+const rwx=d=>(d&4?'r':'-')+(d&2?'w':'-')+(d&1?'x':'-');
+function LC(){
+  const S={ round:0, P:null, need:[], t:0, tmax:30, reqs:[], phase:'type', wait:0, sym:null, ok:0 };
+  let fileEl, tabEl, lanes=[], qEl, tb, bar;
+  const oct=v=>'0o'+v.toString(8).padStart(3,'0');
+  const digit=(v,c)=>(v>>(3*(2-c)))&7;
+  // au début on ne cherche que le chiffre « autres », puis groupe + autres, puis les trois ; de temps en temps, une correction chmod g+w / o-r
+  function stageOf(){ const n=S.round; return n<3?1:n<6?2:(n%4===3?'sym':3); }
+  function newRound(){
+    lanes.forEach(l=>l.innerHTML=''); S.reqs=[]; Buf.clear();
+    const P=S.P=pick(PERMS), st=stageOf(), cls=st==='sym'?[]:st===1?[2]:st===2?[1,2]:[0,1,2];
+    S.need=cls; S.phase='type';
+    fileEl.innerHTML=`<b>${P[0]}</b><small>${P[2][0]} ${P[2][1]} · groupe ${P[3][0]} ${P[3][1]}${P[1]?' · x = entrer':''}</small>`;
+    if(st==='sym') return symRound(P);
+    S.sym=null;
+    const known=v=>[0,1,2].map(c=>cls.includes(c)?'?':digit(P[5],c)).join('');
+    qEl.innerHTML=`<b><span class="pre">chmod 0o</span>${known()}</b><small>Les demandes <span class="g">vertes</span> doivent passer, les <span class="r">rouges</span> être refusées. Tape ${cls.length>1?'les chiffres':'le chiffre'} manquant${cls.length>1?'s':''}, puis OK.</small>`;
+    Buf.allowed='01234567'; Buf.max=cls.length; refreshKeys();
+    // une file de demandes par classe, qui avance vers le fichier
+    cls.forEach(c=>{ shuffle([0,1,2]).forEach((a,k)=>{ const i=c*3+a, good=!!(P[5]&(1<<(8-i)));
+      const e=mk('div','preq '+(good?'ok':'no'),`<i>${PACT[a][1]}</i><span>${P[c+2][0]} ${P[6][i]}</span>`,lanes[c]);
+      S.reqs.push({ e, c, a, good, x:W+40+k*Math.min(140,W*.36), done:false }); }); });
+    S.tmax=Math.max(14,(cls.length*13+10)-S.round*.6); S.t=S.tmax;
+    paintTab(); if(G.lv) G.lv.layout();
+  }
+  // correction symbolique : on part de droits presque bons, une demande ne passe pas comme il faut
+  function symRound(P){
+    const i=randi(0,8), cur=P[5]^(1<<(8-i)), c=Math.floor(i/3), a=i%3, good=!!(P[5]&(1<<(8-i)));
+    const ans=`chmod ${'ugo'[c]}${good?'+':'-'}${PACT[a][0]}`;
+    const opts=shuffle([ans, `chmod ${'ugo'[c]}${good?'-':'+'}${PACT[a][0]}`, `chmod ${'ugo'[(c+1)%3]}${good?'+':'-'}${PACT[a][0]}`, `chmod ${'ugo'[c]}${good?'+':'-'}${PACT[(a+1)%3][0]}`]);
+    S.sym={ ans, opts, cur };
+    qEl.innerHTML=`<b><span class="pre">droits : </span>${rwx(cur>>6)}${rwx((cur>>3)&7)}${rwx(cur&7)} <span class="pre">(${oct(cur)})</span></b><small>${good?'Cette demande verte est refusée !':'Cette demande rouge passe !'} Quelle commande corrige ? (touche 1 à 4)</small><div class="psym">${opts.map((o,k)=>`<button data-k="${k+1}"><kbd>${k+1}</kbd>${o}</button>`).join('')}</div>`;
+    qEl.querySelectorAll('.psym button').forEach(b=>b.addEventListener('pointerdown',ev=>{ ev.preventDefault(); ev.stopPropagation(); if(G.run&&!G.pause) symAnswer(+b.dataset.k-1); }));
+    const e=mk('div','preq '+(good?'ok':'no')+' bad',`<i>${PACT[a][1]}</i><span>${P[c+2][0]} ${P[6][i]}</span>`,lanes[c]);
+    S.reqs=[{ e, c, a, good, x:W*.55, done:false, still:true }];
+    Buf.allowed='1234'; Buf.max=1; refreshKeys();
+    S.tmax=22; S.t=S.tmax; paintTab(cur); if(G.lv) G.lv.layout();
+  }
+  function symAnswer(k){
+    if(!S.sym||S.phase!=='type') return; const o=S.sym.opts[k];
+    if(o===S.sym.ans){ S.phase='wait'; S.wait=1.2; addScore(Math.round(20+S.t),W/2,90); banner(`Bien vu : ${o}`,'good'); paintTab(S.P[5]); S.reqs[0].e.classList.remove('bad'); S.reqs[0].e.classList.add('pass'); S.round++; }
+    else { ErrLog.add(3,'droits '+oct(S.sym.cur)+' → '+oct(S.P[5]),o,S.sym.ans); flash('bad'); floatTxt(W/2,90,'Ce n\'est pas ça','bad'); S.t-=4; }
+  }
+  // tableau rwx : les bits s'allument pendant que l'élève tape (comme l'aide du niveau 2)
+  function paintTab(force){
+    const P=S.P, typed=Buf.v;
+    let k=0;
+    const ds=[0,1,2].map(c=>{ if(force!=null) return digit(force,c); if(!S.need.includes(c)) return digit(P[5],c); const ch=typed[k++]; return ch==null?null:+ch; });
+    tabEl.innerHTML=[0,1,2].map(c=>{ const d=ds[c], ask=S.need.includes(c)&&force==null;
+      return `<div class="pcol${ask?' ask':''}"><b>${P[c+2][0]} ${PCLS[c]}</b><div class="pbits">${[4,2,1].map((w,j)=>`<span class="${d!=null&&(d&w)?'on':''}"><i>${'rwx'[j]}</i><small>${w}</small></span>`).join('')}</div><em>${d==null?'?':d}</em></div>`; }).join('');
+  }
+  function fire(){
+    if(S.phase!=='type'||S.sym) return;
+    if(Buf.v.length<S.need.length){ floatTxt(W/2,90,`Il faut ${S.need.length} chiffre${S.need.length>1?'s':''}`,'bad'); return; }
+    let v=S.P[5]; S.need.forEach((c,k)=>{ const sh=3*(2-c); v=(v&~(7<<sh))|(+Buf.v[k]<<sh); });
+    S.try=v; S.phase='go'; S.goT=0; paintTab(v);
+    // toutes les demandes foncent vers le fichier ; chacune passe ou rebondit selon les droits donnés
+    S.reqs.forEach((r,k)=>{ r.delay=k*.18; });
+  }
+  function judge(r){
+    const pass=!!(S.try&(1<<(8-(r.c*3+r.a)))); r.done=true;
+    if(pass===r.good){ r.e.classList.add(pass?'pass':'block'); S.okn++; }
+    else { r.e.classList.add(pass?'intrus':'denied'); S.bad.push(r); }
+    // ✅ passe comme il faut · 🛡️ bien refusée · 💥 intrusion · ⛔ bloquée à tort ; seules les erreurs restent visibles
+    mk('b','pmark',pass===r.good?(pass?'✅':'🛡️'):(pass?'💥':'⛔'),r.e);
+  }
+  function endRound(){
+    const P=S.P, want=oct(P[5]);
+    if(!S.bad.length){ addScore(Math.round(8*S.need.length+S.t),W/2,90); banner(`chmod ${oct(S.try)} : parfait !`,'good'); S.round++; }
+    else {
+      const r=S.bad[0], txt=r.good?`Bloqué : « ${P[6][r.c*3+r.a]} » aurait dû passer`:`Intrusion : « ${P[6][r.c*3+r.a]} » est passé !`;
+      ErrLog.add(3,`${P[0]} : ${S.need.map(c=>PCLS[c]).join(', ')}`,oct(S.try),want);
+      loseLife(`${txt} (il fallait ${want})`);
+    }
+    S.phase='wait'; S.wait=1.6;
+  }
+  return {
+    start(){
+      setKeys('01234567'.split('').map(c=>({label:c,k:c})).concat([{label:'⌫',k:'BACK',cls:'alt'},{label:'OK',k:'OK',cls:'ok'}]), 'Chiffre(s) octal(aux) 0 à 7');
+      stage.classList.add('lc');
+      qEl=mk('div','l3-q pq');
+      fileEl=mk('div','pfile');
+      tabEl=mk('div','ptab');
+      lanes=[0,1,2].map(c=>mk('div','plane'));
+      tb=mk('div','timebar'); tb.style.bottom='6px'; bar=mk('span','',null,tb);
+      newRound(); banner('Donne les bons droits : les verts passent, les rouges restent dehors');
+    },
+    layout(){
+      const fx=Math.min(120,W*.24), qb=qEl.offsetTop+qEl.offsetHeight+6;
+      tabEl.style.top=qb+'px';
+      const t0=qb+tabEl.offsetHeight+10, gap=Math.max(40,Math.min(64,(H-t0-14)/3));
+      lanes.forEach((l,c)=>{ l.style.top=(t0+gap*(c+.5))+'px'; });
+      fileEl.style.top=t0+'px'; fileEl.style.height=(gap*3)+'px'; fileEl.style.width=(fx-8)+'px';
+    },
+    update(dt){
+      if(!lanes.length) return;
+      if(S.phase==='wait'){ if((S.wait-=dt)<=0){ if(!G.run) return; newRound(); this.layout(); } return; }
+      const fx=Math.min(120,W*.24);
+      if(S.phase==='type'){
+        S.t-=dt; bar.style.transform=`scaleX(${Math.max(0,S.t/S.tmax)})`; tb.classList.toggle('low',S.t<S.tmax*.3);
+        // les demandes s'approchent : quand la première touche le fichier, c'est trop tard
+        const sp=(W-fx)/S.tmax;
+        S.reqs.forEach(r=>{ if(!r.still) r.x-=sp*dt*(1+r.c*.04); r.e.style.transform=`translate(${r.x}px,-50%)`; });
+        if(!S.sym) paintTab();
+        if(S.t<=0){
+          const want=oct(S.P[5]);
+          ErrLog.add(3,S.sym?'droits '+oct(S.sym.cur):`${S.P[0]} : ${S.need.map(c=>PCLS[c]).join(', ')}`,'(temps écoulé)',S.sym?S.sym.ans:want);
+          loseLife(S.sym?`Trop tard ! Il fallait ${S.sym.ans}`:`Trop tard ! Il fallait ${want}`); S.phase='wait'; S.wait=1.6; S.round++;
+        }
+      } else if(S.phase==='go'){
+        S.goT+=dt; if(S.okn==null){ S.okn=0; S.bad=[]; }
+        S.reqs.forEach(r=>{ if(S.goT<r.delay||r.done) return; r.x-=Math.max(500,W*1.4)*dt; if(r.x<=fx) judge(r); r.e.style.transform=`translate(${Math.max(fx,r.x)}px,-50%)`; });
+        if(S.reqs.every(r=>r.done) && S.goT>S.reqs.length*.18+.5){ S.okn=null; endRound(); }
+      }
+    },
+    key(k){
+      if(S.sym){ if(k>='1'&&k<='4') symAnswer(+k-1); return; }
       if(k==='OK') fire(); else if(k==='BACK') Buf.back(); else if(k.length===1) Buf.push(k);
     }
   };
@@ -2086,6 +2276,14 @@ TUTOS.l2u = [
   { t:'Écris le nombre en remplissant les bons récipients : par exemple 13 = 8 + 4 + 1. Les nombres <b>BONUS</b> donnent GEL, points ×2 ou +1 ♥.', el:'.l2-target' }
 ];
 const addDemo=()=>{ const e=demoEl('addemo','<i style="left:20px;top:14px;background:#f00"></i><i style="left:74px;top:14px;background:#0f0"></i><i style="left:47px;top:62px;background:#00f"></i>',W/2,H*.3); return e; };
+TUTOS.l3c = [
+  { t:'Sous Linux, macOS ou BSD, chaque fichier dit qui a le droit de <b>lire</b> (r), d\'<b>écrire</b> (w) et d\'<b>exécuter</b> (x). Pour un dossier, x = le droit d\'<b>entrer</b> dedans.' },
+  { t:'Trois classes : le <b>propriétaire</b>, son <b>groupe</b>, et <b>tous les autres</b>. Chaque classe a <b>3 bits</b> r w x qui valent <b>4, 2, 1</b>. On les additionne : r + x = 4 + 1 = <b>5</b>, r + w + x = <b>7</b>.', el:'.ptab' },
+  { t:'Trois bits donnent un chiffre de 0 à 7 : c\'est la <b>base 8</b> (octal), écrite <b>0o</b> comme en Python. chmod 0o750 = rwx r-x --- .', el:'.l3-q' },
+  { t:'Des demandes arrivent vers le fichier. Les <b>vertes</b> sont légitimes : elles doivent passer. Les <b>rouges</b> (🦹 pirate, 🕵️ curieux, 🦠 virus) doivent être refusées.', el:'.plane' },
+  { t:'Tape le ou les chiffres manquants, puis <b>OK</b> : les bits s\'allument dans le tableau pendant que tu tapes. Une demande verte bloquée ou une rouge qui passe, et tu perds une vie.', el:'#inputrow' },
+  { t:'Plus tard, il faudra corriger des droits avec les commandes <b>chmod g+w</b> (ajouter) ou <b>chmod o-r</b> (retirer) : u = propriétaire, g = groupe, o = autres. Atteins <b>'+UNLOCK[3]+' points</b> pour débloquer le niveau 5.' }
+];
 TUTOS.l4byte = [
   { t:'Ton image est trouvée. <b>8 cases</b> sont entourées en orange : c\'est un <b>octet</b>. Case allumée = 1, case éteinte = 0, de gauche à droite.', el:'.l4-byte canvas' },
   { t:'Le tableau de conversion t\'aide : coupe l\'octet en <b>2 groupes de 4 bits</b> et cherche chaque groupe dans le tableau.', el:'.hextab.static' },
@@ -2146,7 +2344,7 @@ const LEVELS = [
   { name:'Les billes 16-8-4-2-1', desc:'Les billes tombent au milieu : déplace les récipients pour écrire le nombre en binaire. Finis vite pour le bonus de temps.', make:L0 },
   { name:'Attaque binaire', desc:'Les nombres descendent : convertis-les du binaire au décimal et inversement. Les nombres verts, plus durs, donnent des bonus.', make:L1 },
   { name:'Les colonnes 16-8-4-2-1', desc:'Remplis les bons récipients pour écrire le nombre en binaire sur 5 bits. Deux modes : une boule par bit, ou une bille par unité.', make:L2 },
-  { name:'Le tableau hexa', desc:'Binaire ↔ hexadécimal sur 4 ou 8 bits. Le tableau de conversion s\'enfuit, se salit et attaque.', make:L3 },
+  { name:'Le tableau hexa', desc:'Binaire ↔ hexadécimal sur 4 ou 8 bits : le tableau de conversion s\'enfuit, se salit et attaque. Ou les droits d\'accès chmod en octal (rwx).', make:L3 },
   { name:'Pixels et lumières', desc:'Révèle une image codée en hexa, convertis un de ses octets, puis colorie-la en mélangeant les lumières RVB.', make:L4 },
   { name:'Binabina', desc:'Façon Puyo Puyo : des blocs de 1, 2, 4, 8 cases tombent, une étoile est fixée sur l\'un d\'eux. Réunis exactement son nombre de cases ! Les blocs égaux fusionnent (1 + 1 = 10), ceux dans le vide se cassent.', make:L6 }
 ];
