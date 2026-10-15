@@ -1,0 +1,158 @@
+{
+ "Écriture": {
+  "err": "HTTP Error 400: Use thumbnail sizes listed on https://w.wiki/GHai",
+  "art": "Cuneiform"
+ },
+ "Imprimerie": {
+  "err": "HTTP Error 400: Use thumbnail sizes listed on https://w.wiki/GHai",
+  "art": "Printing_press"
+ },
+ "Machine à écrire": {
+  "err": "HTTP Error 400: Use thumbnail sizes listed on https://w.wiki/GHai",
+  "art": "Typewriter"
+ },
+ "Web": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "CERN_httpd"
+ },
+ "Smartphone": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "IPhone_(1st_generation)"
+ },
+ "Maîtrise du feu": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Campfire"
+ },
+ "Roue": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Ljubljana_Marshes_Wooden_Wheel"
+ },
+ "Machine à vapeur": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Watt_steam_engine"
+ },
+ "Train à vapeur": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Puffing_Billy_(locomotive)"
+ },
+ "Voiture à moteur à explosion": {
+  "err": "no image",
+  "art": "Benz_Patent-Motorwagen"
+ },
+ "Télégraphe à bras (Chappe)": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Optical_telegraph"
+ },
+ "Télégraphe électrique": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Electrical_telegraph"
+ },
+ "Téléphone": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Candlestick_telephone"
+ },
+ "Radio": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Crystal_radio"
+ },
+ "ARPANET (ancêtre d'Internet)": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Interface_Message_Processor"
+ },
+ "Machine à calculer de Pascal": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Pascal's_calculator"
+ },
+ "Calcul en binaire": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Gottfried_Wilhelm_Leibniz"
+ },
+ "Cartes perforées (métier Jacquard)": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Jacquard_machine"
+ },
+ "Premier ordinateur": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "ENIAC"
+ },
+ "Microprocesseur": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Intel_4004"
+ },
+ "Peintures dans les grottes": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Chauvet_Cave"
+ },
+ "Photographie": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "View_from_the_Window_at_Le_Gras"
+ },
+ "Cinéma": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Cinématographe"
+ },
+ "Télévision": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Mechanical_television"
+ },
+ "Appareil photo numérique": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Digital_camera"
+ },
+ "Flûte en os": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Paleolithic_flutes"
+ },
+ "Microphone": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Microphone"
+ },
+ "Disque vinyle": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Phonograph_record"
+ },
+ "CD audio": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Compact_disc"
+ },
+ "Musique en MP3": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Portable_media_player"
+ },
+ "Pile électrique (Volta)": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Voltaic_pile"
+ },
+ "Batterie rechargeable au plomb": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Lead–acid_battery"
+ },
+ "Ampoule électrique": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Incandescent_light_bulb"
+ },
+ "Centrale électrique": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Pearl_Street_Station"
+ },
+ "Batterie lithium-ion": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Lithium-ion_battery"
+ },
+ "Automate joueur d'échecs (truqué !)": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "The_Turk"
+ },
+ "Ordinateur champion d'échecs": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "Deep_Blue_(chess_computer)"
+ },
+ "Assistant vocal": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "IPhone_4S"
+ },
+ "ChatGPT": {
+  "err": "HTTP Error 429: Too Many Requests",
+  "art": "ChatGPT"
+ }
+}
