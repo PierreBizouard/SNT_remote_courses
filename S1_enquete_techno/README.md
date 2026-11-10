@@ -13,18 +13,20 @@ Séance d'introduction SNT en version ultra-ludique : les élèves font les déc
 | 🫧 La bulle | Boucle de rétroaction des likes, bulle de filtres, mission « sortir de sa bulle » avec les outils des vraies applis (❤ J'aime, 🚫 Pas intéressé, 🔍 Chercher, 🔄 Actualiser) et la chance de voir le sujet cible en direct |
 | ❤️ Les likes | Hasard quand on est inconnu, superstition (menu de croyances testé par expérience), gamification |
 | 🌐 Le réseau | 10 personnages (artistes, médecin, policier, prof, étudiant) aux valeurs cachées, 100 posts sur 25 événements étudiants, propagation des émotions, enquête pour recouper, révélation finale + travaux de recherche |
-| 🧠 La boucle de dopamine | Fil prévisible puis imprévisible, courbe de dopamine simulée (erreur de prédiction, Schultz 1997), envie de continuer, notifications ; boucle déclencheur → action → récompense → envie, comment la casser |
+| 🧠 La boucle de dopamine | Menu en 4 activités, avec la définition (la dopamine, molécule de l'anticipation et de l'envie, pas du plaisir) et la boucle en 4 temps : 🔔 déclencheur → 👆 action → 🎁 récompense variable → 🔁 relance. 1) Expérience du fil : fil prévisible puis imprévisible, courbe de dopamine simulée (erreur de prédiction, Schultz 1997), notifications, comment casser la boucle. 2) Chasse à la boucle : 20 cartes d'applis (TikTok, Snap, Instagram, séries, jeux, messagerie, Techno Survivor lui-même) à classer en temps limité, combos, 3 vies, cartes « casse la boucle ». 3) Mission maison sur 3 jours : carnet (chiffres estimés puis réels du temps d'écran, sa boucle, un maillon cassé 24 h, la boucle d'un proche, bilan), badges, envoyé sur ÉLÉA ou copié. 4) Fiche à imprimer, vierge ou remplie |
 | 🎚️ Le sélecteur | On like dans un flux et on règle l'algorithme (renforcement, découverte, anti-répétition) : boucle qui s'emballe, piège, contre-réaction qui stabilise, visible sur des courbes en direct (part de chaque thème avec seuil anti-répétition, ressemblance et diversité) ; DSA |
-| 🔀 L'usine à filtres | Des filtres OUI / NON envoient chaque objet sur un chemin (arbre de décision) : anti-spam, modération, tri des colis, détecteur de fausses infos (impossible à 12/12 : limites des filtres) |
+| 🔀 L'usine à filtres | Des filtres OUI / NON envoient chaque objet sur un chemin (arbre de décision) : anti-spam, modération, tri des colis, détecteur de fausses infos (impossible à 12/12 : limites des filtres ; la meilleure machine, 10/12, s'appuie sur la source et les fact-checks, pas sur « très partagée » ni les MAJUSCULES ; objectif 9/12) |
 | 🏭 L'usine à tâches (bonus, même carte) | Découper une mission en boîtes, choisir humain, machine à règles ou IA pour chacune, inventer des machines, lancer 20 commandes : erreurs, délai, coût, satisfaction (3 missions : pizzeria, vie scolaire, tournoi e-sport) |
 
 Chaque jeu se termine par « Ta découverte » : un choix + une phrase de l'élève. La page « Mes découvertes » récapitule tout et se copie pour l'envoyer au professeur. Les réponses restent sur l'appareil (localStorage).
+
+`fiche-boucle-dopamine.html` / `.pdf` : la mission maison « chasse à la boucle de dopamine » en 2 pages A4 à imprimer (devoir maison).
 
 `enquete-calme.html` : première version, plus calme, en 6 missions (frise, avant -5000, iceberg, panne, love or hate, copie).
 
 ## ÉLÉA (Moodle)
 
-`techno-survivor-scorm.zip` : paquet SCORM 1.2 à déposer comme activité SCORM. Note sur 100 = part des 12 épreuves dont la découverte est notée (statut « terminé » à 12/12). Chaque découverte est envoyée comme deux interactions (réponse au QCM, correcte ou non, et phrase de l'élève) : elles se lisent dans le rapport des interactions de l'activité. La progression est gardée sur ÉLÉA.
+`techno-survivor-scorm.zip` : paquet SCORM 1.2 à déposer comme activité SCORM. Note sur 100 = part des 12 épreuves dont la découverte est notée (statut « terminé » à 12/12). Le carnet de la mission maison (dopamine) est envoyé en 4 interactions `mission_*` quand l'élève appuie sur « Envoyer à mon prof ». Chaque découverte est envoyée comme deux interactions (réponse au QCM, correcte ou non, et phrase de l'élève) : elles se lisent dans le rapport des interactions de l'activité. La progression est gardée sur ÉLÉA.
 
 ## Ordre et déblocage (15/10/2026)
 
