@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Brain Exploration</title>
+<!-- version affichée : à augmenter à chaque mise à jour -->
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v1 · 12/11/2026</div>
+<!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
+<button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 58px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
+<script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
+  var on=function(){ return d.fullscreenElement||d.webkitFullscreenElement; };
+  if(!(d.fullscreenEnabled||d.webkitFullscreenEnabled)) return;
+  b.hidden=false;
+  b.onclick=function(){ if(on()) (d.exitFullscreen||d.webkitExitFullscreen).call(d); else (e.requestFullscreen||e.webkitRequestFullscreen).call(e); };
+  var up=function(){ b.textContent=on()?'✕ quitter le plein écran':'⛶ plein écran'; };
+  d.addEventListener('fullscreenchange',up); d.addEventListener('webkitfullscreenchange',up);
+})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1426;--panel:#1a2142;--deep:#131a33;--line:#344072;--fg:#e9edff;--muted:#98a2cf;--amber:#ffb547;--cyan:#5ce1e6;--pink:#ff6aa8;--violet:#b18cff;--good:#6ee7a0;--bad:#ff5a5a;--ink:#1a1300;
+--f-display:'Silkscreen',monospace;--f-mono:'JetBrains Mono',monospace;--f-body:'Atkinson Hyperlegible',system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font:16px/1.45 var(--f-body)}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+[hidden]{display:none!important}
+#wrap{max-width:960px;margin:0 auto;padding:10px 16px 28px}
+header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+header h1{flex:1;margin:0;font:700 clamp(14px,4vw,20px) var(--f-display);color:var(--violet);letter-spacing:.02em}
+header .pts{font:700 17px var(--f-mono);color:var(--cyan)}
+.iconbtn{min-width:44px;height:44px;padding:0 10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;font:700 15px var(--f-body)}
+h2{margin:0 0 6px;font:700 clamp(18px,4.6vw,26px) var(--f-display);color:var(--cyan);letter-spacing:.02em;text-wrap:balance}
+h3{margin:0 0 6px;font:700 15px var(--f-display);color:var(--cyan)}
+p{margin:0 0 10px}
+.lead{color:var(--muted);max-width:70ch}
+b{color:var(--amber)}
+.btn{min-height:46px;padding:0 16px;background:var(--panel);border:1px solid var(--line);border-bottom-width:3px;border-radius:9px;font:700 15px var(--f-body)}
+.btn:active{transform:translateY(2px)}
+.btn.ok{background:var(--amber);color:var(--ink);border-color:#c98a24}
+.btn:disabled{opacity:.35;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row.c{justify-content:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:10px}
+.fb{min-height:1.5em;font-weight:700;margin:8px 0}
+.fb.good{color:var(--good)} .fb.bad{color:var(--bad)} .fb.info{color:var(--cyan)}
+.fb span{color:var(--fg);font-weight:400}
+.hud{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;font:700 14px var(--f-mono);margin-bottom:6px}
+/* menu */
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin:14px 0}
+.pairh{grid-column:1/-1;margin:6px 0 -4px;font:700 13px var(--f-display);color:var(--violet);letter-spacing:.04em}
+.gcard{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;text-align:left;background:var(--panel);border:1px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:14px}
+.gcard:hover{border-color:var(--amber)}
+.gcard .e{grid-row:span 3;font-size:44px;line-height:1}
+.gcard .t{font:700 16px var(--f-display);letter-spacing:.02em}
+.gcard .d{color:var(--muted);font-size:14px}
+.gcard .s{font:700 13px var(--f-mono);color:var(--good)}
+.gcard .s.wip{color:var(--amber)}
+.gcard.done{border-color:var(--good)}
+.gcard.locked{cursor:not-allowed;opacity:.75}
+.gcard.locked .e,.gcard.locked .t,.gcard.locked .d{filter:blur(5px);user-select:none}
+.gcard.locked .s.lk{color:var(--amber)}
+.gcard.final{border-color:var(--violet)}
+/* scène commune */
+.stage{position:relative;height:min(62vh,540px);min-height:400px;border-radius:12px;overflow:hidden;border:1px solid var(--line);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+body.paused .stage{filter:blur(14px)}
+.float{position:absolute;transform:translate(-50%,-50%);font:700 17px var(--f-mono);pointer-events:none;z-index:60;animation:rise 1s forwards;white-space:nowrap;text-shadow:0 2px 4px #000}
+@keyframes rise{to{transform:translate(-50%,-160%);opacity:0}}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translate(-8px,4px)}40%{transform:translate(7px,-5px)}60%{transform:translate(-5px,3px)}80%{transform:translate(4px,-2px)}}
+@keyframes pop{from{transform:scale(.8);opacity:.3}to{transform:scale(1);opacity:1}}
+@keyframes blink{to{opacity:.35}}
+.overlay{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:16px;background:rgba(6,8,20,.84);overflow:auto}
+.overlay .card{max-width:540px;width:100%;text-align:center}
+/* découverte */
+.opts{display:grid;gap:8px;margin:10px 0}
+.opt{text-align:left;min-height:48px;padding:10px 14px;background:var(--deep);border:1px solid var(--line);border-radius:10px;font-weight:700}
+.opt.right{border-color:var(--good);background:#16382c}
+.opt.wrong{border-color:var(--bad);background:#3a1a24}
+.opt.sel{border-color:var(--cyan);background:#163040}
+textarea{width:100%;min-height:60px;padding:10px;background:var(--deep);color:var(--fg);border:1px solid var(--line);border-radius:10px;font:15px var(--f-body);resize:vertical}
+.disc{margin-top:16px;border-color:var(--cyan)}
+.steps{display:flex;gap:6px;margin:0 0 10px}
+.steps i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.steps i.on{background:var(--cyan)} .steps i.done{background:var(--good)}
+.reassure{padding:8px 12px;border-left:4px solid var(--violet);background:#1f1d44;border-radius:0 8px 8px 0;font-size:14px;color:var(--fg)}
+.scene{padding:12px 14px;border-radius:12px;background:linear-gradient(135deg,#3a2614,#1e3a2a);font-size:15px}
+.scene .big{font-size:44px;line-height:1.1;letter-spacing:4px;margin-bottom:6px}
+.power{display:inline-block;padding:4px 10px;border-radius:20px;background:var(--violet);color:#160b33;font:700 14px var(--f-body);margin-bottom:6px}
+.case{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--deep);margin:8px 0}
+.case .opts{grid-template-columns:repeat(3,1fr)}
+.case .opt{text-align:center;padding:8px}
+.tag{display:inline-block;font:700 12px var(--f-mono);padding:1px 6px;border-radius:6px;background:var(--line);color:var(--fg)}
+.notes li{margin-bottom:12px}
+.notes .q{color:var(--muted);font-size:14px}
+.wipbox{text-align:center;padding:30px 16px}
+.wipbox .e{font-size:72px}
+/* 1 · homéostasie */
+.hst{background:linear-gradient(#24365a,#1a2a3f 55%,#2b2a1c)}
+.hst.hot{background:linear-gradient(#7a3412,#4a2a18 55%,#3a2a12)}
+.hst.cold{background:linear-gradient(#3a6a96,#22405e 55%,#2a3646)}
+.hst.auto{background:linear-gradient(#1e2a4a,#151d33 55%,#20201a)}
+.hav{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);font-size:72px;line-height:1;transition:filter .3s;filter:drop-shadow(0 6px 6px #0008)}
+.hav.bad{filter:drop-shadow(0 0 14px #ff3b3b)}
+.hlife{position:absolute;left:12px;right:12px;top:10px;height:12px;border-radius:6px;background:#0008;overflow:hidden}
+.hlife i{display:block;height:100%;background:var(--good);transition:width .2s}
+.hev{position:absolute;left:50%;top:48px;transform:translateX(-50%);max-width:92%;padding:6px 12px;border-radius:10px;background:#000a;font:700 15px var(--f-body);text-align:center;z-index:20;animation:pop .3s}
+.hev.warn{background:#5a3a00e6;border:2px solid var(--amber);animation:blink .5s alternate infinite}
+.hgs{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#0007}
+.hg{display:grid;justify-items:center;gap:4px}
+.hg .lb{font:700 12px var(--f-body);text-align:center;line-height:1.1}
+.hg .lb span{font-size:22px;display:block}
+.hbar{position:relative;width:34px;height:110px;border-radius:8px;background:#0009;border:1px solid #fff3;overflow:hidden}
+.hbar .zone{position:absolute;left:0;right:0;bottom:35%;height:30%;background:#6ee7a033;border-top:1px dashed #6ee7a0;border-bottom:1px dashed #6ee7a0}
+.hbar .lvl{position:absolute;left:4px;right:4px;bottom:0;border-radius:5px 5px 0 0;background:var(--cyan);transition:background .2s}
+.hbar.danger .lvl{background:var(--bad)}
+.hbar.danger{animation:blink .4s alternate infinite}
+.hbt{display:flex;gap:4px}
+.hbt button{width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--panel);font:700 20px var(--f-mono)}
+.hbt button:active{background:var(--amber);color:var(--ink)}
+.hauto{font:700 11px var(--f-mono);color:var(--good);height:40px;display:grid;place-items:center;text-align:center}
+.hz{position:absolute;transform:translate(-50%,-50%);font-size:46px;background:none;border:0;padding:0;z-index:15;animation:pop .25s;filter:drop-shadow(0 4px 4px #000a)}
+.hn{position:absolute;transform:translate(-50%,-50%);z-index:16;padding:6px 10px;border-radius:12px;background:#f4f4f8;color:#222;border:0;font:700 13px var(--f-body);box-shadow:0 4px 10px #0008;animation:pop .2s;max-width:180px;text-align:left}
+.hn small{display:block;font-weight:400;color:#666;font-size:11px}
+.hcurve{width:100%;height:auto;display:block;background:var(--deep);border-radius:10px;margin:8px 0}
+/* 2 · hallucination */
+.fst{display:grid;place-items:center;transition:background .6s}
+.fst.calm{background:radial-gradient(circle at 50% 40%,#5b8a4a,#2e4a26 70%)}
+.fst.alert{background:radial-gradient(circle at 50% 40%,#3a1a1a,#120808 75%)}
+.fimg{width:min(64vw,260px);height:min(64vw,260px);display:grid;place-items:center;border-radius:14px;overflow:hidden;position:relative}
+.fimg svg{width:100%;height:100%}
+.fmask{position:absolute;inset:0;background:repeating-conic-gradient(#555 0 25%,#999 0 50%) 0 0/12px 12px}
+.fban{position:absolute;top:10px;left:10px;right:10px;padding:6px 10px;border-radius:10px;font:700 14px var(--f-body);text-align:center;background:#0008}
+.fst.alert .fban{background:#7a0010d9;border:2px solid #ff5a5a;animation:blink .6s alternate infinite}
+.fbtns{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:12px}
+.fbtns .btn{min-width:130px;font-size:17px}
+.fcount{position:absolute;right:12px;bottom:70px;font:700 13px var(--f-mono);color:#fffc}
+.scram{font:18px/1.6 var(--f-body);padding:14px;background:#f6f1e2;color:#2a2440;border-radius:12px}
+.bspot{position:relative;max-width:440px;height:150px;border-radius:12px;overflow:hidden;background:repeating-linear-gradient(90deg,#f2d23c 0 10px,#2a6fd6 10px 20px)}
+.bspot .x{position:absolute;left:12%;top:50%;transform:translate(-50%,-50%);font:700 34px var(--f-mono);color:#000;background:#fff;border-radius:6px;padding:0 6px}
+.bspot .dot{position:absolute;left:78%;top:50%;width:30px;height:30px;border-radius:50%;background:#e01020;transform:translate(-50%,-50%);box-shadow:0 0 0 3px #fff}
+.probs{display:grid;gap:4px;margin:8px 0}
+.probs div{display:grid;grid-template-columns:110px 1fr 44px;gap:8px;align-items:center;font-size:14px}
+.probs i{display:block;height:12px;border-radius:6px;background:var(--violet)}
+.word{display:inline-block;min-width:90px;border-bottom:3px solid var(--amber);text-align:center;color:var(--amber);font-weight:700}
+@media (max-width:520px){ .hbar{height:84px;width:28px} .hbt button{width:34px;height:36px;font-size:17px} .hav{font-size:58px} .case .opts{grid-template-columns:1fr} }
+@media (prefers-reduced-motion:reduce){ .hev.warn,.hbar.danger,.fst.alert .fban{animation:none!important} }
+</style>
+
+<div id="wrap">
+  <header><button class="iconbtn" id="home" aria-label="Retour au menu">☰</button><h1>Brain Exploration</h1><button class="iconbtn" id="pausebtn" hidden>Pause</button><span class="pts" id="pts">0 pt</span></header>
+  <main id="main"></main>
+</div>
+<div class="overlay" id="ov" hidden><div class="card" id="ovc"></div></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s), main=$('#main');
+const rand=(a,b)=>a+Math.random()*(b-a), randi=(a,b)=>Math.floor(rand(a,b+1)), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function mk(tag,cls,html,parent){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; parent.appendChild(e); return e; }
+function place(e,x,y){ e.style.left=x+'px'; e.style.top=y+'px'; }
+
+/* ---------- sauvegarde : ÉLÉA (SCORM 1.2) si la page y est ouverte, sinon cet appareil ---------- */
+const KEY='snt-brain-exploration';
+const SCORM=(()=>{
+  let api=null;
+  try{ let w=window; for(let i=0;i<12 && w;i++){ if(w.API){ api=w.API; break; } if(w===w.parent) break; w=w.parent; } }catch(e){}
+  try{ if(!api && window.opener && window.opener.API) api=window.opener.API; }catch(e){}
+  if(api){ try{ if(String(api.LMSInitialize(''))!=='true') api=null; }catch(e){ api=null; } }
+  return api;
+})();
+let D={ pts:0, best:{}, disc:{} };
+try{ const v=JSON.parse(SCORM ? SCORM.LMSGetValue('cmi.suspend_data') : localStorage.getItem(KEY)); if(v && typeof v==='object') D=Object.assign(D,v); }catch(e){}
+// note ÉLÉA : la part des jeux dont la découverte est notée (100 quand les 12 sont faites)
+function save(){
+  try{
+    if(SCORM){
+      // suspend_data est limité (4096 caractères en SCORM 1.2) : on raccourcit les textes
+      const slim={ pts:D.pts, best:D.best, prof:D.prof, disc:{} };
+      for(const k in D.disc){ const d=D.disc[k]; slim.disc[k]={ ok:d.ok, got:d.got, txt:String(d.txt||'').slice(0,200), help:String(d.help||'').slice(0,80), trap:String(d.trap||'').slice(0,80) }; }
+      SCORM.LMSSetValue('cmi.suspend_data',JSON.stringify(slim));
+      const n=GAMES.filter(g=>D.disc[g.id]).length, pct=Math.round(n*100/GAMES.length);
+      SCORM.LMSSetValue('cmi.core.score.min','0'); SCORM.LMSSetValue('cmi.core.score.max','100');
+      SCORM.LMSSetValue('cmi.core.score.raw',String(pct));
+      SCORM.LMSSetValue('cmi.core.lesson_status', n>=GAMES.length ? 'completed' : 'incomplete');
+      SCORM.LMSCommit('');
+    } else localStorage.setItem(KEY,JSON.stringify(D));
+  }catch(e){}
+  $('#pts').textContent=D.pts+' pt';
+}
+addEventListener('pagehide',()=>{ if(SCORM){ try{ save(); SCORM.LMSFinish(''); }catch(e){} } });
+// chaque réponse est envoyée à ÉLÉA comme une « interaction » : l'enseignant la lit dans le rapport de l'activité SCORM
+function sendInt(id,resp,result){
+  if(!SCORM || !resp) return;
+  try{
+    const n=+SCORM.LMSGetValue('cmi.interactions._count')||0, k='cmi.interactions.'+n+'.';
+    SCORM.LMSSetValue(k+'id',String(id).replace(/[^\w-]/g,'_'));
+    SCORM.LMSSetValue(k+'type','fill-in'); SCORM.LMSSetValue(k+'time',new Date().toTimeString().slice(0,8));
+    SCORM.LMSSetValue(k+'student_response',String(resp).replace(/[\r\n]+/g,' ').slice(0,250));
+    SCORM.LMSSetValue(k+'result',result||'neutral');
+    SCORM.LMSCommit('');
+  }catch(e){}
+}
+function addPts(n,x,y,st){ D.pts+=Math.round(n); save(); if(st && x!=null) floatTxt(st,x,y,'+'+Math.round(n),'var(--good)'); }
+function floatTxt(st,x,y,t,c){ const e=mk('div','float',t,st); e.style.color=c||'#fff'; place(e,x,y); setTimeout(()=>e.remove(),1000); }
+function shake(el){ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+
+/* ---------- boucle de jeu (s'arrête en pause) ---------- */
+const G={ cur:null, pause:false };
+let last=0;
+function frame(ts){ const dt=Math.min(.05,(ts-last)/1000||0); last=ts; if(G.cur && !G.pause && G.cur.update) G.cur.update(dt); requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+function startGame(g){ stopGame(); G.cur=g; G.pause=false; $('#pausebtn').hidden=!g.update; }
+function stopGame(){ if(G.cur && G.cur.stop) G.cur.stop(); G.cur=null; G.pause=false; document.body.classList.remove('paused'); $('#pausebtn').hidden=true; $('#pausebtn').textContent='Pause'; $('#ov').hidden=true; }
+function togglePause(){ if(!G.cur || !G.cur.update || G.cur.over) return; G.pause=!G.pause; document.body.classList.toggle('paused',G.pause); $('#pausebtn').textContent=G.pause?'Reprendre':'Pause'; }
+$('#pausebtn').onclick=togglePause;
+addEventListener('keydown',e=>{ if(e.key==='Escape' && G.cur){ e.preventDefault(); togglePause(); } });
+function overlay(html){ $('#ovc').innerHTML=html; $('#ov').hidden=false; }
+function head(e,t,lead){ main.innerHTML=`<h2>${e} ${t}</h2>${lead?`<p class="lead">${lead}</p>`:''}`; scrollTo(0,0); }
+
+/* =========================================================
+   DÉCOUVERTE EN 5 ÉTAPES (jamais de pénalité)
+   1 révélation · 2 superpouvoir et scène préhistorique · 3 enquête
+   4 Et l'IA ? · 5 tes mots (+ quand ça aide, quand ça piège)
+   ========================================================= */
+const REASSURE='Pas d\'inquiétude : la plupart des gens font exactement pareil, ton prof aussi. Ce n\'est pas un défaut, c\'est la façon dont marche un cerveau humain.';
+const VERD={aide:'Ça aide',piege:'Ça piège',deux:'Les deux'};
+function discovery(id,cfg){
+  stopGame();
+  const prev=D.disc[id]||{}; const res={ ok:prev.ok, got:prev.got };
+  let step=0; const N=5;
+  const box=mk('div','card disc',null,main);
+  const bar=()=>`<div class="steps">${Array.from({length:N},(_,i)=>`<i class="${i<step?'done':i===step?'on':''}"></i>`).join('')}</div>`;
+  const qcm=(el,q,opts,good,explain,onDone,tag)=>{
+    const w=mk('div',null,`<p><b>${q}</b></p><div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div><p class="fb"></p>`,el);
+    w.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const k=+b.dataset.i;
+      w.querySelectorAll('.opt').forEach((x,i)=>{ x.classList.toggle('right',i===good); x.classList.toggle('wrong',i===k && i!==good); x.disabled=true; });
+      const fb=w.querySelector('.fb'); fb.className='fb '+(k===good?'good':'info');
+      fb.innerHTML=(k===good?'Oui ! ':'Bonne piste à creuser. ')+`<span>${explain}</span>`;
+      sendInt(id+'_'+tag,opts[k],k===good?'correct':'wrong');
+      onDone(k===good);
+    });
+    return w;
+  };
+  const next=(label)=>{ const r=mk('div','row',`<button class="btn ok">${label||'Suivant →'}</button>`,box); r.querySelector('button').onclick=()=>{ step++; render(); }; return r; };
+  function render(){
+    box.innerHTML=bar()+`<h3>Ta découverte · ${['Ce qui s\'est passé','Ton superpouvoir','Mode enquête','Et l\'IA ?','Avec tes mots'][step]}</h3>`;
+    if(step===0){
+      if(cfg.reveal.html) mk('div',null,cfg.reveal.html,box);
+      qcm(box,cfg.reveal.q,cfg.reveal.opts,cfg.reveal.good,cfg.reveal.explain,ok=>{
+        res.ok=ok; if(ok && !prev.got){ res.got=prev.got=1; addPts(20); }
+        mk('p','reassure',REASSURE,box); next();
+      },'revelation');
+    } else if(step===1){
+      mk('div',null,`<span class="power">🦸 Superpouvoir : ${cfg.power.name}</span><div class="scene"><div class="big">${cfg.power.emoji}</div>${cfg.power.scene}</div>`,box);
+      qcm(box,cfg.power.q,cfg.power.opts,cfg.power.good,cfg.power.explain,()=>{
+        mk('div','card',`<p>✅ <b>Aujourd'hui, ça t'aide :</b> ${cfg.power.help}</p><p style="margin:0">⚠️ <b>Aujourd'hui, ça te piège :</b> ${cfg.power.trap}</p>`,box); next();
+      },'superpouvoir');
+    } else if(step===2){
+      mk('p','lead','🔎 Enquête : ces situations viennent de la vie de tous les jours. Pour chacune, ce mécanisme aide, piège… ou les deux ?',box);
+      let left=cfg.cases.length;
+      cfg.cases.forEach((c,ci)=>{
+        const w=mk('div','case',`<p style="margin:0">${c.s}</p><div class="opts">${Object.keys(VERD).map(k=>`<button class="opt" data-k="${k}">${VERD[k]}</button>`).join('')}</div><p class="fb" style="margin:0"></p>`,box);
+        w.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+          const k=b.dataset.k, good=k===c.a;
+          w.querySelectorAll('.opt').forEach(x=>{ x.disabled=true; x.classList.toggle('right',x.dataset.k===c.a); x.classList.toggle('wrong',x===b && !good); });
+          const fb=w.querySelector('.fb'); fb.className='fb '+(good?'good':'info'); fb.innerHTML=(good?'Bien vu ! ':`Plutôt « ${VERD[c.a]} ». `)+`<span>${c.why}</span>`;
+          if(good) addPts(5);
+          sendInt(id+'_enquete'+(ci+1),VERD[k],good?'correct':'wrong');
+          if(--left===0) next();
+        });
+      });
+    } else if(step===3){
+      if(cfg.ai.html) mk('div',null,cfg.ai.html,box);
+      qcm(box,cfg.ai.q,cfg.ai.opts,cfg.ai.good,cfg.ai.explain,()=>next(),'ia');
+    } else {
+      box.insertAdjacentHTML('beforeend',`<p class="lead">${cfg.ask}</p><textarea id="d-txt" placeholder="J'ai découvert que…">${esc(prev.txt||'')}</textarea>
+        <p class="lead" style="margin-top:10px">Une situation de <b>ta</b> vie où ce mécanisme <b>t'aide</b> :</p><textarea id="d-help" placeholder="Par exemple…">${esc(prev.help||'')}</textarea>
+        <p class="lead" style="margin-top:10px">Une situation où il peut <b>te piéger</b> :</p><textarea id="d-trap" placeholder="Par exemple…">${esc(prev.trap||'')}</textarea>
+        <div class="row" style="margin-top:10px"><button class="btn ok" id="d-ok">Enregistrer et revenir au menu</button></div>`);
+      $('#d-ok').onclick=()=>{
+        const d={ q:cfg.reveal.q, ok:res.ok, got:res.got, txt:$('#d-txt').value.trim(), help:$('#d-help').value.trim(), trap:$('#d-trap').value.trim() };
+        if(d.txt!==(prev.txt||'')) sendInt(id+'_phrase',d.txt);
+        if(d.help!==(prev.help||'')) sendInt(id+'_aide',d.help);
+        if(d.trap!==(prev.trap||'')) sendInt(id+'_piege',d.trap);
+        if(!D.disc[id]) addPts(10);
+        D.disc[id]=d; save(); menu();
+      };
+    }
+    box.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  render();
+}
+
+/* =========================================================
+   1 · SURVIE HOMÉOSTATIQUE
+   phase 1 : tu régules à la main · phase 2 : tu vois venir, tu anticipes
+   phase 3 : pilote automatique… et les notifications
+   ========================================================= */
+const HG=[ {k:'temp',e:'🌡️',n:'Température'}, {k:'eau',e:'💧',n:'Eau'}, {k:'sucre',e:'🍬',n:'Sucre'}, {k:'stress',e:'💓',n:'Stress'} ];
+const HEV=[
+  {e:'☀️',t:'Canicule',d:'température ↑, eau ↓',r:{temp:7,eau:-3},dur:4,main:'temp',dir:-1,cls:'hot'},
+  {e:'❄️',t:'Vague de froid',d:'température ↓',r:{temp:-7},dur:4,main:'temp',dir:1,cls:'cold'},
+  {e:'🏃',t:'Course',d:'sucre ↓, eau ↓, température ↑',r:{sucre:-6,eau:-3,temp:3},dur:3,main:'sucre',dir:1},
+  {e:'🍩',t:'Goûter',d:'sucre ↑',r:{sucre:8},dur:3,main:'sucre',dir:-1},
+  {e:'🍟',t:'Chips très salées',d:'eau ↓',r:{eau:-8},dur:3,main:'eau',dir:1},
+  {e:'🧟',t:'Zombie en vue !',d:'stress ↑',r:{stress:10},dur:2.5,main:'stress',dir:-1},
+  {e:'🥤',t:'Grand verre d\'eau',d:'eau ↑',r:{eau:8},dur:3,main:'eau',dir:-1}
+];
+const NOTIFS=[['Groupe classe','42 nouveaux messages'],['Appli de vidéos','Ton créateur préféré est en live !'],['Jeu','Ton coffre expire dans 5 min ⏰'],['Réseau','Quelqu\'un a commenté ta photo'],['Maman','Tu rentres à quelle heure ?'],['Appli','Ne perds pas ta série de 87 jours 🔥'],['Info','ALERTE : nouvelle incroyable'],['Réseau','3 personnes ont vu ton profil']];
+function gHomeo(){
+  head('🌡️','Survie homéostatique','Garde ton survivant en vie : chaque jauge doit rester dans la <b>zone verte</b>. Appuie sur <b>−</b> et <b>+</b> pour corriger. Trois phases de 30 secondes.');
+  const go=mk('div','row',`<button class="btn ok" id="h-go">Commencer</button>`,main);
+  $('#h-go').onclick=()=>{ go.remove(); playHomeo(); };
+}
+function playHomeo(){
+  const PH=[
+    {t:'Phase 1 · À la main',m:'Les événements tombent sans prévenir : corrige vite !'},
+    {t:'Phase 2 · Tu vois venir',m:'Maintenant, tu vois l\'événement 3 secondes avant. Corrige <b>avant</b> qu\'il arrive : bonus « Anticipé ! ».'},
+    {t:'Phase 3 · Pilote automatique',m:'Ton corps prend le relais pour la température, l\'eau et le sucre. Toi, élimine les zombies qui approchent (touche-les).'}
+  ];
+  const hud=mk('div','hud',`<span id="h-ph"></span><span id="h-t"></span><span id="h-sc">0 pt</span>`,main);
+  const st=mk('div','stage hst',null,main);
+  st.innerHTML=`<div class="hlife"><i style="width:100%"></i></div><div class="hav">🧍</div><div class="hgs">${HG.map(g=>`<div class="hg" data-k="${g.k}"><div class="lb"><span>${g.e}</span>${g.n}</div><div class="hbar"><div class="zone"></div><div class="lvl"></div></div><div class="hbt"><button data-d="-1" aria-label="${g.n} moins">−</button><button data-d="1" aria-label="${g.n} plus">+</button></div><div class="hauto" hidden>AUTO ✓</div></div>`).join('')}</div>`;
+  const S={ ph:0, t:0, v:{temp:50,eau:55,sucre:50,stress:30}, life:100, sc:0, ev:null, warn:null, nextEv:2, antic:0, faints:0, zt:1.5, nt:0, zs:[], ns:[], stressLog:[], tapsInWarn:{}, over:false, paid:0 };
+  const W=()=>st.clientWidth, H=()=>st.clientHeight;
+  const ev=mk('div','hev','',st); ev.hidden=true;
+  const tap=(k,d)=>{
+    if(S.ph===2 && k!=='stress') return;
+    S.v[k]=clamp(S.v[k]+d*7,0,100);
+    if(S.warn && S.warn.main===k && d===S.warn.dir) S.tapsInWarn[k]=(S.tapsInWarn[k]||0)+1;
+  };
+  st.querySelectorAll('.hg').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>tap(g.dataset.k,+b.dataset.d)));
+  const showEv=(html,warn)=>{ ev.hidden=false; ev.className='hev'+(warn?' warn':''); ev.innerHTML=html; };
+  function startPhase(i){
+    S.ph=i; S.t=0; S.ev=null; S.warn=null; S.nextEv=2.5; ev.hidden=true;
+    $('#h-ph').textContent=PH[i].t;
+    st.classList.toggle('auto',i===2);
+    st.querySelectorAll('.hg').forEach(g=>{ const auto=i===2 && g.dataset.k!=='stress'; g.querySelector('.hbt').hidden=auto; g.querySelector('.hauto').hidden=!auto; });
+    G.pause=true; overlay(`<h2>${PH[i].t}</h2><p>${PH[i].m}</p><div class="row c"><button class="btn ok" id="h-c">C'est parti</button></div>`);
+    $('#h-c').onclick=()=>{ $('#ov').hidden=true; G.pause=false; };
+  }
+  function launch(e){
+    const strength=S.tapsInWarn[e.main]? .45 : 1;
+    if(S.ph===1 && S.tapsInWarn[e.main]){ S.antic++; S.sc+=15; S.paid+=15; addPts(15); floatTxt(st,W()/2,H()*.36,'Anticipé ! +15','var(--good)'); }
+    S.tapsInWarn={}; S.warn=null;
+    S.ev={ ...e, left:e.dur, k:strength };
+    if(S.ph<2) showEv(`${e.e} <b>${e.t}</b> · ${e.d}`);
+    st.classList.remove('hot','cold'); if(e.cls) st.classList.add(e.cls);
+  }
+  function spawnZombie(){
+    const z=mk('button','hz','🧟',st); const x=rand(40,W()-40), y=rand(H()*.3,H()*.55); place(z,x,y);
+    const o={el:z,age:0}; S.zs.push(o);
+    z.onclick=()=>{ z.remove(); S.zs.splice(S.zs.indexOf(o),1); S.sc+=10; S.paid+=10; addPts(10,x,y,st); };
+  }
+  function spawnNotif(){
+    const [a,m]=pick(NOTIFS); const n=mk('button','hn',`<small>📱 ${a}</small>${m}`,st);
+    place(n,rand(100,W()-100),rand(60,H()*.42)); const o={el:n}; S.ns.push(o);
+    S.v.stress=clamp(S.v.stress+7,0,100);
+    n.onclick=()=>{ n.remove(); S.ns.splice(S.ns.indexOf(o),1); };
+    if(S.ns.length>5){ const old=S.ns.shift(); old.el.remove(); }
+  }
+  const g={ update(dt){
+    if(S.over) return;
+    S.t+=dt; const v=S.v;
+    // dérives naturelles
+    v.eau-=1.1*dt; v.sucre-=1*dt; v.temp+=rand(-1.5,1.5)*dt; v.stress+=(S.ph<2?.4:0)*dt;
+    // événements (phases 1 et 2 ; en phase 3 ils continuent, le pilote automatique s'en charge)
+    if(!S.ev && !S.warn){ S.nextEv-=dt; if(S.nextEv<=0){
+      const e=pick(S.ph===2?HEV.filter(x=>x.main!=='stress'):HEV);
+      if(S.ph===1){ S.warn={...e,left:3}; S.tapsInWarn={}; showEv(`⏳ Dans 3 s : ${e.e} <b>${e.t}</b> (${e.d})`,true); }
+      else launch(e);
+    }}
+    if(S.warn){ S.warn.left-=dt; ev.innerHTML=`⏳ Dans ${Math.ceil(S.warn.left)} s : ${S.warn.e} <b>${S.warn.t}</b> (${S.warn.d})`; if(S.warn.left<=0) launch(S.warn); }
+    if(S.ev){ for(const k in S.ev.r) v[k]+=S.ev.r[k]*S.ev.k*dt; S.ev.left-=dt; if(S.ev.left<=0){ S.ev=null; ev.hidden=true; st.classList.remove('hot','cold'); S.nextEv=S.ph===0?rand(1.2,2.4):rand(1.6,2.6); } }
+    // phase 3 : régulation automatique (sauf le stress, que le corps ne règle que lentement)
+    if(S.ph===2){
+      for(const k of ['temp','eau','sucre']) v[k]+=(50-v[k])*2.2*dt;
+      v.stress+=(30-v.stress)*.05*dt;
+      S.zt-=dt; if(S.zt<=0){ spawnZombie(); S.zt=rand(1,1.8); }
+      S.zs.slice().forEach(o=>{ o.age+=dt; if(o.age>3.2){ o.el.remove(); S.zs.splice(S.zs.indexOf(o),1); v.stress+=6; } });
+      if(S.t>6){ S.nt-=dt; if(S.nt<=0){ spawnNotif(); S.nt=rand(.8,1.4); } }
+      S.stressLog.push(v.stress);
+    } else v.stress+=(30-v.stress)*.08*dt;
+    let bad=0;
+    for(const k in v){ v[k]=clamp(v[k],0,100); if(v[k]<20||v[k]>80) bad++; }
+    const inZone=Object.values(v).every(x=>x>=35&&x<=65);
+    S.life=clamp(S.life-bad*(S.ph===2?3:9)*dt+(inZone?3*dt:0),0,100);
+    if(inZone && S.ph<2){ S.sc+=dt*4; }
+    if(S.life<=0){ S.faints++; S.life=60; for(const k of ['temp','eau','sucre']) v[k]=50; shake(st); floatTxt(st,W()/2,H()*.3,'Malaise ! On repart.','#ffb3b3'); }
+    // affichage
+    st.querySelectorAll('.hg').forEach(el=>{ const x=v[el.dataset.k]; el.querySelector('.lvl').style.height=x+'%'; el.querySelector('.hbar').classList.toggle('danger',x<20||x>80); });
+    st.querySelector('.hlife i').style.width=S.life+'%'; st.querySelector('.hlife i').style.background=S.life<35?'var(--bad)':'var(--good)';
+    const av=st.querySelector('.hav');
+    av.textContent=v.stress>75?'😰':v.temp>75?'🥵':v.temp<25?'🥶':v.eau<25?'🫠':v.sucre<25?'😵':S.ph===2?'🧘':'🧍';
+    av.classList.toggle('bad',bad>0);
+    $('#h-t').textContent=Math.max(0,Math.ceil(30-S.t))+' s'; $('#h-sc').textContent=Math.round(S.sc)+' pt';
+    if(S.t>=30){ if(S.ph<2) startPhase(S.ph+1); else finish(); }
+  }, stop(){ S.over=true; } };
+  function finish(){
+    S.over=true; G.cur.over=true;
+    const sc=Math.round(S.sc); D.best.homeo=Math.max(D.best.homeo||0,sc); addPts(Math.max(0,sc-S.paid));
+    const log=S.stressLog, n=log.length, pts=log.filter((_,i)=>i%6===0).map((y,i,a)=>`${(i/(a.length-1||1)*300).toFixed(1)},${(100-y).toFixed(1)}`).join(' ');
+    const endStress=Math.round(log[n-1]||S.v.stress);
+    stopGame();
+    overlay(`<h2>Fin de la survie</h2><p>Score : <b>${sc} pt</b>${S.antic?` · ${S.antic} anticipation${S.antic>1?'s':''}`:''}${S.faints?` · ${S.faints} malaise${S.faints>1?'s':''} (pas grave, c'est un jeu !)`:''}</p>
+      <p style="text-align:left">En phase 3, ton stress pendant le pilote automatique :</p>
+      <svg class="hcurve" viewBox="0 0 300 100" preserveAspectRatio="none"><rect x="0" y="35" width="300" height="30" fill="#6ee7a022"/><polyline points="${pts}" fill="none" stroke="#ff6aa8" stroke-width="3"/></svg>
+      <p style="text-align:left">${endStress>65?'Les notifications ont fait grimper ton stress, et le pilote automatique n\'arrivait plus à le faire redescendre.':'Ton stress a tenu, mais regarde comme il montait à chaque notification.'}</p>
+      <div class="row c"><button class="btn" id="h-a">Rejouer</button><button class="btn ok" id="h-d">Ma découverte</button></div>`);
+    $('#h-a').onclick=()=>{ $('#ov').hidden=true; gHomeo(); };
+    $('#h-d').onclick=()=>{ $('#ov').hidden=true; main.querySelectorAll('.stage,.hud').forEach(e=>e.remove()); discHomeo(); };
+  }
+  startGame(g); startPhase(0);
+}
+function discHomeo(){
+  discovery('homeo',{
+    reveal:{ q:'En phase 3, qui a gardé ta température, ton eau et ton sucre dans la zone verte ?', opts:['Moi, en appuyant sur les boutons','Mon corps, tout seul : c\'est l\'homéostasie','Le hasard'], good:1,
+      explain:'Ton corps règle en permanence des dizaines de variables sans te demander : il transpire, frissonne, te donne soif ou faim. Et ton cerveau ne fait pas que réagir : comme en phase 2, il <b>anticipe</b> (tu as soif avant d\'être déshydraté, tu salives avant de manger). Le stress, lui, est fait pour durer quelques minutes face à un danger : quand les alertes ne s\'arrêtent jamais, il reste allumé.' },
+    power:{ name:'le pilote automatique', emoji:'🔥🦣🏃', scene:'Il y a 40 000 ans, ton ancêtre poursuit un mammouth sous le soleil. S\'il devait penser à transpirer, à respirer plus vite et à garder du sucre pour ses muscles, il n\'aurait plus d\'attention pour viser… ni pour voir le lion caché.',
+      q:'Pourquoi le cerveau régule-t-il le corps sans nous demander notre avis ?', opts:['Pour libérer notre attention pour l\'essentiel : chasser, fuir, parler, apprendre','Parce que nous sommes paresseux','Parce que le corps n\'a pas besoin du cerveau'], good:0,
+      explain:'Un cerveau qui devrait tout décider consciemment serait vite débordé. L\'automatique est rapide, économique et fiable : c\'est un énorme avantage pour survivre.',
+      help:'tu peux jouer au foot, parler et réfléchir pendant que ton corps gère la chaleur, la soif et l\'équilibre.',
+      trap:'le système d\'alarme (stress) se déclenche pour des notifications comme pour un zombie, et ne sait pas s\'éteindre si les alertes continuent.' },
+    cases:[
+      { s:'Pendant le match, Lina boit dès qu\'elle a soif. Elle n\'a jamais compté ses gorgées.', a:'aide', why:'La soif est un signal d\'anticipation : elle arrive avant que le corps manque vraiment d\'eau.' },
+      { s:'Sam reçoit 200 notifications par jour. Son cœur s\'accélère à chaque vibration, même la nuit.', a:'piege', why:'L\'alarme faite pour les vrais dangers reste allumée : c\'est le stress chronique, qui fatigue et abîme le sommeil.' },
+      { s:'Avant un contrôle, ton cœur bat plus vite et tes mains deviennent moites.', a:'deux', why:'Le corps se prépare à un effort (plus d\'énergie, plus d\'attention), mais trop de stress peut bloquer la mémoire.' }
+    ],
+    ai:{ html:'<p>Un thermostat fait de la régulation : il mesure, compare à une <b>consigne</b> (20 °C), corrige. L\'algorithme qui choisit tes vidéos fait pareil : il mesure ce que tu regardes et ajuste en continu.</p>',
+      q:'Quelle est, le plus souvent, la consigne de l\'algorithme qui te recommande des vidéos ?', opts:['Ton bien-être','Le temps que tu passes sur l\'appli','Ton sommeil'], good:1,
+      explain:'Il régule pour maximiser ton temps d\'écran, pas ton équilibre. Ton corps et l\'appli régulent tous les deux… mais pas vers la même consigne.' },
+    ask:'Avec tes mots, en une phrase : qu\'as-tu découvert sur ton corps et ton cerveau ?'
+  });
+}
+
+/* =========================================================
+   2 · HALLUCINATION CONTRÔLÉE
+   flashs zombie ou souche (calme puis alerte) · lettres mélangées
+   tache aveugle · le mot suivant
+   ========================================================= */
+// images : zombie net, souche nette, ou forme floue ambiguë (les MÊMES dans les deux phases)
+function fSvg(kind,seed){
+  const r=(a,b)=>a+((Math.sin(seed*9301+a*49297)+1)/2)*(b-a);
+  if(kind==='z') return `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#2e4a26"/><text x="50" y="72" font-size="62" text-anchor="middle" style="filter:blur(.6px)">🧟</text></svg>`;
+  if(kind==='s') return `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#2e4a26"/><text x="50" y="74" font-size="60" text-anchor="middle" style="filter:blur(.6px)">🪵</text></svg>`;
+  const ax=r(18,30), ay=r(30,48), bx=r(70,84), by=r(28,46), h=r(40,56);
+  return `<svg viewBox="0 0 100 100"><defs><filter id="bl${seed}"><feGaussianBlur stdDeviation="${r(3.5,5).toFixed(1)}"/></filter></defs><rect width="100" height="100" fill="#3a4a30"/>
+    <g filter="url(#bl${seed})" fill="#1c1a14"><rect x="38" y="${100-h-10}" width="24" height="${h+12}" rx="8"/><ellipse cx="50" cy="${100-h-12}" rx="11" ry="10"/>
+    <path d="M40 ${100-h+6} L${ax} ${ay}" stroke="#1c1a14" stroke-width="7" stroke-linecap="round"/><path d="M60 ${100-h+6} L${bx} ${by}" stroke="#1c1a14" stroke-width="7" stroke-linecap="round"/></g></svg>`;
+}
+function gHallu(){
+  head('👁️','Hallucination contrôlée','Quatre petites épreuves sur ce que tu <b>vois</b> vraiment. Réponds vite, sans réfléchir : il n\'y a pas de piège… enfin, presque.');
+  const go=mk('div','row',`<button class="btn ok" id="f-go">Commencer</button>`,main);
+  $('#f-go').onclick=()=>{ go.remove(); hFlash(); };
+}
+const HA={};
+function hFlash(){
+  HA.amb=shuffle([1,2,3,4].map(i=>i*7+randi(1,5)));
+  HA.res={calm:0,alert:0};
+  const seq=mode=>shuffle([...['z','z','z','s','s','s'].map(k=>({k,seed:randi(1,99)})),...HA.amb.map(s=>({k:'a',seed:s}))]);
+  const phases=[{m:'calm',ban:'🌳 Promenade tranquille en forêt. Zombie ou souche ?',ms:320},{m:'alert',ban:'⚠️ ALERTE : des zombies ont été vus dans cette forêt ! Ne te fais pas surprendre.',ms:260}];
+  let pi=0;
+  const hud=mk('div','hud',`<span>Épreuve 1/4 · Zombie ou souche ?</span><span id="f-n"></span>`,main);
+  const st=mk('div','stage fst calm',`<div class="fban"></div><div class="fimg"></div><div class="fcount"></div><div class="fbtns"><button class="btn" data-a="z" disabled>🧟 Zombie !</button><button class="btn" data-a="s" disabled>🪵 Souche</button></div>`,main);
+  const img=st.querySelector('.fimg'), btns=st.querySelectorAll('.fbtns .btn');
+  let list, i, cur, timer, answered;
+  function runPhase(){
+    const p=phases[pi]; st.className='stage fst '+p.m; st.querySelector('.fban').textContent=p.ban;
+    list=seq(); i=0;
+    overlay(`<h2>${pi===0?'Au calme':'En alerte !'}</h2><p>${pi===0?'Des images vont apparaître une fraction de seconde. Zombie ou souche ? Réponds le plus vite possible.':'Même jeu… mais maintenant, des zombies rôdent. Un zombie raté, c\'est un zombie qui t\'attrape !'}</p><div class="row c"><button class="btn ok" id="f-c">Prêt</button></div>`);
+    $('#f-c').onclick=()=>{ $('#ov').hidden=true; setTimeout(show,600); };
+  }
+  function show(){
+    if(i>=list.length){ pi++; if(pi<phases.length) return runPhase(); return revealFlash(); }
+    cur=list[i]; answered=false; $('#f-n').textContent=(i+1)+'/'+list.length;
+    img.innerHTML=fSvg(cur.k,cur.seed);
+    btns.forEach(b=>b.disabled=false);
+    timer=setTimeout(()=>{ img.innerHTML='<div class="fmask"></div>'; },phases[pi].ms);
+  }
+  btns.forEach(b=>b.onclick=()=>{
+    if(answered) return; answered=true; clearTimeout(timer); btns.forEach(x=>x.disabled=true);
+    const a=b.dataset.a;
+    if(cur.k==='a'){ if(a==='z') HA.res[phases[pi].m]++; }
+    else if(a===cur.k){ addPts(2); }
+    img.innerHTML='<div class="fmask"></div>';
+    i++; setTimeout(show,450);
+  });
+  function revealFlash(){
+    const c=HA.res.calm, a=HA.res.alert;
+    main.querySelectorAll('.stage,.hud').forEach(e=>e.remove());
+    head('👁️','Les formes floues…','Parmi les images, quatre étaient des <b>formes floues</b>, ni zombie ni souche, et c\'étaient <b>exactement les mêmes</b> dans les deux phases :');
+    mk('div','row',HA.amb.map(s=>`<div style="width:90px;height:90px;border-radius:10px;overflow:hidden">${fSvg('a',s)}</div>`).join(''),main);
+    mk('div','card',`<p>Sur ces mêmes 4 formes, tu as vu un zombie <b>${c} fois au calme</b> et <b>${a} fois en alerte</b>.</p>
+      <p>${a>c?'Quand on t\'a prévenu du danger, ton cerveau a vu plus de zombies dans les mêmes images : il voit ce qu\'il <b>s\'attend</b> à voir.':a===c?'Autant de zombies dans les deux cas : bien joué ! Mais dans une classe, la plupart des gens en voient plus quand on les met en alerte.':'Tu en as vu moins en alerte : ton cerveau a peut-être été prudent dans l\'autre sens. Dans une classe, la plupart des gens en voient plus en alerte.'}</p>
+      <p class="reassure" style="margin:0">${REASSURE}</p>`,main);
+    mk('div','row',`<button class="btn ok" id="f-n2">Épreuve suivante →</button>`,main);
+    $('#f-n2').onclick=hScramble;
+  }
+  startGame({}); runPhase();
+}
+function hScramble(){
+  head('📝','Épreuve 2/4 · Lis ce message','Lis ce texte à voix basse, normalement, puis appuie sur le bouton.');
+  const t0=performance.now();
+  mk('div','scram','Sleon une édtue, l\'odrre des ltetres dnas un mot n\'a pas bcuoaucp d\'ipmrotncae. Ce qui cmopte, c\'est que la pmeirère et la drenière lterte siont à la bnone pclae. Le rsete puet êrte en dsérorde et tu puex qnuad mmêe lrie snas torp de mal, pacre que ton cvreeau ne lit pas les lteerts une par une : il dvenie le mot etneir.',main);
+  const r=mk('div','row',`<button class="btn ok" id="s-ok">J'ai lu !</button>`,main);
+  $('#s-ok').onclick=()=>{
+    const sec=((performance.now()-t0)/1000).toFixed(0); r.remove();
+    const box=mk('div','card',`<p>Tu as lu en <b>${sec} secondes</b>. Combien de mots étaient mal écrits ?</p><div class="opts"><button class="opt" data-i="0">Aucun ou presque</button><button class="opt" data-i="1">Quelques-uns</button><button class="opt" data-i="2">Presque tous les mots longs</button></div><p class="fb"></p>`,main);
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      box.querySelectorAll('.opt').forEach((x,i)=>{ x.disabled=true; x.classList.toggle('right',i===2); x.classList.toggle('wrong',x===b && i!==2); });
+      if(+b.dataset.i===2) addPts(5);
+      const fb=box.querySelector('.fb'); fb.className='fb info'; fb.innerHTML='Presque tous les mots longs avaient leurs lettres mélangées ! <span>Ton cerveau a <b>prédit</b> les mots grâce au contexte et a corrigé tout seul. (Petit secret : la fameuse « étude » qui circule sur Internet n\'existe pas vraiment, mais l\'effet est réel pour des mots courants dans une phrase qui a du sens.)</span>';
+      mk('div','row',`<button class="btn ok" id="s-n">Épreuve suivante →</button>`,main); $('#s-n').onclick=hBlind;
+    });
+  };
+}
+function hBlind(){
+  head('🎯','Épreuve 3/4 · Ta tache aveugle','Chaque œil a un endroit où il ne voit <b>rien</b> : là où le nerf optique sort de la rétine. Trouve le tien.');
+  mk('ol',null,'<li>Ferme (ou cache) ton <b>œil gauche</b>.</li><li>Regarde fixement la <b>croix</b> avec ton œil droit. Ne bouge pas les yeux !</li><li>Approche-toi ou recule lentement de l\'écran (entre 20 et 50 cm). À un moment, le <b>rond rouge</b> disparaît.</li>',main);
+  mk('div','bspot','<span class="x">✚</span><span class="dot"></span>',main);
+  const r=mk('div','row',`<button class="btn ok" id="b-y">Le rond a disparu !</button><button class="btn" id="b-n">Je n'y arrive pas</button>`,main);
+  r.style.marginTop='10px';
+  $('#b-y').onclick=()=>{ r.remove();
+    const box=mk('div','card',`<p>Et à la place du rond, qu'as-tu vu ?</p><div class="opts"><button class="opt">Un trou noir</button><button class="opt">Les rayures jaunes et bleues du fond</button><button class="opt">Une tache blanche</button></div><p class="fb"></p>`,main);
+    box.querySelectorAll('.opt').forEach((b,i)=>b.onclick=()=>{ box.querySelectorAll('.opt').forEach((x,j)=>{ x.disabled=true; x.classList.toggle('right',j===1); }); if(i===1) addPts(5); blindEnd(box); });
+  };
+  $('#b-n').onclick=()=>{ r.remove(); blindEnd(mk('div','card','<p>Pas grave : sur certains écrans ou avec des lunettes, c\'est difficile. Tu pourras réessayer avec un rond dessiné sur une feuille.</p><p class="fb"></p>',main)); };
+  function blindEnd(box){ const fb=box.querySelector('.fb'); fb.className='fb info'; fb.innerHTML='Il y a un vrai trou dans ta vision… <span>mais tu ne l\'as jamais vu de ta vie ! Ton cerveau le <b>bouche</b> avec ce qu\'il prédit d\'après les alentours : ici, des rayures. Ce que tu vois est en partie inventé.</span>';
+    mk('div','row',`<button class="btn ok" id="b-nx">Dernière épreuve →</button>`,main); $('#b-nx').onclick=hNext; }
+}
+const HNX=[
+  ['Le chat boit du','lait',['lait','ciel','bruit']],
+  ['Après la pluie vient le beau','temps',['temps','fromage','vélo']],
+  ['Pour allumer la lumière, j\'appuie sur l\'','interrupteur',['interrupteur','éléphant','horizon']],
+  ['Il était une fois une','princesse',['princesse','chaussette','équation']],
+  ['Ce matin, au lieu de prendre le bus, Léa est venue au lycée en','trottinette',['voiture','vélo','trottinette']]
+];
+function hNext(){
+  head('🔮','Épreuve 4/4 · Le mot suivant','Choisis le plus vite possible le mot qui termine la phrase.');
+  let i=0, fast=0; const box=mk('div','card',null,main);
+  function show(){
+    if(i>=HNX.length) return end();
+    const [s,good,opts]=HNX[i]; const t0=performance.now();
+    box.innerHTML=`<p style="font-size:19px">${s} <span class="word">?</span></p><div class="opts">${shuffle(opts.slice()).map(o=>`<button class="opt">${o}</button>`).join('')}</div>`;
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const ms=performance.now()-t0; if(ms<2500) fast++; box.querySelector('.word').textContent=b.textContent; box.querySelectorAll('.opt').forEach(x=>x.disabled=true); b.classList.add('sel'); i++; setTimeout(show,500); });
+  }
+  function end(){
+    box.innerHTML=`<p>Tu as répondu en moins de 2,5 secondes à <b>${fast} phrase${fast>1?'s':''} sur ${HNX.length}</b>. Pour les quatre premières, tu connaissais la fin <b>avant</b> de la lire : ton cerveau prédit en permanence la suite.</p>
+      <p>La dernière était plus dure : aucune réponse n'était « évidente ». Quand le monde ne ressemble pas à ce que ton cerveau attend, il doit vraiment regarder… et ça prend plus de temps.</p>
+      <p>Une IA de langage fait la même chose avec des probabilités. Pour « Le chat boit du… », elle calcule à peu près :</p>
+      <div class="probs"><div><span>lait</span><i style="width:72%"></i><span>72 %</span></div><div><span>l'eau</span><i style="width:14%"></i><span>14 %</span></div><div><span>sang</span><i style="width:3%"></i><span>3 %</span></div><div><span>ciel</span><i style="width:.5%"></i><span>&lt;1 %</span></div></div>`;
+    addPts(5);
+    mk('div','row',`<button class="btn ok" id="n-d">Ma découverte</button>`,main); $('#n-d').onclick=()=>{ D.best.hallu=1; save(); main.innerHTML=''; discHallu(); };
+  }
+  show();
+}
+function discHallu(){
+  const c=(HA.res||{}).calm||0, a=(HA.res||{}).alert||0;
+  discovery('hallu',{
+    reveal:{ html:HA.res?`<p>Rappel : sur les mêmes formes floues, tu as vu ${c} zombie${c>1?'s':''} au calme et ${a} en alerte. Tu as lu un texte aux lettres mélangées et ton cerveau a bouché ta tache aveugle.</p>`:'',
+      q:'Qu\'est-ce que ces quatre épreuves montrent sur ce que tu vois ?', opts:['Mes yeux photographient le monde exactement comme il est','Mon cerveau prédit ce qu\'il s\'attend à voir, et ne corrige qu\'avec ce qui ne colle pas','Mon cerveau invente n\'importe quoi'], good:1,
+      explain:'Le neuroscientifique Anil Seth parle d\'<b>hallucination contrôlée</b> : ton cerveau fabrique sa meilleure prédiction du monde, et tes sens servent surtout à la corriger. Les attentes (l\'alerte), le contexte (les mots) et les trous (la tache aveugle) sont remplis par la prédiction.' },
+    power:{ name:'la prédiction', emoji:'🌾🦁❓', scene:'Dans la savane, une forme sombre bouge dans les hautes herbes. Celui qui croit voir un lion et s\'enfuit alors que c\'était une souche perd un peu d\'énergie. Celui qui croit voir une souche alors que c\'était un lion… n\'a pas eu d\'enfants. Nous descendons de ceux qui voyaient des lions un peu trop souvent.',
+      q:'Pourquoi vaut-il mieux voir trop de zombies que pas assez ?', opts:['Se tromper sur une souche coûte peu, se tromper sur un lion coûte la vie','Parce que les souches sont dangereuses','Ça ne change rien'], good:0,
+      explain:'Prédire vite, c\'est réagir avant d\'avoir tout vu. Et quand on est en danger, le cerveau règle sa prédiction vers « danger » : c\'est ce que l\'alerte a fait dans le jeu.',
+      help:'tu lis vite, tu comprends un SMS plein de fautes, tu rattrapes une balle en prédisant sa trajectoire.',
+      trap:'tu ne vois pas tes propres fautes en te relisant (tu lis ce que tu voulais écrire), et la peur te fait voir des dangers qui n\'existent pas.' },
+    cases:[
+      { s:'Tu reçois « jsuis en rtard dsl jarive » et tu comprends tout de suite.', a:'aide', why:'Ton cerveau prédit les mots grâce au contexte : il complète sans effort.' },
+      { s:'Tu relis ta copie trois fois, et le professeur trouve une faute énorme dès la première ligne.', a:'piege', why:'En te relisant, ton cerveau prédit ce que tu voulais écrire et « voit » le bon mot. Astuce : relire à l\'envers ou à voix haute.' },
+      { s:'Seul à la maison la nuit, tu entends un craquement et tu es sûr que quelqu\'un est entré.', a:'deux', why:'C\'est sans doute le parquet (piège), mais un cerveau qui vérifie les bruits la nuit a protégé nos ancêtres (aide).' }
+    ],
+    ai:{ html:'<p>Dans l\'épreuve 4, une IA de langage aurait fait comme toi : choisir le mot le plus probable.</p>',
+      q:'Que fait une IA comme ChatGPT, à chaque mot qu\'elle écrit ?', opts:['Elle prédit le mot le plus probable qui suit','Elle recopie la réponse dans une encyclopédie','Elle voit le monde comme un humain'], good:0,
+      explain:'Comme ton cerveau, elle prédit. Et comme lui, elle peut « halluciner » : produire une réponse très plausible mais fausse, avec assurance. Humains et IA ont le même superpouvoir… et le même piège.' },
+    ask:'Avec tes mots, en une phrase : est-ce que tu vois le monde tel qu\'il est ?'
+  });
+}
+
+/* =========================================================
+   JEUX À VENIR
+   ========================================================= */
+function gWip(g){
+  head(g.e,g.t,g.d);
+  mk('div','card wipbox',`<div class="e">🚧</div><p><b>Ce jeu est en construction.</b></p><p class="lead" style="margin:auto">Il arrive bientôt. En attendant, rejoue les jeux déjà ouverts ou relis tes découvertes.</p><div class="row c" style="margin-top:12px"><button class="btn ok" id="w-b">Menu</button></div>`,main);
+  $('#w-b').onclick=menu;
+}
+
+/* =========================================================
+   MENU · 6 paires de 2 jeux, ouvertes deux par deux
+   ========================================================= */
+const PAIRS=['1 · Pilote automatique','2 · Seul le changement compte','3 · Le cerveau conteur','4 · Le jeu du statut','5 · La tribu','6 · Les marchands d\'attention'];
+const GAMES=[
+  {id:'homeo',e:'🌡️',t:'Survie homéostatique',d:'Garde ton survivant en vie : température, eau, sucre, stress. Puis laisse faire le pilote automatique… et les notifications.',fn:gHomeo},
+  {id:'hallu',e:'👁️',t:'Hallucination contrôlée',d:'Zombie ou souche ? Lettres mélangées, tache aveugle, mot suivant : vois-tu vraiment le monde ?',fn:gHallu},
+  {id:'radar',e:'📡',t:'Radar',d:'Les zombies ne sont visibles que quand ils bougent. Trouve ce qui a changé… même très lentement.'},
+  {id:'bruit',e:'🔊',t:'Bruit de fond',d:'Repère les sons nouveaux. Et ce bruit qui ne s\'arrête jamais, tu l\'entends encore ?'},
+  {id:'confab',e:'🎭',t:'Confabulateur',d:'Choisis le survivant le plus fiable… puis explique ton choix.'},
+  {id:'miroir',e:'🪞',t:'Miroir flatteur',d:'Note-toi, note les autres, devine ce que pense la classe.'},
+  {id:'statut',e:'👑',t:'Détecteur de statut',d:'Qui est le chef ? En 43 millisecondes. Et dans les dialogues : qui monte, qui descend ?'},
+  {id:'plus',e:'🪙',t:'Toujours plus',d:'1 jeton pour toi et 0 pour l\'autre, ou 2 chacun ? Et cette ligne d\'arrivée qui recule…'},
+  {id:'groupe',e:'👥',t:'Pression du groupe',d:'Sept avatars répondent avant toi. Ils se trompent. Et toi ?'},
+  {id:'tribu',e:'🟦',t:'Ma tribu',d:'Une couleur tirée au hasard. Nous… et eux.'},
+  {id:'tycoon',e:'📺',t:'Attention Tycoon',d:'Dirige un média gratuit de 1833 à aujourd\'hui. Ce que tu vends, c\'est l\'attention.'},
+  {id:'besoins',e:'🏭',t:'Fabrique à besoins',d:'Crée un problème, vends la solution. Puis repère les ficelles dans de vraies pubs.'}
+];
+// une paire s'ouvre quand les deux jeux d'avant ont leur découverte notée. Code prof : tout ouvert.
+const prevPair=i=>{ const p=Math.floor(i/2); return p?[GAMES[2*p-2],GAMES[2*p-1]]:[]; };
+const isOpen=i=>D.prof||prevPair(i).every(g=>D.disc[g.id]);
+const allDone=()=>GAMES.every(g=>D.disc[g.id]);
+function menu(){
+  stopGame();
+  const card=(g,i)=>!isOpen(i)?`<button class="gcard locked" data-i="${i}" aria-disabled="true"><span class="e">${g.e}</span><span class="t">${i+1} · ${g.t}</span><span class="d">${g.d}</span><span class="s lk">🔒 Termine d'abord ${prevPair(i).filter(x=>!D.disc[x.id]).map(x=>x.e+' '+x.t).join(' et ')}</span></button>`
+    :`<button class="gcard${D.disc[g.id]?' done':''}" data-i="${i}"><span class="e">${g.e}</span><span class="t">${i+1} · ${g.t}</span><span class="d">${g.d}</span><span class="s${g.fn?'':' wip'}">${g.fn?(D.disc[g.id]?'✓ découverte notée':''):'🚧 en construction'}${D.best[g.id]&&g.id==='homeo'?` · record ${D.best[g.id]}`:''}</span></button>`;
+  main.innerHTML=`<h2>🧠 Brain Exploration</h2>${D.prof?'<p class="fb good" style="margin:0 0 8px">🔑 Mode enseignant : tous les jeux sont ouverts.</p>':''}<p class="lead">Douze jeux pour explorer ton cerveau : ses superpouvoirs, ses pièges, et pourquoi il marche comme ça. Tout le monde tombe dans les pièges, c'est normal, et c'est justement intéressant. À la fin de chaque jeu, note ta découverte : on la reprendra en cours.</p>
+    <div class="games">${GAMES.map((g,i)=>(i%2===0?`<div class="pairh">${PAIRS[i/2]}</div>`:'')+card(g,i)).join('')}
+    <div class="pairh">Final</div><button class="gcard final${allDone()||D.prof?'':' locked'}" id="final"><span class="e">🕵️</span><span class="t">L'enquête finale</span><span class="d">Des situations de la vraie vie : quel mécanisme est à l'œuvre ? Et pourquoi un groupe où l'on pense différemment se trompe moins.</span><span class="s ${allDone()||D.prof?'wip':'lk'}">${allDone()||D.prof?'🚧 en construction':'🔒 Termine les 12 jeux'}</span></button></div>
+    <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button><button class="btn" id="profb">${D.prof?'🔓 Quitter le mode enseignant':'🔑 Mode enseignant'}</button></div>${SCORM?'<p class="lead" style="font-size:13px">✅ Ta progression et tes découvertes sont enregistrées sur ÉLÉA.</p>':''}`;
+  main.querySelectorAll('.gcard[data-i]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, g=GAMES[i]; if(isOpen(i)) (g.fn||(()=>gWip(g)))(); else shake(b); });
+  $('#final').onclick=()=>{ if(allDone()||D.prof) gWip({e:'🕵️',t:'L\'enquête finale',d:''}); else shake($('#final')); };
+  $('#notes').onclick=notes; $('#profb').onclick=profMode; scrollTo(0,0);
+}
+function profMode(){
+  if(D.prof){ D.prof=false; save(); return menu(); }
+  overlay(`<h2>🔑 Mode enseignant</h2><p>Mot de passe :</p><input type="password" id="pw" autocomplete="off" style="width:100%;padding:10px;font-size:16px;border-radius:8px;border:1px solid var(--line);background:var(--deep);color:var(--fg)"><p class="fb" id="pwm"></p><div class="row c"><button class="btn ok" id="pwok">Valider</button><button class="btn" id="pwx">Annuler</button></div>`);
+  const ok=()=>{ if($('#pw').value.trim().toUpperCase()==='SNT-PROF'){ D.prof=true; save(); $('#ov').hidden=true; menu(); } else { $('#pwm').className='fb bad'; $('#pwm').textContent='Mot de passe incorrect.'; $('#pw').select(); } };
+  $('#pwok').onclick=ok; $('#pw').onkeydown=e=>{ if(e.key==='Enter') ok(); };
+  $('#pwx').onclick=()=>{ $('#ov').hidden=true; };
+  setTimeout(()=>$('#pw').focus(),50);
+}
+function notes(){
+  stopGame();
+  const L=GAMES.map(g=>({g,d:D.disc[g.id]}));
+  main.innerHTML=`<h2>📒 Mes découvertes</h2><p class="lead">Recopie-les dans ton cahier, ou copie-les pour ton professeur.</p>
+    <ol class="notes">${L.map(({g,d})=>`<li><b>${g.e} ${g.t}</b><br>${d?`${d.txt?`« ${esc(d.txt)} »`:'<span class="q">(pas de phrase)</span>'}${d.help?`<br>✅ Ça m'aide : ${esc(d.help)}`:''}${d.trap?`<br>⚠️ Ça me piège : ${esc(d.trap)}`:''}`:'<span class="q">Pas encore fait.</span>'}</li>`).join('')}</ol>
+    <p>Total : <b>${D.pts} points</b></p><div class="row"><button class="btn ok" id="cpy">Copier le texte</button><button class="btn" id="back">Menu</button><button class="btn" id="rs">Tout effacer</button></div><p class="fb" id="nf"></p>`;
+  const txt='Mes découvertes (SNT · Brain Exploration)\n\n'+L.map(({g,d})=>`${g.e} ${g.t}\n${d?`« ${d.txt||'-'} »${d.help?`\nÇa m'aide : ${d.help}`:''}${d.trap?`\nÇa me piège : ${d.trap}`:''}`:'(pas fait)'}`).join('\n\n');
+  $('#cpy').onclick=async()=>{ try{ await navigator.clipboard.writeText(txt); $('#nf').className='fb good'; $('#nf').textContent='Copié !'; }catch(e){ $('#nf').className='fb bad'; $('#nf').textContent='Copie impossible ici : sélectionne le texte à la main.'; } };
+  $('#back').onclick=menu;
+  $('#rs').onclick=()=>{ if(confirm('Effacer tes découvertes, records et points ?')){ D={pts:0,best:{},disc:{}}; save(); menu(); } };
+}
+$('#home').onclick=menu;
+save(); menu();
+</script>
+
+</body></html>
