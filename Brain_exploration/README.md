@@ -25,7 +25,7 @@ Il y a 12 jeux, en 6 paires. Une paire s'ouvre quand les deux jeux de la paire p
 
 **👁️ Hallucination contrôlée** comporte 4 épreuves :
 
-1. Des images flashées : zombie ou souche ? On joue d'abord au calme, puis en alerte, avec les mêmes formes floues dans les deux cas. On compare ensuite les réponses.
+1. Des silhouettes flashées : zombie ou souche ? Les deux sont faits des mêmes pièces, avec un rapport hauteur/largeur variable. Zombie raté −5, fausse alerte −1, bonne réponse +1. On joue au calme puis en alerte, avec les mêmes silhouettes ambiguës dans les deux phases, et on compare.
 2. Un texte aux lettres mélangées.
 3. La tache aveugle, que le cerveau remplit avec les rayures du fond.
 4. Le mot suivant, avec le lien vers les IA de langage.

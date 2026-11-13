@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Brain Exploration</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v1 · 12/11/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v2 · 13/11/2026</div>
 <!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
 <button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 58px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
 <script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
@@ -441,15 +441,36 @@ function discHomeo(){
    flashs zombie ou souche (calme puis alerte) · lettres mélangées
    tache aveugle · le mot suivant
    ========================================================= */
-// images : zombie net, souche nette, ou forme floue ambiguë (les MÊMES dans les deux phases)
-function fSvg(kind,seed){
-  const r=(a,b)=>a+((Math.sin(seed*9301+a*49297)+1)/2)*(b-a);
-  if(kind==='z') return `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#2e4a26"/><text x="50" y="72" font-size="62" text-anchor="middle" style="filter:blur(.6px)">🧟</text></svg>`;
-  if(kind==='s') return `<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#2e4a26"/><text x="50" y="74" font-size="60" text-anchor="middle" style="filter:blur(.6px)">🪵</text></svg>`;
-  const ax=r(18,30), ay=r(30,48), bx=r(70,84), by=r(28,46), h=r(40,56);
-  return `<svg viewBox="0 0 100 100"><defs><filter id="bl${seed}"><feGaussianBlur stdDeviation="${r(3.5,5).toFixed(1)}"/></filter></defs><rect width="100" height="100" fill="#3a4a30"/>
-    <g filter="url(#bl${seed})" fill="#1c1a14"><rect x="38" y="${100-h-10}" width="24" height="${h+12}" rx="8"/><ellipse cx="50" cy="${100-h-12}" rx="11" ry="10"/>
-    <path d="M40 ${100-h+6} L${ax} ${ay}" stroke="#1c1a14" stroke-width="7" stroke-linecap="round"/><path d="M60 ${100-h+6} L${bx} ${by}" stroke="#1c1a14" stroke-width="7" stroke-linecap="round"/></g></svg>`;
+// silhouettes : zombie et souche sont construits avec les MÊMES pièces (tronc, deux membres, base)
+// m = 0 → souche, m = 1 → zombie ; entre les deux → forme ambiguë. ws / hs : rapport largeur / hauteur variable
+function silItem(k,seed){
+  const R=i=>{ const x=Math.sin(seed*12.9898+i*78.233)*43758.5453; return x-Math.floor(x); };
+  const m=k==='z'?.64+R(1)*.2:k==='s'?.16+R(1)*.2:.45+R(1)*.1;
+  return { k, seed, m, ws:.7+R(2)*.65, hs:.75+R(3)*.45, dir:R(4)<.5?-1:1, bg:R(5) };
+}
+function fSvg(o){
+  const R=i=>{ const x=Math.sin(o.seed*7.137+i*31.7)*9187.31; return x-Math.floor(x); };
+  const m=o.m, cx=50, ground=94, H=58*o.hs, W=15*o.ws, top=ground-H, legH=H*.36*m, bodyB=ground-legH;
+  const P=[];
+  // tronc / corps
+  P.push(`<rect x="${(cx-W/2).toFixed(1)}" y="${top.toFixed(1)}" width="${W.toFixed(1)}" height="${(bodyB-top+2).toFixed(1)}" rx="${(2+4*m).toFixed(1)}"/>`);
+  // jambes (zombie) ou racines (souche)
+  const gap=W*.22*m, lw=(W-gap)/2;
+  if(legH>1){ P.push(`<rect x="${(cx-W/2).toFixed(1)}" y="${(bodyB-1).toFixed(1)}" width="${lw.toFixed(1)}" height="${(legH+1).toFixed(1)}" rx="2"/>`,`<rect x="${(cx+gap/2).toFixed(1)}" y="${(bodyB-1).toFixed(1)}" width="${lw.toFixed(1)}" height="${(legH+1).toFixed(1)}" rx="2"/>`); }
+  const sp=(1-m)*11*o.ws;
+  if(sp>1) P.push(`<path d="M${cx-W/2-sp} ${ground} L${cx-W/2} ${ground-9} L${cx+W/2} ${ground-9} L${cx+W/2+sp} ${ground} Z"/>`);
+  // tête (zombie) ou sommet cassé (souche)
+  const hr=7.5*m*Math.sqrt(o.ws);
+  if(hr>1) P.push(`<circle cx="${(cx+o.dir*2*m).toFixed(1)}" cy="${(top-hr*.75).toFixed(1)}" r="${hr.toFixed(1)}"/>`);
+  const th=(1-m)*8;
+  if(th>1) P.push(`<path d="M${cx-W/2} ${top+2} L${cx-W/4} ${top-th*R(1)} L${cx} ${top+1} L${cx+W/5} ${top-th} L${cx+W/2} ${top+2} Z"/>`);
+  // deux membres : branches vers le haut (souche) → bras tendus devant (zombie)
+  const sy=top+H*(.12+.3*(1-m)*R(2)), sy2=top+H*(.12+.35*(1-m)*R(3)), L1=17*o.ws*(.8+.4*R(4)), L2=17*o.ws*(.8+.4*R(5));
+  const a1=(-130+130*m)*Math.PI/180, a2=(-50+58*m)*Math.PI/180;
+  const limb=(x,y,a,L)=>{ const ax=o.dir>0?a:Math.PI-a; return `<path d="M${x.toFixed(1)} ${y.toFixed(1)} L${(x+Math.cos(ax)*L).toFixed(1)} ${(y+Math.sin(ax)*L).toFixed(1)}" stroke="#141210" stroke-width="${(4+1.5*o.ws).toFixed(1)}" stroke-linecap="round"/>`; };
+  P.push(limb(cx-o.dir*W*.3,sy,a1,L1), limb(cx+o.dir*W*.3,sy2,a2,L2));
+  const bgc=['#55684a','#4c5f4e','#5d6650','#4a5a44'][Math.floor(o.bg*4)];
+  return `<svg viewBox="0 0 100 100"><defs><filter id="bl${o.seed}"><feGaussianBlur stdDeviation="1.3"/></filter></defs><rect width="100" height="100" fill="${bgc}"/><rect y="88" width="100" height="12" fill="#00000033"/><g filter="url(#bl${o.seed})" fill="#141210">${P.join('')}</g></svg>`;
 }
 function gHallu(){
   head('👁️','Hallucination contrôlée','Quatre petites épreuves sur ce que tu <b>vois</b> vraiment. Réponds vite, sans réfléchir : il n\'y a pas de piège… enfin, presque.');
@@ -457,49 +478,60 @@ function gHallu(){
   $('#f-go').onclick=()=>{ go.remove(); hFlash(); };
 }
 const HA={};
+// barème : zombie raté (ou pas de réponse) −5, souche prise pour un zombie −1, bonne réponse +1
+const FCOST={hit:1,miss:-5,fa:-1};
 function hFlash(){
-  HA.amb=shuffle([1,2,3,4].map(i=>i*7+randi(1,5)));
-  HA.res={calm:0,alert:0};
-  const seq=mode=>shuffle([...['z','z','z','s','s','s'].map(k=>({k,seed:randi(1,99)})),...HA.amb.map(s=>({k:'a',seed:s}))]);
-  const phases=[{m:'calm',ban:'🌳 Promenade tranquille en forêt. Zombie ou souche ?',ms:320},{m:'alert',ban:'⚠️ ALERTE : des zombies ont été vus dans cette forêt ! Ne te fais pas surprendre.',ms:260}];
+  HA.amb=[0,1,2,3].map(i=>silItem('a',i*17+randi(1,9)));
+  HA.res={calm:0,alert:0}; HA.score=0; HA.miss=0; HA.fa=0;
+  const seq=()=>shuffle([...['z','z','z','z','s','s','s','s'].map(k=>silItem(k,randi(100,999))),...HA.amb]);
+  const phases=[{m:'calm',ban:'🌳 Promenade tranquille en forêt. Zombie ou souche ?',ms:320},{m:'alert',ban:'⚠️ ALERTE : des zombies ont été vus dans cette forêt !',ms:260}];
   let pi=0;
-  const hud=mk('div','hud',`<span>Épreuve 1/4 · Zombie ou souche ?</span><span id="f-n"></span>`,main);
-  const st=mk('div','stage fst calm',`<div class="fban"></div><div class="fimg"></div><div class="fcount"></div><div class="fbtns"><button class="btn" data-a="z" disabled>🧟 Zombie !</button><button class="btn" data-a="s" disabled>🪵 Souche</button></div>`,main);
+  mk('div','hud',`<span>Épreuve 1/4 · Zombie ou souche ?</span><span id="f-n"></span><span id="f-sc">0 pt</span>`,main);
+  const st=mk('div','stage fst calm',`<div class="fban"></div><div class="fimg"></div><div class="fbtns"><button class="btn" data-a="z" disabled>🧟 Zombie !</button><button class="btn" data-a="s" disabled>🪵 Souche</button></div>`,main);
   const img=st.querySelector('.fimg'), btns=st.querySelectorAll('.fbtns .btn');
-  let list, i, cur, timer, answered;
+  let list, i, cur, t1, t2, answered;
+  const RULES='<p style="text-align:left">Des silhouettes vont apparaître une fraction de seconde.<br>🧟 Zombie raté (ou pas de réponse) : <b>−5</b><br>🪵 Souche prise pour un zombie : <b>−1</b><br>✅ Bonne réponse : <b>+1</b></p>';
   function runPhase(){
     const p=phases[pi]; st.className='stage fst '+p.m; st.querySelector('.fban').textContent=p.ban;
     list=seq(); i=0;
-    overlay(`<h2>${pi===0?'Au calme':'En alerte !'}</h2><p>${pi===0?'Des images vont apparaître une fraction de seconde. Zombie ou souche ? Réponds le plus vite possible.':'Même jeu… mais maintenant, des zombies rôdent. Un zombie raté, c\'est un zombie qui t\'attrape !'}</p><div class="row c"><button class="btn ok" id="f-c">Prêt</button></div>`);
+    overlay(`<h2>${pi===0?'Au calme':'En alerte !'}</h2>${pi===0?RULES:'<p>Même jeu, mêmes règles… mais des zombies rôdent dans cette forêt.</p>'}<div class="row c"><button class="btn ok" id="f-c">Prêt</button></div>`);
     $('#f-c').onclick=()=>{ $('#ov').hidden=true; setTimeout(show,600); };
   }
   function show(){
     if(i>=list.length){ pi++; if(pi<phases.length) return runPhase(); return revealFlash(); }
     cur=list[i]; answered=false; $('#f-n').textContent=(i+1)+'/'+list.length;
-    img.innerHTML=fSvg(cur.k,cur.seed);
+    img.innerHTML=fSvg(cur);
     btns.forEach(b=>b.disabled=false);
-    timer=setTimeout(()=>{ img.innerHTML='<div class="fmask"></div>'; },phases[pi].ms);
+    t1=setTimeout(()=>{ img.innerHTML='<div class="fmask"></div>'; t2=setTimeout(()=>answer(null),1800); },phases[pi].ms);
   }
-  btns.forEach(b=>b.onclick=()=>{
-    if(answered) return; answered=true; clearTimeout(timer); btns.forEach(x=>x.disabled=true);
-    const a=b.dataset.a;
-    if(cur.k==='a'){ if(a==='z') HA.res[phases[pi].m]++; }
-    else if(a===cur.k){ addPts(2); }
+  function answer(a){
+    if(answered) return; answered=true; clearTimeout(t1); clearTimeout(t2); btns.forEach(x=>x.disabled=true);
+    let d=0, msg='';
+    if(cur.k==='a'){ if(a==='z') HA.res[phases[pi].m]++; msg=a?'':'Trop tard !'; }
+    else if(cur.k==='z'){ if(a==='z'){ d=FCOST.hit; msg='Zombie ! +1'; } else { d=FCOST.miss; HA.miss++; msg=(a?'C\'était un zombie !':'Trop tard, un zombie !')+' −5'; } }
+    else { if(a==='s'){ d=FCOST.hit; msg='Souche +1'; } else if(a==='z'){ d=FCOST.fa; HA.fa++; msg='Fausse alerte −1'; } else msg='Trop tard'; }
+    HA.score+=d; $('#f-sc').textContent=HA.score+' pt';
+    if(msg) floatTxt(st,st.clientWidth/2,st.clientHeight*.22,msg,d>0?'var(--good)':d<0?'#ffb3b3':'#fff');
+    if(d<-1) shake(st);
     img.innerHTML='<div class="fmask"></div>';
-    i++; setTimeout(show,450);
-  });
+    i++; setTimeout(show,550);
+  }
+  btns.forEach(b=>b.onclick=()=>answer(b.dataset.a));
   function revealFlash(){
     const c=HA.res.calm, a=HA.res.alert;
+    if(HA.score>0) addPts(HA.score);
     main.querySelectorAll('.stage,.hud').forEach(e=>e.remove());
-    head('👁️','Les formes floues…','Parmi les images, quatre étaient des <b>formes floues</b>, ni zombie ni souche, et c\'étaient <b>exactement les mêmes</b> dans les deux phases :');
-    mk('div','row',HA.amb.map(s=>`<div style="width:90px;height:90px;border-radius:10px;overflow:hidden">${fSvg('a',s)}</div>`).join(''),main);
-    mk('div','card',`<p>Sur ces mêmes 4 formes, tu as vu un zombie <b>${c} fois au calme</b> et <b>${a} fois en alerte</b>.</p>
-      <p>${a>c?'Quand on t\'a prévenu du danger, ton cerveau a vu plus de zombies dans les mêmes images : il voit ce qu\'il <b>s\'attend</b> à voir.':a===c?'Autant de zombies dans les deux cas : bien joué ! Mais dans une classe, la plupart des gens en voient plus quand on les met en alerte.':'Tu en as vu moins en alerte : ton cerveau a peut-être été prudent dans l\'autre sens. Dans une classe, la plupart des gens en voient plus en alerte.'}</p>
+    head('👁️','Les silhouettes…','Zombies et souches étaient faits des mêmes pièces : un tronc, deux membres, une base. Quatre silhouettes étaient <b>entre les deux</b>, ni zombie ni souche, et c\'étaient <b>exactement les mêmes</b> dans les deux phases :');
+    mk('div','row',HA.amb.map(o=>`<div style="width:90px;height:90px;border-radius:10px;overflow:hidden">${fSvg(o)}</div>`).join(''),main);
+    mk('div','card',`<p>Score : <b>${HA.score} pt</b> · ${HA.miss} zombie${HA.miss>1?'s':''} raté${HA.miss>1?'s':''} · ${HA.fa} fausse${HA.fa>1?'s':''} alerte${HA.fa>1?'s':''}.</p>
+      <p>Sur ces 4 silhouettes ambiguës, tu as vu un zombie <b>${c} fois au calme</b> et <b>${a} fois en alerte</b>.</p>
+      <p>${a>c?'Quand on t\'a prévenu du danger, ton cerveau a vu plus de zombies dans les mêmes formes : il voit ce qu\'il <b>s\'attend</b> à voir.':a===c?'Autant de zombies dans les deux cas. Dans une classe, la plupart des gens en voient plus quand on les met en alerte.':'Tu en as vu moins en alerte. Dans une classe, la plupart des gens en voient plus quand on les met en alerte.'}</p>
+      <p>Et avec ces règles (zombie raté −5, fausse alerte −1), dans le doute, il vaut mieux crier « zombie ! » : une fausse alerte coûte peu, un zombie raté coûte cher.</p>
       <p class="reassure" style="margin:0">${REASSURE}</p>`,main);
     mk('div','row',`<button class="btn ok" id="f-n2">Épreuve suivante →</button>`,main);
     $('#f-n2').onclick=hScramble;
   }
-  startGame({}); runPhase();
+  startGame({ stop(){ clearTimeout(t1); clearTimeout(t2); answered=true; } }); runPhase();
 }
 function hScramble(){
   head('📝','Épreuve 2/4 · Lis ce message','Lis ce texte à voix basse, normalement, puis appuie sur le bouton.');
@@ -560,7 +592,7 @@ function hNext(){
 function discHallu(){
   const c=(HA.res||{}).calm||0, a=(HA.res||{}).alert||0;
   discovery('hallu',{
-    reveal:{ html:HA.res?`<p>Rappel : sur les mêmes formes floues, tu as vu ${c} zombie${c>1?'s':''} au calme et ${a} en alerte. Tu as lu un texte aux lettres mélangées et ton cerveau a bouché ta tache aveugle.</p>`:'',
+    reveal:{ html:HA.res?`<p>Rappel : sur les mêmes silhouettes ambiguës, tu as vu ${c} zombie${c>1?'s':''} au calme et ${a} en alerte. Tu as lu un texte aux lettres mélangées et ton cerveau a bouché ta tache aveugle.</p>`:'',
       q:'Qu\'est-ce que ces quatre épreuves montrent sur ce que tu vois ?', opts:['Mes yeux photographient le monde exactement comme il est','Mon cerveau prédit ce qu\'il s\'attend à voir, et ne corrige qu\'avec ce qui ne colle pas','Mon cerveau invente n\'importe quoi'], good:1,
       explain:'Le neuroscientifique Anil Seth parle d\'<b>hallucination contrôlée</b> : ton cerveau fabrique sa meilleure prédiction du monde, et tes sens servent surtout à la corriger. Les attentes (l\'alerte), le contexte (les mots) et les trous (la tache aveugle) sont remplis par la prédiction.' },
     power:{ name:'la prédiction', emoji:'🌾🦁❓', scene:'Dans la savane, une forme sombre bouge dans les hautes herbes. Celui qui croit voir un lion et s\'enfuit alors que c\'était une souche perd un peu d\'énergie. Celui qui croit voir une souche alors que c\'était un lion… n\'a pas eu d\'enfants. Nous descendons de ceux qui voyaient des lions un peu trop souvent.',
@@ -595,7 +627,7 @@ function gWip(g){
 const PAIRS=['1 · Pilote automatique','2 · Seul le changement compte','3 · Le cerveau conteur','4 · Le jeu du statut','5 · La tribu','6 · Les marchands d\'attention'];
 const GAMES=[
   {id:'homeo',e:'🌡️',t:'Survie homéostatique',d:'Garde ton survivant en vie : température, eau, sucre, stress. Puis laisse faire le pilote automatique… et les notifications.',fn:gHomeo},
-  {id:'hallu',e:'👁️',t:'Hallucination contrôlée',d:'Zombie ou souche ? Lettres mélangées, tache aveugle, mot suivant : vois-tu vraiment le monde ?',fn:gHallu},
+  {id:'hallu',e:'👁️',t:'Hallucination contrôlée',d:'Zombie ou souche ? Silhouettes, lettres mélangées, tache aveugle, mot suivant : vois-tu vraiment le monde ?',fn:gHallu},
   {id:'radar',e:'📡',t:'Radar',d:'Les zombies ne sont visibles que quand ils bougent. Trouve ce qui a changé… même très lentement.'},
   {id:'bruit',e:'🔊',t:'Bruit de fond',d:'Repère les sons nouveaux. Et ce bruit qui ne s\'arrête jamais, tu l\'entends encore ?'},
   {id:'confab',e:'🎭',t:'Confabulateur',d:'Choisis le survivant le plus fiable… puis explique ton choix.'},
