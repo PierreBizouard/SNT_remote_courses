@@ -4,16 +4,16 @@ Série ludique sur la cognition, sur le modèle de Techno Survivor. On y aborde 
 
 Le but est la métacognition : nous avons des biais, comme l'IA, et beaucoup sont aussi des superpouvoirs. Aucun jugement : tout le monde tombe dans les pièges, et c'est la diversité des points de vue qui compense.
 
-Il y a 12 jeux, en 6 paires. Une paire s'ouvre quand les deux jeux de la paire précédente ont leur découverte notée. Le code enseignant `SNT-PROF` ouvre tout. L'enquête finale s'ouvre après les 12 jeux.
+Il y a 12 jeux, en 6 paires. Une paire s'ouvre quand les deux jeux de la paire précédente ont leur découverte notée. Le code enseignant `SNT-PROF` ouvre tout. L'enquête finale (8 situations de la vie réelle : quel mécanisme ?) s'ouvre après les 12 jeux.
 
 | Paire | Jeux | État |
 | --- | --- | --- |
-| 1 · Pilote automatique | 🌡️ Survie homéostatique · 👁️ Hallucination contrôlée | ✅ jouables |
-| 2 · Seul le changement compte | 📡 Radar · 🔊 Bruit de fond | 🚧 |
-| 3 · Le cerveau conteur | 🎭 Confabulateur · 🪞 Miroir flatteur | 🚧 |
-| 4 · Le jeu du statut | 👑 Détecteur de statut · 🪙 Toujours plus | 🚧 |
-| 5 · La tribu | 👥 Pression du groupe · 🟦 Ma tribu | 🚧 |
-| 6 · Les marchands d'attention | 📺 Attention Tycoon · 🏭 Fabrique à besoins | 🚧 |
+| 1 · Pilote automatique | 🌡️ Survie homéostatique · 👁️ Hallucination contrôlée | ✅ jouables (v2 du jeu 1 à venir) |
+| 2 · Seul le changement compte | 📡 Radar · 🔊 Bruit de fond | 🧪 à tester |
+| 3 · Le cerveau conteur | 🎭 Confabulateur · 🪞 Miroir flatteur | 🧪 à tester |
+| 4 · Le jeu du statut | 👑 Détecteur de statut · 🪙 Toujours plus | 🧪 à tester |
+| 5 · La tribu | 👥 Pression du groupe · 🟦 Ma tribu | 🧪 à tester |
+| 6 · Les marchands d'attention | 📺 Attention Tycoon · 🏭 Fabrique à besoins | 🧪 à tester |
 
 ## Les deux jeux jouables
 

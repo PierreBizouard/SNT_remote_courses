@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Brain Exploration</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v2 · 13/11/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v3 · 15/11/2026</div>
 <!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
 <button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 58px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
 <script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
@@ -613,6 +613,793 @@ function discHallu(){
 }
 
 /* =========================================================
+   OUTILS COMMUNS AUX MINI-JEUX
+   ========================================================= */
+function nextBtn(label,fn,parent){ const r=mk('div','row',`<button class="btn ok">${label}</button>`,parent||main); r.style.marginTop='10px'; r.querySelector('button').onclick=()=>{ r.remove(); fn(); }; return r; }
+// une question à choix : cb(index, zone de feedback, carte)
+function choice(q,opts,cb,parent){
+  const w=mk('div','card',`<p><b>${q}</b></p><div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div><p class="fb"></p>`,parent||main);
+  w.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ w.querySelectorAll('.opt').forEach(x=>x.disabled=true); b.classList.add('sel'); cb(+b.dataset.i,w.querySelector('.fb'),w); });
+  w.scrollIntoView({behavior:'smooth',block:'nearest'});
+  return w;
+}
+function toDisc(fn){ nextBtn('Ma découverte',()=>{ main.innerHTML=''; fn(); }); }
+function partHead(e,t,n,N,lead){ head(e,t+(N?` · ${n}/${N}`:''),lead); }
+const avg=a=>a.reduce((s,x)=>s+x,0)/(a.length||1);
+
+/* =========================================================
+   3 · RADAR : ton cerveau voit le changement, pas les choses
+   A. zombies visibles seulement quand ils bougent
+   B. trouve ce qui a changé (avec et sans flash gris)
+   C. le changement très lent
+   ========================================================= */
+function gRadar(){ partHead('📡','Radar',1,3,'Des zombies approchent de ta base 🏠. Problème : ton radar ne les montre <b>que quand ils bougent</b>. Touche-les pour les arrêter.'); nextBtn('Commencer',radarA); }
+function radarA(){
+  mk('div','hud',`<span id="r-t">25 s</span><span id="r-k">0 arrêtés</span><span id="r-b">0 arrivés</span>`,main);
+  const st=mk('div','stage',`<div style="position:absolute;inset:0;background:radial-gradient(circle,#0f3a2a,#06140e 70%)"></div><div style="position:absolute;left:50%;top:50%;width:70%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:1px solid #2f8a5a55;box-shadow:inset 0 0 0 40px #0000,0 0 0 1px #2f8a5a22"></div><div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:40px">🏠</div>`,main);
+  const S={t:0,zs:[],sp:.5,k:0,b:0,over:false};
+  const W=()=>st.clientWidth, H=()=>st.clientHeight;
+  function spawn(){
+    const a=rand(0,Math.PI*2), R=Math.max(W(),H())*.55;
+    const z={x:W()/2+Math.cos(a)*R,y:H()/2+Math.sin(a)*R,move:0,wait:rand(.3,1),op:0,el:mk('button','hz','🧟',st)};
+    z.el.style.transition='none';
+    z.el.onclick=()=>{ if(z.dead) return; z.dead=1; z.el.style.opacity=1; z.el.textContent='💥'; S.k++; floatTxt(st,z.x,z.y-30,z.op>.3?'+1':'+1 (à l\'aveugle !)','var(--good)'); setTimeout(()=>z.el.remove(),300); S.zs.splice(S.zs.indexOf(z),1); };
+    S.zs.push(z);
+  }
+  const g={ update(dt){
+    if(S.over) return; S.t+=dt; S.sp-=dt; if(S.sp<=0){ spawn(); S.sp=rand(1.2,2.2); }
+    for(const z of S.zs.slice()){
+      if(z.move>0){ z.move-=dt; const dx=W()/2-z.x, dy=H()/2-z.y, d=Math.hypot(dx,dy)||1; z.x+=dx/d*90*dt; z.y+=dy/d*90*dt; z.op=Math.min(1,z.op+dt*8); if(z.move<=0) z.wait=rand(1,2.2); }
+      else { z.wait-=dt; z.op=Math.max(0,z.op-dt*3); if(z.wait<=0) z.move=rand(.4,.9); }
+      z.el.style.opacity=z.op.toFixed(2); place(z.el,z.x,z.y);
+      if(Math.hypot(W()/2-z.x,H()/2-z.y)<30){ S.b++; z.el.remove(); S.zs.splice(S.zs.indexOf(z),1); shake(st); }
+    }
+    $('#r-t').textContent=Math.max(0,Math.ceil(25-S.t))+' s'; $('#r-k').textContent=S.k+' arrêtés'; $('#r-b').textContent=S.b+' arrivés';
+    if(S.t>=25){ S.over=true; g.over=true; stopGame(); addPts(S.k*2);
+      main.innerHTML=''; partHead('📡','Radar',1,3);
+      mk('div','card',`<p><b>${S.k}</b> zombies arrêtés, <b>${S.b}</b> arrivés à la base.</p><p>Un zombie immobile devenait invisible, et il réapparaissait dès qu'il bougeait. Ton œil fonctionne un peu comme ça : ce qu'il détecte le mieux, c'est le <b>mouvement</b>. Une grenouille, elle, ne voit presque pas une mouche immobile.</p>`,main);
+      nextBtn('Épreuve suivante →',radarB);
+    }
+  }, stop(){ S.over=true; } };
+  startGame(g);
+}
+// B : deux images qui alternent ; on cherche la case qui change
+const RB_SET=['🌲','🌳','🪨','🍄','🌼','🦔','🐿️','🌿','🪵','🐌','🌾','🦋'];
+function radarB(){
+  partHead('📡','Radar',2,3,'Deux images alternent. Une seule case change. Touche-la dès que tu la trouves.');
+  const trials=[{flash:true},{flash:false},{flash:true},{flash:false}]; let ti=0; const times={true:[],false:[]};
+  const box=mk('div',null,null,main); const info=mk('p','lead','',main);
+  function run(){
+    if(ti>=trials.length) return end();
+    const T=trials[ti]; const A=Array.from({length:16},()=>pick(RB_SET)); const ci=randi(0,15); const B=A.slice(); B[ci]=pick(RB_SET.filter(x=>x!==A[ci]));
+    info.textContent=`Image ${ti+1}/${trials.length}`;
+    box.innerHTML=`<div id="rb" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:360px;margin:auto;background:#3c5a32;padding:6px;border-radius:12px"></div>`;
+    const grid=$('#rb'); const cells=Array.from({length:16},(_,i)=>{ const c=mk('button',null,'',grid); c.style.cssText='aspect-ratio:1;font-size:34px;border:0;border-radius:8px;background:#4f7343'; c.onclick=()=>hit(i); return c; });
+    let ph=0, tm; const t0=performance.now(); let done=false;
+    const draw=(arr)=>cells.forEach((c,i)=>c.textContent=arr?arr[i]:'');
+    const loop=()=>{ if(done) return;
+      if(T.flash){ const seq=[A,null,B,null]; draw(seq[ph%4]); grid.style.background=seq[ph%4]?'#3c5a32':'#777'; tm=setTimeout(loop,seq[ph%4]?600:180); }
+      else { draw(ph%2?B:A); tm=setTimeout(loop,600); }
+      ph++; };
+    loop();
+    function hit(i){ if(done) return; if(i!==ci){ shake(cells[i]); return; } done=true; clearTimeout(tm); draw(B); cells[ci].style.background='var(--good)'; const s=(performance.now()-t0)/1000; times[T.flash].push(s); addPts(3); floatTxt(box,box.clientWidth/2,40,s.toFixed(1)+' s','var(--good)'); ti++; setTimeout(run,900); }
+    startGame({stop(){ done=true; clearTimeout(tm); }});
+  }
+  function end(){ stopGame();
+    const f=avg(times[true]), n=avg(times[false]);
+    box.innerHTML=''; info.textContent='';
+    mk('div','card',`<p>Avec un <b>flash gris</b> entre les deux images : <b>${f.toFixed(1)} s</b> en moyenne.<br>Sans flash : <b>${n.toFixed(1)} s</b>.</p><p>Sans flash, la case qui change « clignote » : ton cerveau détecte ce mouvement tout de suite. Avec le flash, <b>tout</b> change à chaque fois, et le petit changement se noie : on appelle ça la <b>cécité au changement</b>. On croit voir toute l'image, mais on ne garde en mémoire que très peu de détails.</p>`,main);
+    nextBtn('Dernière épreuve →',radarC);
+  }
+  run();
+}
+// C : pendant qu'on attrape des étoiles, une case change de couleur très lentement
+function radarC(){
+  partHead('📡','Radar',3,3,'Attrape les étoiles ⭐ qui apparaissent sur la carte, le plus vite possible (20 secondes).');
+  const COLS=['#4f7343','#5a6f8a','#7a6a4a','#6a4f73','#4f6f6f','#73604f'];
+  const base=Array.from({length:16},(_,i)=>COLS[i%6]); shuffle(base);
+  const ci=randi(0,15), from=[79,115,67], to=[200,70,60];
+  const box=mk('div',null,`<div id="rc" style="position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:360px;margin:auto;padding:6px;border-radius:12px;background:#222"></div>`,main);
+  const grid=$('#rc'); const cells=base.map(c=>{ const d=mk('div',null,'',grid); d.style.cssText=`aspect-ratio:1;border-radius:8px;background:${c};display:grid;place-items:center;font-size:30px`; return d; });
+  cells[ci].style.background=`rgb(${from})`;
+  const hud=mk('p','lead','⭐ 0',main); let stars=0, t=0, sp=0, cur=-1;
+  cells.forEach((c,i)=>c.onclick=()=>{ if(i===cur){ stars++; c.textContent=''; cur=-1; hud.textContent='⭐ '+stars; addPts(1); } });
+  const g={ update(dt){ t+=dt; const k=Math.min(1,t/20); cells[ci].style.background=`rgb(${from.map((v,j)=>Math.round(v+(to[j]-v)*k))})`;
+      sp-=dt; if(sp<=0){ if(cur>=0) cells[cur].textContent=''; cur=pick([...Array(16).keys()].filter(i=>i!==ci)); cells[cur].textContent='⭐'; sp=rand(.7,1.1); }
+      if(t>=20){ g.over=true; stopGame(); if(cur>=0) cells[cur].textContent=''; ask(); } }, stop(){} };
+  startGame(g);
+  function ask(){
+    hud.textContent=`⭐ ${stars} attrapées. Pendant ce temps, une case a complètement changé de couleur. Laquelle ? Touche-la.`;
+    cells.forEach((c,i)=>{ c.style.cursor='pointer'; c.onclick=()=>{ cells.forEach(x=>x.onclick=null); cells[ci].style.outline='4px solid #fff'; if(i===ci){ addPts(5); hud.innerHTML='Bien vu ! <span class="lead">La plupart des gens ne la trouvent pas.</span>'; } else hud.innerHTML='C\'était la case entourée en blanc.';
+      mk('div','card',`<div class="row" style="justify-content:center;gap:16px"><div style="text-align:center"><div style="width:70px;height:70px;border-radius:8px;background:rgb(${from})"></div>au début</div><div style="text-align:center"><div style="width:70px;height:70px;border-radius:8px;background:rgb(${to})"></div>à la fin</div></div><p style="margin-top:10px">Elle est passée du vert au rouge sous tes yeux, mais <b>lentement</b>. Un changement assez lent ne déclenche pas l'alarme du cerveau.</p>`,main);
+      toDisc(discRadar); }; });
+  }
+}
+function discRadar(){
+  discovery('radar',{
+    reveal:{ q:'Qu\'est-ce que ton cerveau détecte le mieux ?', opts:['Les choses telles qu\'elles sont, en détail','Ce qui change, surtout quand ça change vite','Les couleurs vives'], good:1,
+      explain:'Les zombies immobiles disparaissaient, le petit changement noyé dans le flash passait inaperçu, et la case qui changeait lentement aussi. Ton cerveau n\'est pas une caméra : c\'est un <b>détecteur de changement</b>. Ce qui reste stable, il arrête de le traiter.' },
+    power:{ name:'le détecteur de mouvement', emoji:'🌾🐆👀', scene:'Dans la savane, ton ancêtre ne peut pas analyser chaque brin d\'herbe. Mais si quelque chose bouge dans un coin de son champ de vision, ses yeux s\'y tournent avant même qu\'il y pense. Ce qui bouge, c\'est peut-être un prédateur… ou un repas.',
+      q:'Pourquoi le cerveau ignore-t-il ce qui ne change pas ?', opts:['Ce qui ne change pas est rarement dangereux : inutile de gaspiller de l\'attention','Parce que nos yeux sont mal faits','Pour nous reposer'], good:0,
+      explain:'L\'attention coûte cher. La concentrer sur ce qui change, c\'est la mettre là où il peut y avoir un danger ou une occasion.',
+      help:'tu repères tout de suite le ballon qui arrive, le vélo qui déboîte, la main qui se lève dans la classe.',
+      trap:'tu ne remarques pas ce qui change lentement : ta façon de parler, le temps passé sur une appli, une situation qui se dégrade petit à petit.' },
+    cases:[
+      { s:'Tu traverses la rue et ton regard est attiré par une voiture qui démarre au loin.', a:'aide', why:'Le mouvement capte ton attention avant que tu y penses : c\'est exactement à ça que sert ce superpouvoir.' },
+      { s:'Tes parents remarquent que tu as grandi, toi tu ne l\'avais pas vu en te regardant chaque jour.', a:'piege', why:'Un changement très lent ne déclenche pas d\'alerte. Il faut une comparaison (une photo d\'il y a un an) pour le voir.' },
+      { s:'Une appli de jeu bouge et clignote sans arrêt pour attirer ton regard.', a:'deux', why:'Le détecteur fonctionne très bien… et c\'est justement ce que l\'appli utilise.' }
+    ],
+    ai:{ html:'<p>Une caméra de surveillance « intelligente » compare chaque image à la précédente et ne garde que ce qui a changé. Beaucoup de systèmes de vision artificielle font pareil pour économiser du calcul.</p>',
+      q:'Quel piège partagent ce système et ton cerveau ?', opts:['Un intrus qui avance très lentement peut passer inaperçu','Ils voient tout en noir et blanc','Ils ne voient rien la nuit'], good:0,
+      explain:'Détecter le changement est rapide et économique, mais un changement assez lent passe sous le seuil, pour une machine comme pour toi.' },
+    ask:'Avec tes mots, en une phrase : qu\'est-ce que ton cerveau voit vraiment ?'
+  });
+}
+
+/* =========================================================
+   4 · BRUIT DE FOND : l'habituation
+   A. repère les sons nouveaux (un ronronnement tourne en fond… puis s'arrête)
+   B. les taches qui s'effacent quand on fixe (effet Troxler)
+   ========================================================= */
+let AC=null;
+function audio(){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==='suspended') AC.resume(); }catch(e){ AC=null; } return AC; }
+function beep(f,dur,vol){ const a=audio(); if(!a) return; const o=a.createOscillator(), g=a.createGain(); o.type=pick(['sine','triangle','square']); o.frequency.value=f; g.gain.setValueAtTime(0,a.currentTime); g.gain.linearRampToValueAtTime(vol||.15,a.currentTime+.02); g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+dur); o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime+dur+.05); }
+function gBruit(){ partHead('🔊','Bruit de fond',1,2,'Monte le son (ou mets des écouteurs). Des petits sons vont apparaître de temps en temps : appuie sur le bouton <b>dès que tu entends un nouveau son</b>.');
+  nextBtn('Commencer (le son va démarrer)',bruitA);
+  mk('p','lead','Pas de son possible ? <a href="#" id="b-ns" style="color:var(--cyan)">Passe à l\'épreuve suivante</a>.',main); $('#b-ns').onclick=e=>{ e.preventDefault(); bruitB(); };
+}
+function bruitA(){
+  const a=audio(); let hum=null;
+  if(a){ const g=a.createGain(); g.gain.value=0; g.gain.linearRampToValueAtTime(.06,a.currentTime+2);
+    const o1=a.createOscillator(), o2=a.createOscillator(); o1.frequency.value=98; o2.frequency.value=147; o1.type='sawtooth'; o2.type='sine';
+    const lp=a.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=400; o1.connect(lp); o2.connect(lp); lp.connect(g).connect(a.destination); o1.start(); o2.start(); hum={g,o1,o2}; }
+  mk('div','hud',`<span id="b-t">40 s</span><span id="b-s">0 sons repérés</span>`,main);
+  const st=mk('div','stage',`<div style="position:absolute;inset:0;background:linear-gradient(#1a2142,#0f1426)"></div><div style="position:absolute;inset:0;display:grid;place-items:center"><button class="btn ok" id="b-hit" style="min-width:220px;min-height:90px;font-size:20px">🔔 Nouveau son !</button></div>`,main);
+  const S={t:0,next:3,last:-9,ok:0,miss:0,false:0,stopped:false};
+  $('#b-hit').onclick=()=>{ if(S.t-S.last<1.6){ S.ok++; S.last=-9; addPts(1); floatTxt(st,st.clientWidth/2,st.clientHeight*.3,'+1','var(--good)'); } else { S.false++; floatTxt(st,st.clientWidth/2,st.clientHeight*.3,'?','#ccc'); } $('#b-s').textContent=S.ok+' sons repérés'; };
+  const g={ update(dt){ S.t+=dt; S.next-=dt;
+      if(S.next<=0){ beep(rand(400,1600),rand(.12,.3),.12); S.last=S.t; S.next=rand(2.2,4.5); }
+      if(!S.stopped && S.t>=32 && hum){ S.stopped=true; hum.g.gain.setValueAtTime(hum.g.gain.value,a.currentTime); hum.g.gain.linearRampToValueAtTime(0,a.currentTime+.15); setTimeout(()=>{ try{ hum.o1.stop(); hum.o2.stop(); }catch(e){} },400); }
+      $('#b-t').textContent=Math.max(0,Math.ceil(40-S.t))+' s';
+      if(S.t>=40){ g.over=true; stopGame(); end(); } },
+    stop(){ if(hum && !S.stopped){ try{ hum.o1.stop(); hum.o2.stop(); }catch(e){} } } };
+  startGame(g);
+  function end(){
+    main.innerHTML=''; partHead('🔊','Bruit de fond',1,2);
+    mk('p',null,`Tu as repéré <b>${S.ok}</b> nouveaux sons.`,main);
+    choice('À la 32e seconde, quelque chose a changé dans le son. Quoi ?',['Les petits sons sont devenus plus forts','Un ronronnement grave, présent depuis le début, s\'est arrêté','Rien n\'a changé'],(i,fb)=>{
+      fb.className='fb '+(i===1?'good':'info'); fb.innerHTML=(i===1?'Oui ! ':'')+'<span>Un ronronnement grave tournait en fond <b>pendant tout le jeu</b>. Au bout de quelques secondes, ton cerveau a arrêté de te le signaler : il n\'apportait aucune information nouvelle. Beaucoup ne remarquent même pas qu\'il s\'est arrêté.</span>';
+      if(i===1) addPts(3);
+      choice('Et là, maintenant : sens-tu ta chaise sous toi ? tes chaussettes ? ta langue dans ta bouche ?',['Oui… maintenant que tu le dis !','Je les sentais déjà avant'],(j,fb2)=>{ fb2.className='fb info'; fb2.innerHTML='<span>Ces sensations étaient là depuis le début. La pression de la chaise, le poids de ton corps (la gravité !), tes vêtements : ton cerveau les coupe parce qu\'ils ne changent pas. Il suffit d\'y faire attention pour les « rallumer ».</span>'; nextBtn('Épreuve suivante →',bruitB); });
+    });
+  }
+}
+function bruitB(){
+  stopGame(); main.innerHTML='';
+  partHead('🔊','Bruit de fond',2,2,'Fixe la <b>croix</b> au centre pendant 20 secondes, sans bouger les yeux. Regarde bien ce qui arrive aux taches colorées autour.');
+  const st=mk('div','stage',`<div style="position:absolute;inset:0;background:#c9c9cf"></div>${[[22,28,'#d48ab5'],[76,30,'#86b2d6'],[30,76,'#9fd08f'],[72,72,'#e0c07a']].map(([x,y,c])=>`<div style="position:absolute;left:${x}%;top:${y}%;width:28%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:${c};filter:blur(22px)"></div>`).join('')}<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:700 30px var(--f-mono);color:#222">+</div><div id="tx-t" style="position:absolute;left:8px;top:8px;font:700 14px var(--f-mono);color:#333"></div>`,main);
+  const r=nextBtn('Je fixe la croix (20 s)',()=>{ let t=20; $('#tx-t').textContent=t+' s'; const iv=setInterval(()=>{ t--; $('#tx-t').textContent=t>0?t+' s':''; if(t<=0){ clearInterval(iv); ask(); } },1000); startGame({stop(){ clearInterval(iv); }}); });
+  function ask(){ stopGame();
+    choice('Qu\'est-il arrivé aux taches ?',['Elles ont pâli ou disparu, une par une','Elles sont restées pareilles','Elles ont bougé'],(i,fb)=>{ fb.className='fb info'; fb.innerHTML=(i===0?'Comme la plupart des gens. ':'Ça ne marche pas pour tout le monde, ou il faut fixer plus longtemps. ')+'<span>Les taches n\'ont <b>jamais</b> changé à l\'écran. Mais comme elles sont floues et immobiles, et que tes yeux ne bougeaient pas, ton cerveau les a classées « rien de nouveau » et les a effacées. C\'est l\'<b>effet Troxler</b>.</span>'; addPts(3); toDisc(discBruit); });
+  }
+}
+function discBruit(){
+  discovery('bruit',{
+    reveal:{ q:'Pourquoi n\'entendais-tu plus le ronronnement, ne sentais-tu plus ta chaise, et voyais-tu les taches s\'effacer ?', opts:['Parce que mes oreilles et ma peau se fatiguent','Parce que mon cerveau coupe ce qui reste stable : c\'est l\'habituation','Parce que je n\'étais pas concentré'], good:1,
+      explain:'Ton cerveau baisse le volume de tout ce qui ne change pas : un bruit de frigo, l\'odeur de ta maison, tes vêtements, la gravité qui t\'appuie sur la chaise. Ce n\'est pas un manque d\'attention, c\'est un tri automatique.' },
+    power:{ name:'le filtre anti-bruit', emoji:'🔥🌧️👂', scene:'La nuit, autour du feu, la pluie tombe sans arrêt et le vent souffle. Si ton ancêtre entendait tout cela avec la même force toute la nuit, il ne remarquerait jamais le petit craquement de branche, celui d\'un animal qui approche.',
+      q:'À quoi sert l\'habituation ?', opts:['À libérer l\'attention pour ce qui est nouveau, donc peut-être important','À dormir plus','À rien, c\'est un défaut'], good:0,
+      explain:'En coupant le stable, le cerveau rend le nouveau très visible. C\'est le même principe que le jeu Radar, appliqué à tous les sens.',
+      help:'tu peux travailler dans une salle bruyante, dormir avec le bruit de la route, oublier tes lunettes sur ton nez.',
+      trap:'tu ne sens plus ta propre odeur ou celle de ta chambre, et tu ne remarques plus un bruit ou une habitude qui te gêne pourtant.' },
+    cases:[
+      { s:'Après dix minutes dans la cantine, tu ne remarques plus le brouhaha et tu discutes tranquillement.', a:'aide', why:'L\'habituation te permet de te concentrer sur ta conversation.' },
+      { s:'Un invité dit que ta maison sent le chien. Toi, tu ne sens rien.', a:'piege', why:'Tu t\'es habitué à l\'odeur : ton cerveau l\'a classée « rien de nouveau ».' },
+      { s:'Le tic-tac de l\'horloge de la classe : tu ne l\'entends plus… jusqu\'à ce que quelqu\'un en parle.', a:'deux', why:'Le filtre t\'aide à suivre le cours, et un mot suffit à rallumer le son.' }
+    ],
+    ai:{ html:'<p>Un assistant vocal (« Dis Siri », « OK Google ») écoute en permanence, mais il ignore presque tout ce qu\'il entend : il attend un son précis qui sort du bruit de fond.</p>',
+      q:'Quel point commun avec ton cerveau ?', opts:['Filtrer le bruit permanent pour ne réagir qu\'à ce qui compte','Comprendre toutes les conversations de la maison','Enregistrer tout pour toujours'], good:0,
+      explain:'Filtrer le stable pour détecter le nouveau : le cerveau le fait depuis des millions d\'années, les machines l\'imitent.' },
+    ask:'Avec tes mots, en une phrase : pourquoi ne sens-tu pas la gravité en ce moment ?'
+  });
+}
+
+/* =========================================================
+   5 · CONFABULATEUR : expliquer un choix qu'on n'a pas fait
+   A. choisis tes coéquipiers (deux fiches sont échangées en douce)
+   B. l'effet Koulechov
+   ========================================================= */
+const CF_TRAITS=['court vite','sait faire du feu','reste calme','connaît les plantes','répare tout','grimpe aux arbres','a le sens de l\'orientation','soigne les blessures','sait nager','fait rire le groupe','voit très loin','est très fort','partage tout','ne dort presque pas','sait se cacher','négocie bien'];
+const CF_P=['🧑🏽‍🦱','👩🏻','🧔🏾','👧🏼','👨🏻‍🦰','👩🏾‍🦳','🧑🏻‍🦲','👩🏽','👦🏿','🧓🏼','👱🏻‍♀️','🧑🏾'];
+const CF_N=['Yanis','Léa','Moussa','Chloé','Tom','Awa','Hugo','Inès','Noah','Rose','Emma','Sami'];
+function gConfab(){ partHead('🎭','Confabulateur',1,2,'Ton groupe de survivants doit s\'agrandir. À chaque fois, deux candidats : choisis celui que tu prends avec toi, puis explique pourquoi.'); nextBtn('Commencer',confabA); }
+function confabA(){
+  const idx=shuffle([...Array(12).keys()]), traits=shuffle(CF_TRAITS.slice());
+  const pairs=[0,1,2,3,4,5].map(i=>[0,1].map(j=>({p:CF_P[idx[2*i+j]],n:CF_N[idx[2*i+j]],t:[traits[(4*i+2*j)%16],traits[(4*i+2*j+1)%16],pick(CF_TRAITS)].filter((x,k,a)=>a.indexOf(x)===k)})));
+  const swaps=[1,4]; const log=[]; let i=0;
+  const card=(c,btn)=>`<div class="card" style="text-align:center;margin:0"><div style="font-size:56px">${c.p}</div><b>${c.n}</b><div class="lead" style="font-size:14px">${c.t.join(' · ')}</div>${btn?`<button class="btn ok" data-k="${btn}" style="margin-top:8px">Je prends ${c.n}</button>`:''}</div>`;
+  const box=mk('div',null,null,main);
+  function trial(){
+    if(i>=pairs.length) return end();
+    const [a,b]=pairs[i];
+    box.innerHTML=`<p class="lead">Candidats ${i+1}/6</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${card(a,'0')}${card(b,'1')}</div>`;
+    box.querySelectorAll('[data-k]').forEach(bt=>bt.onclick=()=>{
+      const k=+bt.dataset.k, swapped=swaps.includes(i), shown=pairs[i][swapped?1-k:k];
+      box.innerHTML='<p class="lead" style="text-align:center;padding:40px 0">🗂️ Je range les fiches…</p>';
+      setTimeout(()=>{
+        box.innerHTML=`<p class="lead">Voici ton choix :</p><div style="max-width:260px;margin:auto">${card(shown)}</div><p style="margin-top:10px"><b>Pourquoi l'as-tu choisi(e) ?</b></p><div class="opts">${shown.t.map(t=>`<button class="opt" data-r="${esc(t)}">Parce qu'il ou elle ${t}</button>`).join('')}<button class="opt" data-r="X">🤨 Attends… ce n'est pas la personne que j'ai choisie !</button></div>`;
+        box.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{ const det=o.dataset.r==='X'; log.push({swapped,det,why:o.dataset.r,name:shown.n}); if(det && swapped) addPts(5); if(det && !swapped) floatTxt(box,box.clientWidth/2,60,'Si, c\'était bien ton choix !','#fff'); i++; setTimeout(trial,det&&!swapped?900:200); });
+      },900);
+    });
+  }
+  function end(){
+    const sw=log.filter(l=>l.swapped), det=sw.filter(l=>l.det).length;
+    box.innerHTML='';
+    mk('div','card',`<p>Deux fois, je t'ai montré <b>la personne que tu n'avais PAS choisie</b>.</p>${sw.map(l=>`<p>• ${l.name} : ${l.det?'tu as repéré l\'échange 👏':`tu as expliqué ce choix « parce qu'il ou elle ${esc(l.why)} »`}</p>`).join('')}<p>${det===2?'Tu as tout repéré : bravo, c\'est rare !':'Dans une célèbre expérience (Johansson et Hall, 2005), des chercheurs échangeaient en douce des photos de visages : seulement 1 personne sur 5 environ s\'en apercevait, et les autres expliquaient tranquillement un choix qu\'elles n\'avaient pas fait.'}</p><p class="reassure" style="margin:0">${REASSURE}</p>`,main);
+    nextBtn('Épreuve suivante →',confabB);
+  }
+  trial();
+}
+const KU_FACE='<svg viewBox="0 0 100 100" style="width:150px;height:150px"><rect width="100" height="100" rx="12" fill="#d9c3a5"/><ellipse cx="50" cy="52" rx="30" ry="38" fill="#f0d2b0"/><path d="M22 36 Q50 6 78 36 Q70 20 50 18 Q30 20 22 36Z" fill="#4a3426"/><ellipse cx="39" cy="48" rx="4" ry="3" fill="#2a2a2a"/><ellipse cx="61" cy="48" rx="4" ry="3" fill="#2a2a2a"/><path d="M33 41 L45 41 M55 41 L67 41" stroke="#4a3426" stroke-width="2.5"/><path d="M50 52 L47 64 L52 64" fill="none" stroke="#b08a6a" stroke-width="2"/><path d="M41 74 L59 74" stroke="#9a5a4a" stroke-width="3" stroke-linecap="round"/></svg>';
+function confabB(){
+  main.innerHTML=''; partHead('🎭','Confabulateur',2,2,'Un petit film en deux plans : d\'abord ce que regarde l\'acteur, puis son visage. Dis ce qu\'il ressent.');
+  const scenes=[['🍲','Une assiette de soupe fumante'],['⚰️','Un cercueil'],['🧸','Une petite fille qui joue avec un ours']];
+  const opts=['La faim','La tristesse','La tendresse','L\'ennui'];
+  const ans=[]; let i=0; const box=mk('div','card',null,main); box.style.textAlign='center';
+  function show(){
+    if(i>=scenes.length) return end();
+    box.innerHTML=`<div style="font-size:110px;line-height:1.2">${scenes[i][0]}</div><p class="lead">Plan ${i+1} : ${scenes[i][1]}</p>`;
+    setTimeout(()=>{ box.innerHTML=`${KU_FACE}<p class="lead">… puis le visage de l'acteur.</p><p><b>Que ressent-il ?</b></p><div class="opts">${opts.map((o,k)=>`<button class="opt" data-k="${k}">${o}</button>`).join('')}</div>`;
+      box.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{ ans.push(opts[+o.dataset.k]); i++; show(); }); },1600);
+  }
+  function end(){
+    box.innerHTML=`<p>Tes réponses : ${scenes.map((s,k)=>`${s[0]} → <b>${ans[k]}</b>`).join(' · ')}</p><div class="row c">${KU_FACE}${KU_FACE}${KU_FACE}</div><p>C'était <b>exactement le même visage</b> les trois fois. Le cinéaste russe Lev Koulechov l'a montré dans les années 1920 : le public voyait la faim, le chagrin ou la tendresse dans un visage neutre. C'est le <b>contexte</b> qui a écrit l'histoire, et ton cerveau l'a cru.</p>`;
+    addPts(3); toDisc(discConfab);
+  }
+  show();
+}
+function discConfab(){
+  discovery('confab',{
+    reveal:{ q:'Quand on t\'a demandé « pourquoi ce choix ? », d\'où venait ta réponse ?', opts:['De ma mémoire exacte de ce que j\'avais pensé','D\'une histoire que mon cerveau fabrique après coup, et qui me paraît vraie','D\'un tirage au hasard'], good:1,
+      explain:'Ton cerveau a un « conteur » qui explique tes choix après coup, très vite et avec assurance, même quand il n\'a pas accès aux vraies raisons. C\'est la <b>confabulation</b>. Avec Koulechov, c\'est pareil : il invente une émotion à partir du contexte.' },
+    power:{ name:'le conteur', emoji:'🔥🗣️👂', scene:'Le soir, autour du feu, la tribu se raconte la journée : qui a fait quoi, pourquoi le gibier s\'est enfui, à qui faire confiance. Celui qui sait expliquer ce qui s\'est passé (même avec des trous) aide le groupe à s\'organiser et à prévoir.',
+      q:'Pourquoi le cerveau invente-t-il des explications au lieu de dire « je ne sais pas » ?', opts:['Une explication, même imparfaite, permet d\'agir et de coordonner le groupe','Pour mentir aux autres','Parce que la mémoire est parfaite'], good:0,
+      explain:'Un monde qu\'on peut expliquer est un monde où l\'on peut agir. Le conteur comble les trous pour que l\'histoire se tienne : c\'est rapide et rassurant, mais pas toujours vrai.',
+      help:'tu donnes un sens à ce qui t\'arrive, tu racontes, tu comprends un film même avec des plans coupés.',
+      trap:'tu justifies avec assurance un choix fait pour d\'autres raisons (ou même pas fait), et tu as du mal à le remettre en question.' },
+    cases:[
+      { s:'Tu regardes une série : deux plans suffisent pour que tu devines qu\'un personnage est amoureux.', a:'aide', why:'Le conteur complète l\'histoire à partir du contexte : c\'est ce qui rend le cinéma possible.' },
+      { s:'Tu as acheté des baskets sur un coup de tête. Le soir, tu expliques que c\'était « pour leur confort ».', a:'piege', why:'L\'explication arrive après le choix et sonne vraie… mais ce n\'était peut-être pas la vraie raison.' },
+      { s:'Après une dispute, chacun raconte une version où il avait raison.', a:'piege', why:'Le conteur fabrique une histoire où on est le héros. Écouter l\'autre version aide à corriger la sienne.' }
+    ],
+    ai:{ html:'<p>Demande à une IA de langage pourquoi elle a donné telle réponse : elle fournit une explication claire et convaincante.</p>',
+      q:'Cette explication raconte-t-elle forcément ce qui s\'est vraiment passé à l\'intérieur ?', opts:['Non : comme notre conteur, elle produit une explication plausible après coup','Oui, elle lit ses propres calculs','Oui, sinon elle ne pourrait pas répondre'], good:0,
+      explain:'Une IA comme un humain peut produire une justification très convaincante sans accès réel à ce qui a produit sa réponse. Plausible ne veut pas dire vrai.' },
+    ask:'Avec tes mots, en une phrase : peux-tu toujours faire confiance à tes propres explications ?'
+  });
+}
+
+/* =========================================================
+   6 · MIROIR FLATTEUR
+   A. toi par rapport à la moyenne · B. les notes de Sacha
+   C. que pense la classe ? (faux consensus)
+   ========================================================= */
+const MF_Q=['Gentillesse','Honnêteté','Sens de l\'humour','Conduite (plus tard) : prudence','Intelligence','Générosité'];
+const MF_CLASS=[71,74,68,72,66,70]; // moyennes d'une classe simulée de 28 élèves
+function gMiroir(){ partHead('🪞','Miroir flatteur',1,3,'Sois honnête : pour chaque qualité, place-toi par rapport aux <b>élèves de ton âge</b>. 50 = pile dans la moyenne.'); miroirA(); }
+function miroirA(){
+  const box=mk('div','card',MF_Q.map((q,i)=>`<label style="display:grid;gap:2px;margin-bottom:10px"><b>${q}</b><input type="range" min="0" max="100" value="50" data-i="${i}" style="width:100%;accent-color:var(--amber)"><span class="lead" style="font-size:13px;display:flex;justify-content:space-between"><span>bien moins que la moyenne</span><span id="mv${i}">50</span><span>bien plus</span></span></label>`).join(''),main);
+  box.querySelectorAll('input').forEach(r=>r.oninput=()=>$('#mv'+r.dataset.i).textContent=r.value);
+  nextBtn('Valider',()=>{
+    const me=[...box.querySelectorAll('input')].map(r=>+r.value); D.mirror=me; save();
+    box.querySelectorAll('input').forEach(r=>r.disabled=true);
+    const above=me.filter(v=>v>50).length;
+    mk('div','card',`<p>Tu t'es placé(e) au-dessus de la moyenne pour <b>${above} qualité${above>1?'s':''} sur 6</b>.</p><p>Dans une classe de 28 élèves qui a fait ce jeu, la note moyenne que chacun se donnait était de <b>${Math.round(avg(MF_CLASS))}</b> sur 100, alors que la moyenne… doit être 50. Mathématiquement, tout le monde ne peut pas être au-dessus de la moyenne !</p><p>Dans une étude célèbre, 93 % des conducteurs américains interrogés se jugeaient plus habiles que la moyenne (Svenson, 1981). On appelle ça l'<b>effet de supériorité illusoire</b>.</p><p class="reassure" style="margin:0">${REASSURE}</p>`,main);
+    nextBtn('Épreuve suivante →',miroirB);
+  });
+}
+function miroirB(){
+  main.innerHTML=''; partHead('🪞','Miroir flatteur',2,3,'Sacha, un élève d\'une autre classe, s\'est noté sur les mêmes qualités.');
+  const me=D.mirror||[60,60,60,60,60,60];
+  mk('div','card',MF_Q.map((q,i)=>`<div style="display:grid;grid-template-columns:150px 1fr 40px;gap:8px;align-items:center;margin:4px 0;font-size:14px"><span>${q}</span><span style="height:12px;border-radius:6px;background:var(--deep)"><i style="display:block;height:100%;width:${me[i]}%;border-radius:6px;background:var(--violet)"></i></span><b>${me[i]}</b></div>`).join(''),main);
+  choice('Qu\'en penses-tu ?',['Sacha se surestime un peu','C\'est sûrement juste','Sacha se sous-estime'],(i,fb)=>{
+    fb.className='fb info'; fb.innerHTML=`<span>Ces notes sont <b>exactement les tiennes</b>. ${i===0?'Tu as trouvé que « Sacha » se surestimait… avec tes propres chiffres. On voit facilement le miroir flatteur chez les autres, beaucoup moins chez soi.':'Tu as été aussi indulgent(e) avec Sacha qu\'avec toi-même : la plupart des gens trouvent que l\'autre se surestime, avec les mêmes chiffres.'}</span>`;
+    nextBtn('Épreuve suivante →',miroirC);
+  });
+}
+const MF_FC=[['Pizza à l\'ananas ?','Oui, j\'aime','Non merci',38],['Plutôt…','Lire le livre','Voir le film',27],['Tu es plutôt…','Du matin','Du soir',31],['Plutôt…','Chat','Chien',46]];
+function miroirC(){
+  main.innerHTML=''; partHead('🪞','Miroir flatteur',3,3,'Réponds, puis devine quelle part de la classe répond <b>comme toi</b>.');
+  let i=0; const res=[]; const box=mk('div',null,null,main);
+  function q(){
+    if(i>=MF_FC.length) return end();
+    const [t,a,b,pa]=MF_FC[i];
+    box.innerHTML=''; choice(t,[a,b],(k)=>{
+      const w=mk('div','card',`<p>Selon toi, quel pourcentage de la classe a répondu « ${k?b:a} » comme toi ?</p><input type="range" min="0" max="100" value="50" id="fc" style="width:100%;accent-color:var(--amber)"><p style="text-align:center"><b id="fcv">50 %</b></p>`,box);
+      $('#fc').oninput=()=>$('#fcv').textContent=$('#fc').value+' %';
+      nextBtn('Valider',()=>{ const real=k?100-pa:pa; res.push({t:k?b:a,g:+$('#fc').value,real}); i++; q(); },box);
+    },box);
+  }
+  function end(){
+    box.innerHTML='';
+    const over=res.filter(r=>r.g>r.real).length;
+    mk('div','card',`${res.map(r=>`<p>« ${r.t} » : tu pensais <b>${r.g} %</b>, en réalité <b>${r.real} %</b> dans la classe simulée.</p>`).join('')}<p>Tu as surestimé ton camp ${over} fois sur 4. On a tendance à croire que les autres pensent comme nous : c'est l'<b>effet de faux consensus</b>. Normal : on passe son temps avec des gens qui nous ressemblent.</p>`,box);
+    addPts(3); toDisc(discMiroir);
+  }
+  q();
+}
+function discMiroir(){
+  discovery('miroir',{
+    reveal:{ q:'Qu\'ont montré ces trois épreuves ?', opts:['Que je me connais parfaitement','Que mon cerveau me montre une image un peu flatteuse de moi, et croit que les autres pensent comme moi','Que les autres sont tous prétentieux'], good:1,
+      explain:'Presque tout le monde se place au-dessus de la moyenne, juge les autres plus sévèrement avec les mêmes chiffres, et surestime le nombre de gens qui pensent comme lui. Will Storr explique que notre cerveau nous raconte une histoire dont on est le héros.' },
+    power:{ name:'la confiance en soi', emoji:'🏔️🧗🔥', scene:'Pour partir chasser un animal dix fois plus gros que soi, traverser une montagne ou défendre son groupe, il fallait se croire un peu plus fort qu\'on ne l\'était. Ceux qui doutaient de tout restaient près du feu.',
+      q:'Pourquoi un cerveau légèrement « flatteur » a-t-il été utile ?', opts:['Il donne le courage d\'essayer et de convaincre les autres de nous suivre','Il rend plus intelligent','Il évite tous les dangers'], good:0,
+      explain:'Une image de soi un peu gonflée aide à oser, à tenir bon et à être choisi par le groupe. Mais elle rend aussi aveugle à ses propres défauts.',
+      help:'tu oses te lancer (exposé, sport, nouvelle activité) et tu te relèves après un échec.',
+      trap:'tu vois les défauts des autres bien mieux que les tiens, et tu crois que « tout le monde pense comme toi ».' },
+    cases:[
+      { s:'Avant un match important, toute l\'équipe se répète « on est les meilleurs ».', a:'aide', why:'Se croire un peu plus fort donne de l\'énergie et de la confiance.' },
+      { s:'Kenza ne relit pas sa copie : elle est sûre d\'avoir bon partout.', a:'piege', why:'Se surestimer fait baisser la vigilance. Relire, c\'est comparer son histoire à la réalité.' },
+      { s:'Léo est persuadé que toute la classe trouve la nouvelle prof nulle, « comme lui ».', a:'piege', why:'C\'est le faux consensus : ses amis pensent peut-être comme lui, mais pas forcément la classe.' }
+    ],
+    ai:{ html:'<p>Une IA de langage répond souvent avec une grande assurance, même quand elle se trompe.</p>',
+      q:'Quel réflexe adopter face à une réponse très sûre d\'elle, d\'une IA comme d\'une personne ?', opts:['Vérifier avec une autre source ou un autre point de vue','La croire, puisqu\'elle est sûre','La rejeter systématiquement'], good:0,
+      explain:'L\'assurance n\'est pas une preuve, chez l\'IA comme chez l\'humain. Un autre point de vue corrige ce que l\'on ne voit pas soi-même.' },
+    ask:'Avec tes mots, en une phrase : ton miroir intérieur est-il fidèle ?'
+  });
+}
+
+/* =========================================================
+   7 · DÉTECTEUR DE STATUT
+   A. un groupe flashé : qui est le chef ?
+   B. les dialogues à la Johnstone : qui monte, qui descend ?
+   ========================================================= */
+// silhouette de personnage : le chef est droit, épaules ouvertes, menton haut ; les autres sont tournés vers lui
+function stFig(x,lead,face,sc){
+  const s=sc||1, y=88;
+  if(lead) return `<g transform="translate(${x} ${y}) scale(${s})"><circle cx="0" cy="-58" r="7" fill="#1a1a22"/><path d="M-9 -49 L9 -49 L7 -20 L-7 -20 Z" fill="#1a1a22"/><path d="M-9 -47 L-17 -33 L-8 -27 M9 -47 L17 -33 L8 -27" stroke="#1a1a22" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M-5 -21 L-11 0 M5 -21 L11 0" stroke="#1a1a22" stroke-width="5" stroke-linecap="round"/></g>`;
+  const t=face*3;
+  return `<g transform="translate(${x} ${y+3}) scale(${s*.95})"><circle cx="${t}" cy="-53" r="6.5" fill="#1a1a22"/><path d="M-6 -45 L6 -45 L5 -20 L-5 -20 Z" fill="#1a1a22" transform="rotate(${face*6} 0 -20)"/><path d="M-6 -43 L-8 -24 M6 -43 L8 -24" stroke="#1a1a22" stroke-width="4" stroke-linecap="round"/><path d="M-3 -21 L-4 0 M3 -21 L4 0" stroke="#1a1a22" stroke-width="4.5" stroke-linecap="round"/></g>`;
+}
+function gStatut(){ partHead('👑','Détecteur de statut',1,2,'Un groupe apparaît <b>un très court instant</b>. Qui est le chef ? Touche ensuite le bon numéro.'); nextBtn('Commencer',statutA); }
+function statutA(){
+  let i=0, ok=0; const N=8;
+  const box=mk('div','card',null,main); box.style.textAlign='center';
+  function trial(){
+    if(i>=N) return end();
+    const n=randi(3,4), L=randi(0,n-1), xs=Array.from({length:n},(_,k)=>(k+1)*100/(n+1));
+    const svg=`<svg viewBox="0 0 100 100" style="width:100%;max-width:420px;background:#cfd6c8;border-radius:12px">${xs.map((x,k)=>stFig(x,k===L,k<L?1:-1,rand(.92,1.05))).join('')}</svg>`;
+    box.innerHTML=`<p class="lead">Groupe ${i+1}/${N}</p><div id="sa" style="min-height:200px;display:grid;place-items:center"><button class="btn ok" id="sa-go">Prêt</button></div>`;
+    $('#sa-go').onclick=()=>{ $('#sa').innerHTML=svg; setTimeout(()=>{ $('#sa').innerHTML=`<svg viewBox="0 0 100 100" style="width:100%;max-width:420px;background:repeating-conic-gradient(#888 0 25%,#aaa 0 50%) 0 0/8px 8px;border-radius:12px"></svg>`;
+      setTimeout(()=>{ $('#sa').innerHTML=`<div class="row c">${xs.map((_,k)=>`<button class="btn" data-k="${k}" style="min-width:56px">${k+1}</button>`).join('')}</div><p class="lead">Les personnages étaient numérotés de gauche à droite.</p>`;
+        $('#sa').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ const good=+b.dataset.k===L; if(good){ ok++; addPts(2); } $('#sa').innerHTML=svg+`<p class="fb ${good?'good':'info'}">${good?'Oui !':'C\'était le numéro '+(L+1)+'.'}</p>`; i++; setTimeout(trial,1100); }); },200); },150); };
+  }
+  function end(){
+    box.innerHTML=`<p>Tu as trouvé le chef <b>${ok} fois sur ${N}</b>, en le voyant 0,15 seconde.</p><p>Les chercheurs ont montré qu'on repère le statut d'une personne en quelques dizaines de millisecondes, sans savoir comment. Ici, le chef se tenait droit, épaules et coudes écartés, il prenait de la place, et les autres étaient tournés vers lui. Ton cerveau a lu tout ça avant que tu y penses.</p>`;
+    nextBtn('Épreuve suivante →',statutB);
+  }
+  trial();
+}
+const ST_DIAL=[
+  {d:'A : « Tu lis quoi ? »<br>B : « <i>Guerre et Paix</i>. »<br>A : « Ah ! C\'est mon livre préféré ! »',q:'Dans sa dernière réplique, A…',a:0,why:'A monte : il montre qu\'il a lu ce pavé, peut-être plusieurs fois. Il croyait juste être sympa.'},
+  {d:'A : « Tu lis quoi ? »<br>B : « <i>Guerre et Paix</i>. »<br>A : « J\'ai toujours voulu le lire. »',q:'Dans sa dernière réplique, A…',a:1,why:'A descend (et B monte) : il reconnaît que B a fait quelque chose qu\'il n\'a pas fait.'},
+  {d:'Le clochard : « Hé ! Vous allez où, là ? »<br>La duchesse : « Pardon, je n\'ai pas bien saisi… »<br>Le clochard : « Vous êtes sourde en plus d\'être aveugle ? »',q:'Ici, la duchesse…',a:1,why:'Elle joue bas, le clochard joue haut. Le statut qu\'on joue n\'est pas le statut social (Keith Johnstone, <i>Impro</i>).'},
+  {d:'« J\'aime beaucoup ta pièce de théâtre. »<br>« Oh, ça ne vaut pas grand-chose. »',q:'Celui qui répond « ça ne vaut pas grand-chose »…',a:0,why:'Il croit être modeste, mais il fait descendre son admirateur, sous-entendu « tu as mauvais goût ». Johnstone raconte qu\'il faisait ça lui-même sans s\'en rendre compte.'},
+  {d:'Mme X : « J\'ai eu un malaise dans la queue du cinéma. »<br>Mme Y : « Vous avez de la chance d\'aller au cinéma. Moi, si je pouvais y aller, je ne me plaindrais de rien. »',q:'Mme Y…',a:0,why:'Sous un air gentil, Mme Y monte au-dessus de Mme X : son problème à elle est plus grave. C\'est la surenchère du malheur.'},
+  {d:'B : « Tu as ouvert ma lettre ? »<br>A : « Oui. Tu as raison d\'être en colère. Je mets mon nez partout. »',q:'A…',a:1,why:'A descend volontairement, et c\'est lui qui contrôle la scène : B n\'arrive plus à attaquer. C\'est la non-défense, comme le loup qui montre sa gorge.'},
+  {d:'Le maître : « Où est le sucre ? »<br>Le valet : « Il est dedans, Monsieur. »',q:'Le valet…',a:2,why:'Il reste bas (« Monsieur ») mais gagne la manche : il accepte le reproche et le dévie. Monter et descendre à la fois, c\'est tout l\'art du valet de comédie.'}
+];
+function statutB(){
+  main.innerHTML=''; partHead('👑','Détecteur de statut',2,2,'Dans chaque conversation, on monte ou on descend, sans arrêt, comme sur une balançoire. Lis le dialogue et dis ce que fait le personnage.');
+  let i=0, ok=0; const box=mk('div',null,null,main);
+  function q(){
+    if(i>=ST_DIAL.length) return end();
+    const D2=ST_DIAL[i]; box.innerHTML=`<div class="card"><p class="lead">Dialogue ${i+1}/${ST_DIAL.length}</p><p style="font-size:17px">${D2.d}</p></div>`;
+    choice(D2.q,['⬆️ monte','⬇️ descend','↕️ les deux'],(k,fb)=>{ const good=k===D2.a; if(good){ ok++; addPts(2); } fb.className='fb '+(good?'good':'info'); fb.innerHTML=(good?'Oui ! ':'')+`<span>${D2.why}</span>`; nextBtn(i<ST_DIAL.length-1?'Suivant →':'Terminer',()=>{ i++; q(); },box); },box);
+  }
+  function end(){ box.innerHTML=''; mk('div','card',`<p><b>${ok}/${ST_DIAL.length}</b>. Keith Johnstone, un metteur en scène, a découvert que <b>chaque réplique</b> fait monter ou descendre quelqu\'un, et qu\'il est impossible d\'être neutre. Ton cerveau joue ce jeu en permanence, sans te demander ton avis.</p>`,box); toDisc(discStatut); }
+  q();
+}
+function discStatut(){
+  discovery('statut',{
+    reveal:{ q:'Comment as-tu fait pour trouver le chef en 0,15 seconde ?', opts:['J\'ai réfléchi très vite','Mon cerveau lit automatiquement les signes de statut (posture, place, regards) avant que j\'y pense','J\'ai eu de la chance'], good:1,
+      explain:'Ton cerveau classe tout le monde en permanence : qui domine, qui suit, qui monte, qui descend. Il le fait dans les postures et dans les mots, même dans une conversation entre amis.' },
+    power:{ name:'le radar à statut', emoji:'🏕️👑👥', scene:'Dans une tribu de chasseurs-cueilleurs, savoir en un coup d\'œil qui commande, à qui demander de l\'aide et qui il vaut mieux ne pas contrarier évitait des bagarres inutiles. Les animaux sociaux le font aussi : une fois la hiérarchie établie, on se bat beaucoup moins.',
+      q:'Pourquoi lire le statut aussi vite était-il utile ?', opts:['Pour savoir comment se comporter sans se battre à chaque rencontre','Pour devenir chef à tout prix','Ça ne servait à rien'], good:0,
+      explain:'Lire la hiérarchie évite les conflits et permet de trouver sa place. Johnstone remarquait que même les cloportes et les poules ont une hiérarchie.',
+      help:'tu sens l\'ambiance en entrant dans une pièce, tu sais à qui t\'adresser, tu calmes une dispute en baissant d\'un cran.',
+      trap:'tu juges les gens sur leur posture ou leurs vêtements, et tu rabaisses parfois quelqu\'un sans le vouloir (la fausse modestie, le « c\'est mon livre préféré »).' },
+    cases:[
+      { s:'En arrivant à un stage, tu repères tout de suite qui est le responsable, alors que personne ne te l\'a dit.', a:'aide', why:'Le radar à statut lit la posture, la place et les regards.' },
+      { s:'Au téléphone, un « conseiller » à la voix posée et sûre de lui te convainc de donner ton code.', a:'piege', why:'Les signes du statut haut (voix calme, phrases complètes) peuvent être imités pour manipuler.' },
+      { s:'Ton ami annonce qu\'il a été pris dans l\'équipe, tu le félicites… et tu te sens un peu moins bien.', a:'deux', why:'C\'est la balançoire : quand l\'autre monte, on se sent descendre. Le savoir aide à se réjouir vraiment pour lui.' }
+    ],
+    ai:{ html:'<p>Les assistants IA sont souvent réglés pour jouer un statut bas : « Excellente question ! », « Désolé, vous avez raison ».</p>',
+      q:'Quel effet cela peut-il avoir sur toi ?', opts:['Me mettre en position haute, et me rendre moins critique face à ses réponses','Aucun effet','Me rendre plus méfiant'], good:0,
+      explain:'Être flatté nous fait monter… et on vérifie moins. Ce statut bas est un réglage choisi par ceux qui ont entraîné l\'IA.' },
+    ask:'Avec tes mots, en une phrase : est-il possible de parler sans jouer au statut ?'
+  });
+}
+
+/* =========================================================
+   8 · TOUJOURS PLUS : le statut est relatif et jamais rassasié
+   A. choix entre deux mondes · B. la ligne d'arrivée qui recule
+   ========================================================= */
+const TP_Q=[
+  ['Option A : tu gagnes <b>1 jeton</b>, l\'autre joueur <b>0</b>.','Option B : tu gagnes <b>2 jetons</b>, l\'autre joueur aussi <b>2</b>.',41],
+  ['Monde A : tu gagnes <b>2 000 €</b> par mois, les autres <b>1 500 €</b>.','Monde B : tu gagnes <b>2 500 €</b>, les autres <b>3 000 €</b>.',52],
+  ['Classe A : tu as <b>15/20</b>, la moyenne de la classe est <b>11</b>.','Classe B : tu as <b>16/20</b>, la moyenne est <b>17</b>.',63],
+  ['Réseau A : ton post fait <b>80 likes</b>, ceux de tes amis <b>30</b>.','Réseau B : ton post fait <b>150 likes</b>, ceux de tes amis <b>400</b>.',58]
+];
+function gPlus(){ partHead('🪙','Toujours plus',1,2,'Pas de bonne ou de mauvaise réponse : choisis vraiment ce que tu préfères.'); plusA(); }
+function plusA(){
+  let i=0, rel=0; const box=mk('div',null,null,main);
+  function q(){
+    if(i>=TP_Q.length) return end();
+    const [a,b,pct]=TP_Q[i]; box.innerHTML='';
+    choice(`Choix ${i+1}/${TP_Q.length}`,[a,b],(k,fb)=>{ if(k===0) rel++; fb.className='fb info'; fb.innerHTML=`<span>Dans la classe simulée, <b>${pct} %</b> ont choisi A : ${k===0?'comme toi, ':''}gagner <b>moins</b> mais <b>plus que les autres</b>.</span>`; nextBtn(i<TP_Q.length-1?'Suivant →':'Voir le bilan',()=>{ i++; q(); },box); },box);
+  }
+  function end(){
+    box.innerHTML=''; mk('div','card',`<p>Tu as choisi « moins, mais plus que les autres » <b>${rel} fois sur ${TP_Q.length}</b>.</p><p>Dans une vraie étude (Solnick et Hemenway, 1998), environ la moitié des gens préféraient gagner 50 000 $ quand les autres en gagnent 25 000, plutôt que 100 000 $ quand les autres en gagnent 200 000. Pour le cerveau, ce qui compte souvent, ce n\'est pas ce qu\'on a : c\'est <b>sa place par rapport aux autres</b>. C\'est le cœur du « jeu du statut » de Will Storr.</p>`,box);
+    nextBtn('Épreuve suivante →',plusB);
+  }
+  q();
+}
+const TP_SHOP=[['🛴','Trottinette',10],['🚲','Vélo',25],['🛵','Scooter',60],['🚗','Voiture',140],['🏎️','Voiture de sport',320],['🛥️','Bateau',700],['🚁','Hélicoptère',1500]];
+function plusB(){
+  main.innerHTML=''; partHead('🪙','Toujours plus',2,2,'Travaille (touche le bouton) pour gagner des pièces et achète de quoi être heureux. Surveille ta jauge de satisfaction… et ton voisin Kim. 30 secondes.');
+  mk('div','hud',`<span id="tp-t">30 s</span><span id="tp-c">0 🪙</span>`,main);
+  const st=mk('div','card',`<div class="row" style="justify-content:space-around;text-align:center"><div>Toi<div id="tp-me" style="font-size:48px">🚶</div></div><div>Kim, ton voisin<div id="tp-kim" style="font-size:48px">🛴</div></div></div>
+    <p style="margin:8px 0 2px">😊 Satisfaction</p><div style="height:16px;border-radius:8px;background:var(--deep);overflow:hidden"><i id="tp-s" style="display:block;height:100%;width:40%;background:var(--good)"></i></div>
+    <div class="row c" style="margin-top:12px"><button class="btn" id="tp-w" style="min-width:150px;min-height:60px">⛏️ Travailler</button><button class="btn ok" id="tp-b"></button></div>
+    <svg id="tp-g" viewBox="0 0 300 80" style="width:100%;height:auto;margin-top:10px;background:var(--deep);border-radius:8px"></svg>`,main);
+  const S={t:0,c:0,lvl:-1,kim:0,sat:40,log:[]};
+  const shopUp=()=>{ const n=TP_SHOP[S.lvl+1]; $('#tp-b').textContent=n?`Acheter ${n[0]} ${n[1]} (${n[2]} 🪙)`:'Tout acheté !'; $('#tp-b').disabled=!n||S.c<n[2]; };
+  $('#tp-w').onclick=()=>{ S.c+=3+Math.max(0,S.lvl)*2; $('#tp-c').textContent=S.c+' 🪙'; shopUp(); };
+  $('#tp-b').onclick=()=>{ const n=TP_SHOP[S.lvl+1]; if(!n||S.c<n[2]) return; S.c-=n[2]; S.lvl++; S.sat=Math.min(100,S.sat+45); $('#tp-me').textContent=n[0]; $('#tp-c').textContent=S.c+' 🪙'; addPts(1);
+    setTimeout(()=>{ S.kim=Math.min(TP_SHOP.length-1,S.lvl+1); $('#tp-kim').textContent=TP_SHOP[S.kim][0]; S.sat-=12; },2500); shopUp(); };
+  shopUp();
+  const g={ update(dt){ S.t+=dt; S.sat+=(40-S.sat)*.35*dt; S.log.push(S.sat); $('#tp-s').style.width=clamp(S.sat,0,100)+'%';
+      $('#tp-t').textContent=Math.max(0,Math.ceil(30-S.t))+' s';
+      if(S.t>=30){ g.over=true; stopGame(); end(); } }, stop(){} };
+  startGame(g);
+  function end(){
+    const pts=S.log.filter((_,i)=>i%5===0).map((y,i,a)=>`${(i/(a.length-1||1)*300).toFixed(1)},${(78-y*.75).toFixed(1)}`).join(' ');
+    $('#tp-g').innerHTML=`<line x1="0" y1="${78-40*.75}" x2="300" y2="${78-40*.75}" stroke="#ffffff33" stroke-dasharray="4"/><polyline points="${pts}" fill="none" stroke="#6ee7a0" stroke-width="2.5"/>`;
+    $('#tp-w').disabled=true; $('#tp-b').disabled=true;
+    mk('div','card',`<p>Regarde la courbe : chaque achat fait grimper la satisfaction… qui <b>redescend toujours au même niveau</b> (la ligne en pointillés). Et chaque fois que Kim avait mieux, elle baissait encore.</p><p>Les psychologues appellent ça le <b>tapis roulant hédonique</b> : on s\'habitue à ce qu\'on gagne, et la ligne d\'arrivée recule. Comme dans le jeu Bruit de fond, le cerveau s\'habitue à ce qui ne change plus.</p>`,main);
+    toDisc(discPlus);
+  }
+}
+function discPlus(){
+  discovery('plus',{
+    reveal:{ q:'Qu\'est-ce qui compte souvent le plus pour ton cerveau ?', opts:['Ce que je possède, dans l\'absolu','Ma place par rapport aux autres, et ce qui est nouveau','Rien, je suis toujours satisfait'], good:1,
+      explain:'Le statut est <b>relatif</b> : on se compare. Et il n\'est <b>jamais rassasié</b> : on s\'habitue à ce qu\'on gagne, la ligne d\'arrivée recule. Storr décrit trois façons de jouer ce jeu : la domination (la force, la peur), la vertu (être le plus moral, le plus loyal) et le succès (être le plus compétent).' },
+    power:{ name:'le moteur de progrès', emoji:'🏹🎯🏆', scene:'Dans la tribu, celui qui chasse un peu mieux, qui fabrique de meilleurs outils ou qui aide le plus gagne de la considération, des alliés et des partenaires. Ne jamais être tout à fait satisfait poussait à s\'améliorer encore.',
+      q:'Pourquoi ne jamais être rassasié a-t-il été un avantage ?', opts:['Ça pousse à continuer d\'apprendre et de progresser','Ça rend plus heureux','Ça permet de dormir tranquille'], good:0,
+      explain:'Un cerveau qui se contenterait de tout s\'arrêterait de chercher mieux. La comparaison est un moteur, à condition de choisir avec qui et sur quoi on se compare.',
+      help:'tu t\'entraînes pour battre ton propre record, tu progresses en voyant comment font les meilleurs.',
+      trap:'tu n\'es jamais content de ce que tu as, parce qu\'il y a toujours quelqu\'un qui a plus (surtout sur les réseaux, où chacun montre son meilleur).' },
+    cases:[
+      { s:'Tu compares ton temps au 100 m avec celui de la semaine dernière et tu gagnes 2 dixièmes.', a:'aide', why:'Se comparer à soi-même pousse à progresser sans écraser personne.' },
+      { s:'Tu avais adoré ton téléphone neuf, jusqu\'à ce que ton cousin arrive avec le dernier modèle.', a:'piege', why:'Ton téléphone n\'a pas changé : c\'est ta comparaison qui a changé.' },
+      { s:'Pour avoir plus de vues que sa rivale, une influenceuse publie des vidéos de plus en plus risquées.', a:'piege', why:'Quand le statut se joue en comparaison permanente, il faut toujours aller plus loin.' }
+    ],
+    ai:{ html:'<p>Une IA de recommandation est souvent réglée pour maximiser un chiffre : vues, clics, temps passé.</p>',
+      q:'Quel point commun avec le « toujours plus » humain ?', opts:['Un objectif sans ligne d\'arrivée : il y a toujours un chiffre à augmenter','Elle sait quand s\'arrêter','Elle se compare à ses amis'], good:0,
+      explain:'Un chiffre à maximiser n\'est jamais « assez », pour une IA comme pour notre jeu du statut. C\'est aux humains de fixer des limites.' },
+    ask:'Avec tes mots, en une phrase : pourquoi « avoir plus » ne suffit-il pas à être plus heureux ?'
+  });
+}
+
+/* =========================================================
+   9 · PRESSION DU GROUPE
+   A. les lignes de Asch (7 avatars répondent avant toi)
+   B. la même chose avec une personne qui pense autrement
+   C. la passe de ballon (Cyberball)
+   ========================================================= */
+const PG_AV=[['🧑🏽','Nolan'],['👩🏻','Jade'],['🧔🏾','Karim'],['👧🏼','Lou'],['👨🏻','Théo'],['👩🏾','Fatou'],['🧑🏻','Ilyes']];
+function gGroupe(){ partHead('👥','Pression du groupe',1,3,'Un test de vision tout simple : quelle ligne (A, B ou C) a la même longueur que la ligne de référence ? Sept autres joueurs répondent avant toi.'); nextBtn('Commencer',()=>groupeAsch(false)); }
+function groupeAsch(ally){
+  if(ally){ main.innerHTML=''; partHead('👥','Pression du groupe',2,3,'Même test, mêmes joueurs… avec une petite différence.'); }
+  const crit=ally?[0,1,2,3]:[1,2,4,5,7];
+  const N=ally?4:8; let i=0, conf=0, critN=0; const box=mk('div','card',null,main);
+  function trial(){
+    if(i>=N) return end();
+    const ref=randi(40,80), good=randi(0,2); const lens=[0,1,2].map(k=>k===good?ref:ref+pick([-1,1])*randi(14,26));
+    const isCrit=crit.includes(i), wrong=[0,1,2].filter(k=>k!==good)[randi(0,1)];
+    const svg=`<svg viewBox="0 0 220 100" style="width:100%;max-width:420px;background:#f4f1e8;border-radius:10px"><text x="20" y="14" font-size="9" fill="#444">Référence</text><line x1="35" y1="${92-ref}" x2="35" y2="92" stroke="#222" stroke-width="5"/>${lens.map((l,k)=>`<text x="${100+k*45}" y="14" font-size="10" fill="#444" text-anchor="middle">${'ABC'[k]}</text><line x1="${100+k*45}" y1="${92-l}" x2="${100+k*45}" y2="92" stroke="#222" stroke-width="5"/>`).join('')}</svg>`;
+    box.innerHTML=`<p class="lead">Question ${i+1}/${N}</p>${svg}<div id="pg-av" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0"></div><div id="pg-me"></div>`;
+    const av=$('#pg-av'); let k=0;
+    const step=()=>{ if(k>=7){ $('#pg-me').innerHTML=`<p><b>À toi :</b></p><div class="row c">${[0,1,2].map(j=>`<button class="btn" data-j="${j}" style="min-width:70px;font-size:20px">${'ABC'[j]}</button>`).join('')}</div>`; $('#pg-me').querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>answer(+b.dataset.j)); return; }
+      const dissent=ally && k===4; const ans=isCrit && !dissent ? wrong : good;
+      mk('div',null,`<div style="text-align:center;font-size:13px"><span style="font-size:28px">${PG_AV[k][0]}</span><br>${PG_AV[k][1]}<br><b style="font-size:18px;color:${dissent?'var(--cyan)':'var(--amber)'}">${'ABC'[ans]}</b></div>`,av); k++; setTimeout(step,380); };
+    step();
+    let done=false;
+    function answer(j){ if(done) return; done=true; if(isCrit){ critN++; if(j===wrong) conf++; } if(j===good) addPts(1); i++; setTimeout(trial,500); }
+  }
+  function end(){
+    if(!ally){ HA.conf={conf,critN}; box.innerHTML=`<p>Les autres joueurs étaient des avatars programmés. Sur <b>${critN}</b> questions, ils ont <b>tous</b> donné la même mauvaise réponse, avant toi.</p><p>Tu les as suivis <b>${conf} fois sur ${critN}</b>. ${conf?'Tu n\'es pas seul(e) :':'Bravo, tu as tenu bon !'} dans l'expérience de Solomon Asch (1951), environ 3 personnes sur 4 suivaient le groupe au moins une fois, sur une question pourtant évidente.</p><p class="reassure" style="margin:0">${REASSURE}</p>`; nextBtn('Épreuve suivante →',()=>groupeAsch(true)); }
+    else { const a=HA.conf||{conf:0,critN:5}; box.innerHTML=`<p>Cette fois, <b>${PG_AV[4][1]}</b> donnait la bonne réponse quand tous les autres se trompaient.</p><p>Tu as suivi la mauvaise réponse du groupe <b>${conf} fois sur ${critN}</b> (contre ${a.conf} sur ${a.critN} sans ${PG_AV[4][1]}).</p><p>Chez Asch, il suffisait d'<b>une seule personne qui pense autrement</b> pour que la pression du groupe s'effondre : le taux d'erreur chutait de près des trois quarts. La diversité des avis protège tout le groupe.</p>`; nextBtn('Épreuve suivante →',groupeBall); }
+  }
+  trial();
+}
+function groupeBall(){
+  main.innerHTML=''; partHead('👥','Pression du groupe',3,3,'Un petit jeu de passes. Quand tu as le ballon 🏐, touche un joueur pour lui lancer.');
+  const P=[{e:'🧑🏽',n:'Nolan',x:20,y:25},{e:'👩🏻',n:'Jade',x:80,y:25},{e:'🙂',n:'Toi',x:50,y:82}];
+  const st=mk('div','stage',`<div style="position:absolute;inset:0;background:linear-gradient(#2e5a3a,#1c3a26)"></div>`,main); st.style.height='360px'; st.style.minHeight='360px';
+  const els=P.map((p,k)=>{ const e=mk('button',null,`<span style="font-size:46px">${p.e}</span><br><b>${p.n}</b>`,st); e.style.cssText=`position:absolute;left:${p.x}%;top:${p.y}%;transform:translate(-50%,-50%);background:none;border:0;color:#fff;text-align:center`; e.onclick=()=>throwTo(k); return e; });
+  const ball=mk('div',null,'🏐',st); ball.style.cssText='position:absolute;font-size:30px;transform:translate(-50%,-50%);transition:left .6s,top .6s;z-index:5';
+  let holder=0, passes=0, toMe=0, excl=false, busy=false, dead=false;
+  const put=k=>{ ball.style.left=P[k].x+'%'; ball.style.top=(P[k].y-12)+'%'; };
+  put(0);
+  function throwTo(k){ if(holder!==2||busy||k===2) return; go(k); }
+  function go(k){ if(dead) return; busy=true; holder=k; put(k); passes++; if(k===2) toMe++; setTimeout(()=>{ if(dead) return; busy=false; if(passes>=16){ dead=true; return end(); } if(k!==2) setTimeout(()=>{ const to=excl?1-k:(Math.random()<.5?2:1-k); go(to); },rand(350,650)); },600); if(toMe>=3 && passes>=6) excl=true; }
+  setTimeout(()=>go(2),800);
+  startGame({stop(){ dead=true; }});
+  function end(){ stopGame();
+    choice('Les dernières passes ne sont plus jamais arrivées jusqu\'à toi. Comment tu t\'es senti(e) ?',['Pas bien du tout','Un peu agacé(e) ou triste','Ça m\'est égal'],(i,fb)=>{
+      fb.className='fb info'; fb.innerHTML='<span>Nolan et Jade étaient deux programmes de quelques lignes, et tu le savais. Pourtant, dans l\'expérience « Cyberball » (Williams, 2000), la plupart des gens se sentent mal d\'être exclus d\'un jeu de passes entre inconnus virtuels. Les scanners montrent que l\'exclusion active des zones proches de celles de la douleur physique. Et savoir que c\'est un programme ne suffit pas à s\'en protéger.</span>';
+      addPts(3); toDisc(discGroupe);
+    });
+  }
+}
+function discGroupe(){
+  discovery('groupe',{
+    reveal:{ q:'Pourquoi est-il si difficile de contredire tout un groupe, même quand on voit qu\'il se trompe ?', opts:['Parce que je ne suis pas sûr de moi','Parce que mon cerveau traite l\'accord avec le groupe, et l\'exclusion, comme une question de survie','Parce que le groupe a toujours raison'], good:1,
+      explain:'Suivre le groupe et avoir peur d\'en être exclu sont des réflexes profonds. Mais une seule voix différente suffit à libérer tout le monde : la diversité des avis est une protection.' },
+    power:{ name:'l\'instinct de meute', emoji:'🏕️👥❄️', scene:'Il y a 20 000 ans, un humain seul dans le froid avait très peu de chances de survivre. Faire comme le groupe (manger ce que les autres mangent, fuir quand ils fuient) était presque toujours une bonne idée. Et être rejeté de la tribu, c\'était souvent mourir.',
+      q:'Pourquoi l\'exclusion fait-elle aussi mal ?', opts:['Parce qu\'être exclu du groupe a longtemps signifié être en danger de mort','Parce qu\'on est fragile','Ça ne fait pas vraiment mal'], good:0,
+      explain:'La douleur sociale est une alarme : elle pousse à rester dans le groupe ou à y revenir. Et copier le groupe permet d\'apprendre vite, sans tout tester soi-même.',
+      help:'tu apprends vite en imitant (une langue, un sport, les règles d\'un nouveau lycée), et tu fais confiance à un groupe qui sait mieux que toi.',
+      trap:'tu suis une majorité qui se trompe, tu n\'oses pas dire ce que tu vois, ou tu laisses quelqu\'un à l\'écart parce que tout le monde le fait.' },
+    cases:[
+      { s:'Dans un pays étranger, tu ne sais pas comment payer le bus : tu fais comme les gens devant toi.', a:'aide', why:'Copier le groupe est souvent la façon la plus rapide d\'apprendre.' },
+      { s:'Toute la classe se moque d\'une vidéo d\'un élève. Tu trouves ça méchant, mais tu ne dis rien.', a:'piege', why:'La pression du groupe fait taire. Pourtant, une seule voix différente suffit souvent à faire changer les autres.' },
+      { s:'Un avis à contre-courant dans un groupe de travail fait découvrir une erreur que personne n\'avait vue.', a:'aide', why:'C\'est le pouvoir de la diversité : celui qui pense autrement protège tout le groupe.' }
+    ],
+    ai:{ html:'<p>Quand on lui répète plusieurs fois qu\'elle se trompe, une IA de langage finit parfois par changer une bonne réponse pour une mauvaise, pour aller dans le sens de l\'utilisateur.</p>',
+      q:'Comment appelle-t-on ce comportement ?', opts:['La complaisance : dire ce que l\'autre veut entendre','La lucidité','La vitesse de calcul'], good:0,
+      explain:'Comme un humain face au groupe, une IA peut céder à la pression. Une réponse n\'est pas vraie parce que tout le monde (ou l\'utilisateur) insiste.' },
+    ask:'Avec tes mots, en une phrase : que peut faire une seule personne qui pense autrement ?'
+  });
+}
+
+/* =========================================================
+   10 · MA TRIBU : une couleur au hasard suffit
+   A. le test des points · B. partager les ressources · C. juger des avis
+   ========================================================= */
+function gTribu(){ partHead('🟦','Ma tribu',1,3,'Des nuages de points vont apparaître très vite. Estime combien il y en a.'); tribuA(); }
+function tribuA(){
+  let i=0; const box=mk('div','card',null,main); box.style.textAlign='center';
+  function trial(){
+    if(i>=4){ const team=Math.random()<.5?'bleu':'orange'; D.team=team; save();
+      box.innerHTML=`<p>Résultat du test :</p><div style="font-size:64px">${team==='bleu'?'🟦':'🟧'}</div><p>Tu fais partie des <b>${team==='bleu'?'SURESTIMATEURS':'SOUS-ESTIMATEURS'}</b> : tu es dans l'équipe <b style="color:${team==='bleu'?'#5ca8ff':'#ffa64a'}">${team==='bleu'?'Bleue':'Orange'}</b>.</p>`;
+      return nextBtn('Épreuve suivante →',tribuB); }
+    const n=randi(25,70); const dots=Array.from({length:n},()=>`<circle cx="${rand(4,96).toFixed(1)}" cy="${rand(4,96).toFixed(1)}" r="1.6" fill="#222"/>`).join('');
+    box.innerHTML=`<p class="lead">Nuage ${i+1}/4</p><svg viewBox="0 0 100 100" style="width:100%;max-width:300px;background:#eee;border-radius:10px">${dots}</svg>`;
+    setTimeout(()=>{ const opts=shuffle([n,n+randi(8,18),Math.max(5,n-randi(8,18)),n+randi(20,35)]).map(x=>x-x%5);
+      box.innerHTML=`<p>Combien de points ?</p><div class="row c">${opts.map(o=>`<button class="btn" style="min-width:70px">${o}</button>`).join('')}</div>`;
+      box.querySelectorAll('button').forEach(b=>b.onclick=()=>{ i++; trial(); }); },700);
+  }
+  trial();
+}
+const TR_M=[ // [nous, eux] option 1 = le plus pour tous ; option 2 = le plus grand écart
+  [[13,13],[11,5]],[[15,17],[12,8]],[[19,21],[14,9]],[[10,12],[9,4]]
+];
+function tribuB(){
+  main.innerHTML=''; const team=D.team||'bleu', T=team==='bleu'?'🟦 Bleus':'🟧 Oranges', O=team==='bleu'?'🟧 Oranges':'🟦 Bleus';
+  partHead('🟦','Ma tribu',2,3,`Tu dois partager des pièces entre un membre anonyme de ton équipe (${T}) et un membre anonyme de l'autre équipe (${O}). Tu ne gagnes rien toi-même.`);
+  let i=0, md=0; const box=mk('div',null,null,main);
+  function q(){
+    if(i>=TR_M.length) return end();
+    const [a,b]=TR_M[i]; box.innerHTML='';
+    choice(`Partage ${i+1}/${TR_M.length}`,[`${T} : <b>${a[0]}</b> pièces · ${O} : <b>${a[1]}</b> pièces`,`${T} : <b>${b[0]}</b> pièces · ${O} : <b>${b[1]}</b> pièces`],(k)=>{ if(k===1) md++; i++; setTimeout(q,250); },box);
+  }
+  function end(){
+    box.innerHTML=''; mk('div','card',`<p>Dans la première option, ton équipe gagnait <b>plus</b>. Dans la seconde, elle gagnait <b>moins</b>… mais avec un plus grand <b>écart</b> sur l'autre équipe.</p><p>Tu as choisi l'écart <b>${md} fois sur ${TR_M.length}</b>.</p><p>Ton équipe a été tirée <b>au hasard</b> : le test des points ne mesurait rien. Pourtant, dans les expériences d'Henri Tajfel (1971), des adolescents répartis ainsi favorisaient leur « équipe », et choisissaient souvent de gagner moins pour creuser l'écart avec l'autre.</p><p class="reassure" style="margin:0">${REASSURE}</p>`,box);
+    nextBtn('Épreuve suivante →',tribuC);
+  }
+  q();
+}
+const TR_OP=['Les devoirs devraient être faits au lycée, pas à la maison.','On devrait pouvoir choisir sa place en classe.','La cantine devrait proposer un menu végétarien chaque jour.','Les cours devraient commencer à 9 h.','Les téléphones devraient être autorisés à la récré.','Il faudrait plus de sorties scolaires, même si c\'est payant.'];
+function tribuC(){
+  main.innerHTML=''; const team=D.team||'bleu';
+  partHead('🟦','Ma tribu',3,3,'Des élèves des deux équipes ont donné leur avis. Note la qualité de chaque avis, de 1 à 5.');
+  const items=shuffle(TR_OP.map((t,k)=>({t,own:k%2===0}))); const notes={own:[],other:[]}; let i=0; const box=mk('div',null,null,main);
+  function q(){
+    if(i>=items.length) return end();
+    const it=items[i], col=it.own===(team==='bleu')?'🟦':'🟧';
+    box.innerHTML=''; choice(`${col} « ${it.t} »`,['1 ★','2 ★★','3 ★★★','4 ★★★★','5 ★★★★★'],k=>{ notes[it.own?'own':'other'].push(k+1); i++; setTimeout(q,200); },box);
+  }
+  function end(){
+    const a=avg(notes.own), b=avg(notes.other);
+    box.innerHTML=''; mk('div','card',`<p>Note moyenne des avis de <b>ton équipe</b> : <b>${a.toFixed(1)}</b> · de <b>l'autre équipe</b> : <b>${b.toFixed(1)}</b>.</p><p>${a>b?'Tu as un peu mieux noté ton équipe.':'Tu as été équitable, bravo !'} Les avis étaient attribués aux équipes <b>au hasard</b>, comme les équipes elles-mêmes. Il suffit d'une couleur pour que le cerveau trie le monde en « nous » et « eux ».</p>`,box);
+    addPts(3); toDisc(discTribu);
+  }
+  q();
+}
+function discTribu(){
+  discovery('tribu',{
+    reveal:{ q:'Qu\'est-ce qui a créé « ton » équipe ?', opts:['Un vrai talent commun (surestimer les points)','Un tirage au hasard, et pourtant mon cerveau s\'y est attaché','Mes amis'], good:1,
+      explain:'Il suffit d\'une étiquette, même tirée au hasard, pour que le cerveau favorise « nous » et se méfie d\'« eux ». C\'est le paradigme des groupes minimaux. Storr explique qu\'on joue le jeu du statut en équipe : faire gagner son groupe nous fait monter.' },
+    power:{ name:'l\'esprit d\'équipe', emoji:'🏕️🤝🔥', scene:'Pendant des centaines de milliers d\'années, les humains ont vécu en petits groupes. Se serrer les coudes avec les siens, partager la nourriture avec eux, les défendre, c\'était la clé de la survie face aux prédateurs, au froid… et aux autres groupes.',
+      q:'Pourquoi le cerveau s\'attache-t-il si vite à un groupe ?', opts:['Parce qu\'appartenir à un groupe soudé a été vital','Parce que les couleurs nous plaisent','Parce que les autres groupes sont méchants'], good:0,
+      explain:'La coopération à l\'intérieur du groupe est l\'un des superpouvoirs de notre espèce. Le revers : la méfiance envers « eux » s\'allume tout aussi vite, même sans raison.',
+      help:'tu te donnes à fond pour ton équipe, ta classe, tes amis ; tu te sens soutenu.',
+      trap:'tu juges un avis d\'après le camp de celui qui le donne, et tu préfères parfois que « eux » perdent plutôt que « nous » gagnions.' },
+    cases:[
+      { s:'Pour le projet de classe, ton groupe s\'organise, chacun aide les autres et vous finissez en avance.', a:'aide', why:'L\'esprit d\'équipe démultiplie l\'efficacité.' },
+      { s:'Un supporter refuse d\'admettre que l\'arbitre avait raison, parce que la décision était contre son club.', a:'piege', why:'Le « nous » déforme le jugement : on voit les faits à travers les couleurs de son équipe.' },
+      { s:'Sur un réseau, un post qui se moque de « l\'autre camp » fait dix fois plus de partages qu\'un post nuancé.', a:'piege', why:'L\'opposition nous / eux déclenche des émotions fortes, que les réseaux amplifient.' }
+    ],
+    ai:{ html:'<p>Une IA apprend à partir de textes écrits par des humains, qui contiennent nos préférences pour « nous » et nos clichés sur « eux ».</p>',
+      q:'Que risque-t-il d\'arriver ?', opts:['L\'IA peut reproduire ces préjugés de groupe','L\'IA devient parfaitement neutre','L\'IA choisit une équipe préférée'], good:0,
+      explain:'Les biais de groupe des humains passent dans les données, puis dans l\'IA. Les repérer demande des équipes variées pour la construire et la tester.' },
+    ask:'Avec tes mots, en une phrase : que suffit-il pour créer « nous » et « eux » ?'
+  });
+}
+
+/* =========================================================
+   11 · ATTENTION TYCOON : dirige un média gratuit de 1833 à aujourd'hui
+   chaque hameçon attire l'attention, s'use (habituation) et agace (révolte)
+   ========================================================= */
+const AT_ERAS=[
+  {y:'1833',e:'📰',n:'La presse à un sou',p:1,h:[['🔪','Faits divers sanglants',30,12],['📖','Feuilleton à suivre',22,4],['🌕','Canular : « On a vu des êtres vivants sur la Lune ! »',45,20],['💊','Réclames de remèdes miracles',8,10]]},
+  {y:'1925',e:'📻',n:'La radio',p:2,h:[['🎵','Jingle qui reste en tête',20,8],['🎭','Feuilleton radio sponsorisé par une lessive',30,5],['📢','Pub au milieu de l\'émission',12,14],['🎤','Discours enflammés',35,18]]},
+  {y:'1960',e:'📺',n:'La télévision',p:4,h:[['⭐','Grand show en prime time',35,5],['✂️','Coupure pub au moment du suspense',25,16],['🎰','Jeu télévisé avec gros lots',30,6],['🧸','Pubs pour les enfants le mercredi',18,14]]},
+  {y:'2015',e:'📱',n:'Le smartphone',p:8,h:[['🔔','Notifications',30,14],['♾️','Défilement infini',35,10],['😱','Titres putaclic',28,16],['🎯','Recommandations personnalisées',40,8],['🔥','Série de jours à ne pas perdre',25,12]]}
+];
+function gTycoon(){ partHead('📺','Attention Tycoon',0,0,'Tu diriges un média <b>gratuit</b>. Tu ne vends rien au public : tu vends son <b>attention</b> aux annonceurs. À chaque tour, choisis un hameçon. Attention : un hameçon répété s\'use, et un public trop agacé se révolte.'); nextBtn('Commencer en 1833',()=>tycoon(0,{money:0,rev:0,used:{},log:[]})); }
+function tycoon(ei,S){
+  const E=AT_ERAS[ei]; let turn=0;
+  main.innerHTML=''; head(E.e,`${E.y} · ${E.n}`,`Prix d'une minute d'attention : <b>${E.p} 🪙</b> (plus le média est puissant, plus elle se vend cher).`);
+  const hud=mk('div','card',null,main); const box=mk('div',null,null,main);
+  const draw=()=>{ hud.innerHTML=`<div style="display:grid;grid-template-columns:110px 1fr 50px;gap:8px;align-items:center;font-size:14px"><span>💰 Recettes</span><b style="font-family:var(--f-mono)">${S.money} 🪙</b><span></span><span>😤 Agacement</span><span style="height:12px;border-radius:6px;background:var(--deep);overflow:hidden"><i style="display:block;height:100%;width:${clamp(S.rev,0,100)}%;background:${S.rev>70?'var(--bad)':'var(--amber)'}"></i></span><span>${Math.round(S.rev)}</span></div><p class="lead" style="margin:6px 0 0">Tour ${turn+1}/4</p>`; };
+  function play(){
+    draw(); box.innerHTML='';
+    choice('Quel hameçon utilises-tu ?',E.h.map(([e,n,a,r])=>{ const u=S.used[n]||0; return `${e} ${n}<br><small class="lead">attention ${'★'.repeat(Math.max(1,Math.round(a*Math.pow(.6,u)/10)))}${u?` (déjà utilisé ${u}×, s'use)`:''} · agacement ${'😤'.repeat(Math.max(1,Math.round(r/6)))}</small>`; }),(k,fb)=>{
+      const [e,n,a,r]=E.h[k]; const u=S.used[n]||0; S.used[n]=u+1;
+      let att=Math.round(a*Math.pow(.6,u)); S.rev+=r; let msg='';
+      if(S.rev>=100){ att=Math.round(att*.3); S.rev=55; msg='<br>😡 <b>Révolte du public !</b> Des gens se plaignent, on vote une loi, ou ils inventent un moyen d\'éviter tes hameçons (la télécommande, le bloqueur de pub…). Ton audience s\'effondre ce tour-ci.'; }
+      S.rev=Math.max(0,S.rev-4);
+      const gain=att*E.p; S.money+=gain; S.log.push(att);
+      fb.className='fb info'; fb.innerHTML=`<span>${e} ${att} minutes d'attention vendues → <b>+${gain} 🪙</b>${u?' (le public s\'habitue : l\'effet s\'use)':''}${msg}</span>`;
+      draw(); turn++;
+      nextBtn(turn<4?'Tour suivant →':(ei<AT_ERAS.length-1?`Passer à ${AT_ERAS[ei+1].y} →`:'Voir le bilan'),()=>{ if(turn<4) play(); else if(ei<AT_ERAS.length-1){ S.used={}; S.rev=Math.max(0,S.rev-20); tycoon(ei+1,S); } else end(); },box);
+    },box);
+  }
+  function end(){
+    main.innerHTML=''; partHead('📺','Attention Tycoon',0,0);
+    addPts(Math.min(30,Math.round(S.money/40)));
+    const max=Math.max(...S.log,1), pts=S.log.map((v,i)=>`${(i/(S.log.length-1)*300).toFixed(1)},${(78-v/max*70).toFixed(1)}`).join(' ');
+    mk('div','card',`<p>Bilan : <b>${S.money} 🪙</b> gagnés en vendant l'attention de ton public.</p><svg viewBox="0 0 300 80" style="width:100%;height:auto;background:var(--deep);border-radius:8px"><polyline points="${pts}" fill="none" stroke="#b18cff" stroke-width="2.5"/></svg><p class="lead" style="font-size:13px">Attention captée à chaque tour, de 1833 à 2015.</p>
+      <p>Tout ça est inspiré de l'histoire racontée par Tim Wu dans <i>The Attention Merchants</i> :</p>
+      <p>• <b>1833</b> : le <i>Sun</i> de New York est vendu 1 cent, moins cher que son papier. Il gagne son argent en vendant ses lecteurs aux annonceurs. En 1835, il publie un canular sur des créatures vivant sur la Lune, et ses ventes explosent.<br>• <b>Radio et télé</b> : les « soap operas » doivent leur nom aux marques de savon qui les finançaient ; le prime time réunit des familles entières devant les mêmes pubs.<br>• <b>Révoltes</b> : contre les affiches géantes au début du XXe siècle, contre les pubs télé avec la télécommande, contre les pop-ups avec les bloqueurs.<br>• <b>Aujourd'hui</b> : notifications, défilement infini et recommandations captent l'attention en continu.</p>`,main);
+    toDisc(discTycoon);
+  }
+  play();
+}
+function discTycoon(){
+  discovery('tycoon',{
+    reveal:{ q:'Dans un média gratuit, qu\'est-ce qui est vendu, et à qui ?', opts:['Les articles, au public','L\'attention du public, aux annonceurs','Rien, c\'est gratuit'], good:1,
+      explain:'Quand c\'est gratuit, ce qui se vend, c\'est ton attention. Tim Wu appelle ces entreprises les « marchands d\'attention ». Leur difficulté : le public s\'habitue aux hameçons (il faut sans cesse en inventer) et se révolte quand on va trop loin.' },
+    power:{ name:'l\'attention sélective', emoji:'👀🐍🍓', scene:'Dans la forêt, ton ancêtre ne peut pas tout regarder. Son attention saute vers ce qui est nouveau, surprenant, effrayant ou délicieux : un serpent, un fruit rare, un cri. C\'est ce qui lui permet de réagir au bon moment.',
+      q:'Pourquoi notre attention est-elle attirée par le surprenant et l\'émotion ?', opts:['Parce que le surprenant et l\'émotionnel signalaient souvent un danger ou une occasion','Parce qu\'on aime être distrait','Parce que c\'est la mode'], good:0,
+      explain:'Notre attention est réglée pour le nouveau et l\'émotion. Les marchands d\'attention utilisent exactement ces réglages : faits divers, suspense, notifications.',
+      help:'tu remarques immédiatement une info importante, une alerte, une bonne nouvelle.',
+      trap:'des hameçons fabriqués exprès attrapent ton attention, et quelqu\'un d\'autre décide de ce que tu regardes.' },
+    cases:[
+      { s:'Une alerte météo s\'affiche sur ton téléphone : orage violent dans une heure.', a:'aide', why:'Une notification utile et rare : ton attention est attirée vers une vraie information.' },
+      { s:'Tu ouvres une appli pour regarder une vidéo et tu relèves la tête 45 minutes plus tard.', a:'piege', why:'Le défilement infini supprime les points d\'arrêt naturels (la fin d\'un journal, d\'un épisode).' },
+      { s:'Une série s\'arrête toujours au moment le plus tendu de l\'épisode.', a:'deux', why:'Le suspense fait plaisir… et te pousse à lancer l\'épisode suivant. C\'est le feuilleton de 1833, en version 2025.' }
+    ],
+    ai:{ html:'<p>Les hameçons d\'aujourd\'hui sont choisis par des IA, qui testent en permanence ce qui te fait rester.</p>',
+      q:'Quelle différence avec le journal de 1833 ?', opts:['L\'hameçon est personnalisé pour toi et ajusté en temps réel','Il n\'y a aucune différence','Les IA ne cherchent pas l\'attention'], good:0,
+      explain:'En 1833, le même titre était imprimé pour tout le monde. Aujourd\'hui, une IA ajuste les hameçons à chaque personne. Le principe n\'a pas changé : vendre l\'attention.' },
+    ask:'Avec tes mots, en une phrase : quand une appli est gratuite, qu\'est-ce que tu donnes ?'
+  });
+}
+
+/* =========================================================
+   12 · FABRIQUE À BESOINS
+   A. lance « Halinex » (inspiré de l'histoire de Listerine)
+   B. mode défense : repère la ficelle dans des pubs
+   ========================================================= */
+function gBesoins(){ partHead('🏭','Fabrique à besoins',1,2,'Nous sommes en 1921. Ta fabrique produit un liquide antiseptique, le <b>Halinex</b>, qui sert surtout à désinfecter… les sols. Les ventes sont faibles. Ta mission : le vendre à tout le monde.'); besoinsA(); }
+const FB_STEPS=[
+  ['1. Quel problème ton produit résout-il ?',[['Désinfecter les sols',1],['Un problème que personne ne connaît encore : la mauvaise haleine, que tu baptises d\'un nom savant, « l\'halitose »',3],['Aucun, il est juste joli',0]]],
+  ['2. Quelle émotion vises-tu ?',[['L\'information technique (composition, prix)',1],['La peur d\'être rejeté : « Ta meilleure amie ne te le dira jamais »',3],['L\'humour',2]]],
+  ['3. Qui cibles-tu ?',[['Les médecins',1],['Les jeunes qui cherchent l\'amour et un travail',3],['Personne en particulier',0]]],
+  ['4. Combien de fois montres-tu la pub ?',[['Une fois, c\'est assez',0],['Souvent, dans tous les magazines, pendant des années',3],['Une fois par an',1]]]
+];
+function besoinsA(){
+  let i=0, sc=0; const box=mk('div',null,null,main); const picks=[];
+  function q(){
+    if(i>=FB_STEPS.length) return end();
+    const [t,o]=FB_STEPS[i]; box.innerHTML=picks.map(p=>`<p class="lead" style="margin:0">✓ ${p}</p>`).join('');
+    choice(t,o.map(x=>x[0]),k=>{ sc+=o[k][1]; picks.push(o[k][0].replace(/<[^>]+>/g,'')); i++; setTimeout(q,250); },box);
+  }
+  function end(){
+    const sales=Math.round(100*Math.pow(1.9,sc/2.4));
+    box.innerHTML=`<div class="card"><p>Ventes après 7 ans : <b>${sales.toLocaleString('fr-FR')} flacons par mois</b> ${sc>=10?'🚀':''}</p><p>${sc>=10?'Tu as fabriqué un besoin !':'Ça se vend, mais tu peux faire bien plus fort : rejoue en choisissant d\'autres options.'}</p>
+      <p><b>L'histoire vraie</b> : dans les années 1920, la marque Listerine, un antiseptique, a popularisé le mot savant « halitose » pour la mauvaise haleine, avec des pubs comme « Toujours demoiselle d'honneur, jamais la mariée ». Ses ventes ont été multipliées par 70 en 7 ans. Tim Wu raconte comment la publicité moderne a appris à <b>créer un problème</b> pour vendre la solution.</p></div>`;
+    const r=mk('div','row',`<button class="btn" id="fb-r">Rejouer</button><button class="btn ok" id="fb-n">Mode défense →</button>`,box);
+    $('#fb-r').onclick=()=>{ main.innerHTML=''; gBesoins(); }; $('#fb-n').onclick=besoinsB;
+  }
+  q();
+}
+const FB_TR=['Problème inventé','Peur d\'être rejeté','Statut, prestige','Rareté, urgence','Tout le monde le fait'];
+const FB_ADS=[
+  ['⌚','« La montre que portent ceux qui ont réussi. »',2],
+  ['⏳','« Plus que 3 en stock ! L\'offre expire dans 09:59. »',3],
+  ['🧴','« Vos cils manquent de volume ? Ne laissez plus vos cils fatigués gâcher votre regard. »',0],
+  ['👟','« 2 millions de lycéens l\'ont déjà adoptée. Et toi ? »',4],
+  ['💬','« Tes amis remarquent-ils ton odeur avant toi ? »',1],
+  ['📱','« Rejoins les 10 000 premiers membres VIP, accès réservé. »',3]
+];
+function besoinsB(){
+  main.innerHTML=''; partHead('🏭','Fabrique à besoins',2,2,'Maintenant, tu connais les ficelles. Pour chaque pub inventée, repère la ficelle principale.');
+  let i=0, ok=0; const box=mk('div',null,null,main);
+  function q(){
+    if(i>=FB_ADS.length) return end();
+    const [e,t,a]=FB_ADS[i]; box.innerHTML=`<div class="card" style="text-align:center"><div style="font-size:54px">${e}</div><p style="font-size:18px"><b>${t}</b></p></div>`;
+    choice(`Pub ${i+1}/${FB_ADS.length} : quelle ficelle ?`,FB_TR,(k,fb)=>{ const g=k===a; if(g){ ok++; addPts(2); } fb.className='fb '+(g?'good':'info'); fb.innerHTML=g?'Bien vu !':`<span>Surtout : <b>${FB_TR[a]}</b> (mais plusieurs ficelles se mélangent souvent).</span>`; nextBtn(i<FB_ADS.length-1?'Suivante →':'Terminer',()=>{ i++; q(); },box); },box);
+  }
+  function end(){ box.innerHTML=''; mk('div','card',`<p><b>${ok}/${FB_ADS.length}</b> ficelles repérées. Les mêmes ficelles reviennent depuis un siècle : créer un problème, faire peur d'être rejeté, promettre du statut, presser avec la rareté, montrer que « tout le monde le fait ».</p><p>Les repérer ne rend pas immunisé (on y reste sensible, comme pour tous les biais), mais ça donne le temps de se poser la question : « en ai-je vraiment besoin ? ».</p>`,box); toDisc(discBesoins); }
+  q();
+}
+function discBesoins(){
+  discovery('besoins',{
+    reveal:{ q:'Comment la pub a-t-elle fait vendre un désinfectant à sols pour la bouche ?', opts:['En prouvant qu\'il était le meilleur','En créant un problème (et une peur) que le produit venait résoudre','Par hasard'], good:1,
+      explain:'Un besoin peut se fabriquer : on nomme un problème, on y attache une émotion forte (peur du rejet, envie de statut), on le répète partout. Et on peut aussi s\'en défendre : repérer la ficelle laisse le temps de se demander si le besoin est réel.' },
+    power:{ name:'l\'apprentissage social', emoji:'🏕️👀🫐', scene:'Ton ancêtre n\'a pas besoin de goûter toutes les baies pour savoir lesquelles sont bonnes : il regarde ce que mangent les autres, surtout ceux qui réussissent, et il écoute les avertissements du groupe (« ne touche pas à ça, tu seras malade »).',
+      q:'Pourquoi sommes-nous si sensibles à « ce que font les autres » et à « ce qu\'il faut craindre » ?', opts:['Parce qu\'apprendre des autres et écouter les alertes évitait des erreurs mortelles','Parce que nous sommes naïfs','Parce que les pubs existent depuis toujours'], good:0,
+      explain:'Copier ceux qui réussissent et croire les avertissements, c\'est apprendre vite et sans risque. La publicité imite ces deux signaux : « les gagnants l\'utilisent », « attention à ce problème ».',
+      help:'tu adoptes vite les bons conseils (se laver les mains, porter un casque) et tu apprends des meilleurs.',
+      trap:'tu peux te mettre à avoir « besoin » d\'un produit pour un problème qui n\'existait pas, ou qu\'on a exagéré.' },
+    cases:[
+      { s:'Une campagne explique comment se laver les mains pour éviter la grippe, et tu le fais.', a:'aide', why:'Les mêmes techniques (répétition, émotion, exemple) servent aussi à diffuser de bonnes habitudes.' },
+      { s:'Après une pub, tu trouves soudain que tes dents ne sont « pas assez blanches », alors qu\'elles sont normales.', a:'piege', why:'Un problème a été fabriqué, ou grossi, pour vendre la solution.' },
+      { s:'Un ami t\'envoie un lien : « Vite, plus que 2 places ! »', a:'piege', why:'La rareté pousse à décider sans réfléchir. Une vraie bonne affaire supporte 10 minutes de réflexion.' }
+    ],
+    ai:{ html:'<p>Une IA peut aujourd\'hui écrire des milliers de versions d\'une pub, tester laquelle fait le plus cliquer, et l\'adapter à ton profil.</p>',
+      q:'Que change l\'IA dans la fabrique à besoins ?', opts:['Elle trouve plus vite la ficelle qui marche sur chaque personne','Elle rend les pubs honnêtes','Rien du tout'], good:0,
+      explain:'Les ficelles restent les mêmes depuis 1920, mais l\'IA les teste et les personnalise à très grande échelle. Connaître les ficelles reste la meilleure défense.' },
+    ask:'Avec tes mots, en une phrase : comment repérer un besoin fabriqué ?'
+  });
+}
+
+/* =========================================================
+   ENQUÊTE FINALE : quel mécanisme est à l'œuvre ?
+   ========================================================= */
+const EF_M=['Pilote automatique','Prédiction','Détecteur de changement','Habituation','Conteur','Miroir flatteur','Radar à statut','Toujours plus','Instinct de meute','Esprit d\'équipe','Marchands d\'attention','Besoin fabriqué'];
+const EF_C=[
+  ['Après un mois en 3e, Lina ne remarque plus l\'odeur de la cantine.',3],
+  ['Un influenceur montre sa nouvelle voiture : ses abonnés regardent soudain la leur avec moins de plaisir.',7],
+  ['Tom est sûr d\'avoir lu « réunion lundi » alors que le message disait « mardi ».',1],
+  ['Interrogé sur sa mauvaise note, Sami explique avec assurance que « le prof l\'a dans le nez ».',4],
+  ['Dans un groupe de discussion, tout le monde valide une rumeur ; personne n\'ose demander la source.',8],
+  ['Une appli invente une « série de jours » à ne surtout pas perdre.',10],
+  ['Dans le match de quartier, chacun trouve que l\'arbitre favorise l\'autre équipe.',9],
+  ['En entrant dans la salle, tu sais tout de suite qui est le principal, sans l\'avoir jamais vu.',6]
+];
+function gFinal(){
+  partHead('🕵️','L\'enquête finale',0,0,'Huit situations de la vraie vie. Pour chacune, quel mécanisme du cerveau est à l\'œuvre ? Plusieurs réponses peuvent se défendre : choisis la plus évidente.');
+  let i=0, ok=0; const box=mk('div',null,null,main);
+  function q(){
+    if(i>=EF_C.length) return end();
+    const [s,a]=EF_C[i]; const opts=shuffle([a,...shuffle([...EF_M.keys()].filter(k=>k!==a)).slice(0,3)]);
+    box.innerHTML=''; choice(`${i+1}/${EF_C.length} · ${s}`,opts.map(k=>EF_M[k]),(k,fb)=>{ const g=opts[k]===a; if(g){ ok++; addPts(2); } fb.className='fb '+(g?'good':'info'); fb.innerHTML=g?'Bien vu !':`<span>Plutôt : <b>${EF_M[a]}</b>.</span>`; sendInt('final_'+(i+1),EF_M[opts[k]],g?'correct':'wrong'); nextBtn('Suivante →',()=>{ i++; q(); },box); },box);
+  }
+  function end(){
+    box.innerHTML=''; mk('div','card',`<p><b>${ok}/${EF_C.length}</b> mécanismes identifiés.</p><p>Tous ces mécanismes sont des <b>superpouvoirs</b> qui ont aidé nos ancêtres à survivre, et qui nous piègent parfois aujourd'hui. Personne n'y échappe : ni toi, ni ton prof, ni les IA, qui ont leurs propres biais.</p><p>La meilleure protection n'est pas d'être parfait : c'est d'écouter <b>ceux qui pensent autrement</b>. Un groupe varié repère les erreurs que chacun ne voit pas chez lui, comme la personne qui donnait la bonne réponse dans Pression du groupe.</p>`,box);
+    nextBtn('Retour au menu',menu);
+  }
+  q();
+}
+
+/* =========================================================
    JEUX À VENIR
    ========================================================= */
 function gWip(g){
@@ -628,16 +1415,16 @@ const PAIRS=['1 · Pilote automatique','2 · Seul le changement compte','3 · Le
 const GAMES=[
   {id:'homeo',e:'🌡️',t:'Survie homéostatique',d:'Garde ton survivant en vie : température, eau, sucre, stress. Puis laisse faire le pilote automatique… et les notifications.',fn:gHomeo},
   {id:'hallu',e:'👁️',t:'Hallucination contrôlée',d:'Zombie ou souche ? Silhouettes, lettres mélangées, tache aveugle, mot suivant : vois-tu vraiment le monde ?',fn:gHallu},
-  {id:'radar',e:'📡',t:'Radar',d:'Les zombies ne sont visibles que quand ils bougent. Trouve ce qui a changé… même très lentement.'},
-  {id:'bruit',e:'🔊',t:'Bruit de fond',d:'Repère les sons nouveaux. Et ce bruit qui ne s\'arrête jamais, tu l\'entends encore ?'},
-  {id:'confab',e:'🎭',t:'Confabulateur',d:'Choisis le survivant le plus fiable… puis explique ton choix.'},
-  {id:'miroir',e:'🪞',t:'Miroir flatteur',d:'Note-toi, note les autres, devine ce que pense la classe.'},
-  {id:'statut',e:'👑',t:'Détecteur de statut',d:'Qui est le chef ? En 43 millisecondes. Et dans les dialogues : qui monte, qui descend ?'},
-  {id:'plus',e:'🪙',t:'Toujours plus',d:'1 jeton pour toi et 0 pour l\'autre, ou 2 chacun ? Et cette ligne d\'arrivée qui recule…'},
-  {id:'groupe',e:'👥',t:'Pression du groupe',d:'Sept avatars répondent avant toi. Ils se trompent. Et toi ?'},
-  {id:'tribu',e:'🟦',t:'Ma tribu',d:'Une couleur tirée au hasard. Nous… et eux.'},
-  {id:'tycoon',e:'📺',t:'Attention Tycoon',d:'Dirige un média gratuit de 1833 à aujourd\'hui. Ce que tu vends, c\'est l\'attention.'},
-  {id:'besoins',e:'🏭',t:'Fabrique à besoins',d:'Crée un problème, vends la solution. Puis repère les ficelles dans de vraies pubs.'}
+  {id:'radar',e:'📡',t:'Radar',d:'Les zombies ne sont visibles que quand ils bougent. Trouve ce qui a changé… même très lentement.',fn:gRadar},
+  {id:'bruit',e:'🔊',t:'Bruit de fond',d:'Repère les sons nouveaux. Et ce bruit qui ne s\'arrête jamais, tu l\'entends encore ?',fn:gBruit},
+  {id:'confab',e:'🎭',t:'Confabulateur',d:'Choisis le survivant le plus fiable… puis explique ton choix.',fn:gConfab},
+  {id:'miroir',e:'🪞',t:'Miroir flatteur',d:'Note-toi, note les autres, devine ce que pense la classe.',fn:gMiroir},
+  {id:'statut',e:'👑',t:'Détecteur de statut',d:'Qui est le chef ? En un clin d\'œil. Et dans les dialogues : qui monte, qui descend ?',fn:gStatut},
+  {id:'plus',e:'🪙',t:'Toujours plus',d:'1 jeton pour toi et 0 pour l\'autre, ou 2 chacun ? Et cette ligne d\'arrivée qui recule…',fn:gPlus},
+  {id:'groupe',e:'👥',t:'Pression du groupe',d:'Sept avatars répondent avant toi. Ils se trompent. Et toi ?',fn:gGroupe},
+  {id:'tribu',e:'🟦',t:'Ma tribu',d:'Une couleur tirée au hasard. Nous… et eux.',fn:gTribu},
+  {id:'tycoon',e:'📺',t:'Attention Tycoon',d:'Dirige un média gratuit de 1833 à aujourd\'hui. Ce que tu vends, c\'est l\'attention.',fn:gTycoon},
+  {id:'besoins',e:'🏭',t:'Fabrique à besoins',d:'Crée un problème, vends la solution. Puis repère les ficelles dans de vraies pubs.',fn:gBesoins}
 ];
 // une paire s'ouvre quand les deux jeux d'avant ont leur découverte notée. Code prof : tout ouvert.
 const prevPair=i=>{ const p=Math.floor(i/2); return p?[GAMES[2*p-2],GAMES[2*p-1]]:[]; };
@@ -649,10 +1436,10 @@ function menu(){
     :`<button class="gcard${D.disc[g.id]?' done':''}" data-i="${i}"><span class="e">${g.e}</span><span class="t">${i+1} · ${g.t}</span><span class="d">${g.d}</span><span class="s${g.fn?'':' wip'}">${g.fn?(D.disc[g.id]?'✓ découverte notée':''):'🚧 en construction'}${D.best[g.id]&&g.id==='homeo'?` · record ${D.best[g.id]}`:''}</span></button>`;
   main.innerHTML=`<h2>🧠 Brain Exploration</h2>${D.prof?'<p class="fb good" style="margin:0 0 8px">🔑 Mode enseignant : tous les jeux sont ouverts.</p>':''}<p class="lead">Douze jeux pour explorer ton cerveau : ses superpouvoirs, ses pièges, et pourquoi il marche comme ça. Tout le monde tombe dans les pièges, c'est normal, et c'est justement intéressant. À la fin de chaque jeu, note ta découverte : on la reprendra en cours.</p>
     <div class="games">${GAMES.map((g,i)=>(i%2===0?`<div class="pairh">${PAIRS[i/2]}</div>`:'')+card(g,i)).join('')}
-    <div class="pairh">Final</div><button class="gcard final${allDone()||D.prof?'':' locked'}" id="final"><span class="e">🕵️</span><span class="t">L'enquête finale</span><span class="d">Des situations de la vraie vie : quel mécanisme est à l'œuvre ? Et pourquoi un groupe où l'on pense différemment se trompe moins.</span><span class="s ${allDone()||D.prof?'wip':'lk'}">${allDone()||D.prof?'🚧 en construction':'🔒 Termine les 12 jeux'}</span></button></div>
+    <div class="pairh">Final</div><button class="gcard final${allDone()||D.prof?'':' locked'}" id="final"><span class="e">🕵️</span><span class="t">L'enquête finale</span><span class="d">Des situations de la vraie vie : quel mécanisme est à l'œuvre ? Et pourquoi un groupe où l'on pense différemment se trompe moins.</span><span class="s ${allDone()||D.prof?'':'lk'}">${allDone()||D.prof?'':'🔒 Termine les 12 jeux'}</span></button></div>
     <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button><button class="btn" id="profb">${D.prof?'🔓 Quitter le mode enseignant':'🔑 Mode enseignant'}</button></div>${SCORM?'<p class="lead" style="font-size:13px">✅ Ta progression et tes découvertes sont enregistrées sur ÉLÉA.</p>':''}`;
   main.querySelectorAll('.gcard[data-i]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, g=GAMES[i]; if(isOpen(i)) (g.fn||(()=>gWip(g)))(); else shake(b); });
-  $('#final').onclick=()=>{ if(allDone()||D.prof) gWip({e:'🕵️',t:'L\'enquête finale',d:''}); else shake($('#final')); };
+  $('#final').onclick=()=>{ if(allDone()||D.prof) gFinal(); else shake($('#final')); };
   $('#notes').onclick=notes; $('#profb').onclick=profMode; scrollTo(0,0);
 }
 function profMode(){
