@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Brain Exploration</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v3 · 15/11/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v4 · 15/11/2026</div>
 <!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
 <button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 58px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
 <script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
@@ -696,9 +696,10 @@ function radarB(){
 // C : pendant qu'on attrape des étoiles, une case change de couleur très lentement
 function radarC(){
   partHead('📡','Radar',3,3,'Attrape les étoiles ⭐ qui apparaissent sur la carte, le plus vite possible (20 secondes).');
-  const COLS=['#4f7343','#5a6f8a','#7a6a4a','#6a4f73','#4f6f6f','#73604f'];
+  // la case part d'une couleur présente ailleurs et arrive sur une autre couleur déjà présente : aucune case n'est « unique » à la fin
+  const COLS=['#4f7343','#5a6f8a','#a8443c','#6a4f73','#4f6f6f','#b8873a'];
   const base=Array.from({length:16},(_,i)=>COLS[i%6]); shuffle(base);
-  const ci=randi(0,15), from=[79,115,67], to=[200,70,60];
+  const greens=[...base.keys()].filter(i=>base[i]==='#4f7343'), ci=pick(greens), from=[79,115,67], to=[168,68,60];
   const box=mk('div',null,`<div id="rc" style="position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:360px;margin:auto;padding:6px;border-radius:12px;background:#222"></div>`,main);
   const grid=$('#rc'); const cells=base.map(c=>{ const d=mk('div',null,'',grid); d.style.cssText=`aspect-ratio:1;border-radius:8px;background:${c};display:grid;place-items:center;font-size:30px`; return d; });
   cells[ci].style.background=`rgb(${from})`;
@@ -711,7 +712,7 @@ function radarC(){
   function ask(){
     hud.textContent=`⭐ ${stars} attrapées. Pendant ce temps, une case a complètement changé de couleur. Laquelle ? Touche-la.`;
     cells.forEach((c,i)=>{ c.style.cursor='pointer'; c.onclick=()=>{ cells.forEach(x=>x.onclick=null); cells[ci].style.outline='4px solid #fff'; if(i===ci){ addPts(5); hud.innerHTML='Bien vu ! <span class="lead">La plupart des gens ne la trouvent pas.</span>'; } else hud.innerHTML='C\'était la case entourée en blanc.';
-      mk('div','card',`<div class="row" style="justify-content:center;gap:16px"><div style="text-align:center"><div style="width:70px;height:70px;border-radius:8px;background:rgb(${from})"></div>au début</div><div style="text-align:center"><div style="width:70px;height:70px;border-radius:8px;background:rgb(${to})"></div>à la fin</div></div><p style="margin-top:10px">Elle est passée du vert au rouge sous tes yeux, mais <b>lentement</b>. Un changement assez lent ne déclenche pas l'alarme du cerveau.</p>`,main);
+      mk('div','card',`<div class="row" style="justify-content:center;gap:16px"><div style="text-align:center"><div style="width:70px;height:70px;border-radius:8px;background:rgb(${from})"></div>au début</div><div style="text-align:center"><div style="width:70px;height:70px;border-radius:8px;background:rgb(${to})"></div>à la fin</div></div><p style="margin-top:10px">Elle est passée du vert au rouge sous tes yeux, mais <b>lentement</b>. À la fin, rien ne la distinguait des autres cases rouges : seul le changement pouvait la trahir. Un changement assez lent ne déclenche pas l'alarme du cerveau.</p>`,main);
       toDisc(discRadar); }; });
   }
 }
