@@ -46,3 +46,8 @@ Il y a 12 jeux, en 6 paires. Une paire s'ouvre quand les deux jeux de la paire p
 - Chaque réponse est envoyée comme interaction, avec les identifiants suivants :
   - `<jeu>_revelation`, `_superpouvoir`, `_enqueteN` et `_ia`, accompagnés de correct / wrong ;
   - `<jeu>_phrase`, `_aide` et `_piege` pour les textes de l'élève.
+
+## Crédits photos (v6)
+
+- Visages du Confabulateur et visage neutre de Koulechov : Face Research Lab London Set, DeBruine & Jones (2017), CC BY 4.0, https://doi.org/10.6084/m9.figshare.5047666.v5
+- Soupe, cercueil, petite fille à l'ours et les 8 photos du Détecteur de statut : Flickr via Open Images, CC BY 2.0. Les auteurs sont crédités dans le jeu, sous chaque épreuve.
