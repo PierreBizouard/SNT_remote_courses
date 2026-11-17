@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,interactive-widget=resizes-content">
+<title>Print of the Dead</title>
+</head><body>
+<!-- version affichée : à augmenter à chaque mise à jour -->
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v1 · 08/11/2026</div>
+<button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 52px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
+<script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
+  var on=function(){ return d.fullscreenElement||d.webkitFullscreenElement; };
+  if(!(d.fullscreenEnabled||d.webkitFullscreenEnabled)) return;
+  b.hidden=false;
+  b.onclick=function(){ if(on()) (d.exitFullscreen||d.webkitExitFullscreen).call(d); else (e.requestFullscreen||e.webkitRequestFullscreen).call(e); };
+  var up=function(){ b.textContent=on()?'✕ quitter le plein écran':'⛶ plein écran'; };
+  d.addEventListener('fullscreenchange',up); d.addEventListener('webkitfullscreenchange',up);
+})();</script>
+<style>
+:root{--bg:#0c0e13;--panel:#161a23;--line:#2a3142;--txt:#e7ecf3;--mut:#8b96a8;--acc:#4ade80;--warn:#fbbf24;--bad:#f87171;--blue:#60a5fa;--code:#c4b5fd;--py1:#3b77b8;--py2:#ffd43b;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+code,.mono,input,pre{font-family:ui-monospace,"Cascadia Code",Consolas,monospace}
+code{background:#0006;border:1px solid var(--line);border-radius:5px;padding:0 4px;color:var(--code)}
+button{font:inherit;cursor:pointer;color:inherit}
+.app{display:flex;flex-direction:column;height:100dvh;max-width:1100px;margin:0 auto}
+header{display:flex;align-items:center;gap:8px;padding:12px 10px 6px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:16px;margin:0;color:var(--acc);letter-spacing:.5px;white-space:nowrap}
+header .sp{flex:1}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;white-space:nowrap}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 12px}
+.btn:hover{border-color:var(--acc)}
+.btn.ok{background:var(--acc);color:#05200f;border-color:var(--acc);font-weight:700}
+.main{flex:1;display:grid;grid-template-columns:1fr 250px;min-height:0}
+.arena{position:relative;overflow:hidden;background:
+  radial-gradient(ellipse at 50% 115%,#22301f 0,transparent 60%),
+  radial-gradient(circle at 82% 12%,#fff3 0 18px,transparent 19px),
+  linear-gradient(#0b1020,#131a14 85%);min-height:220px;touch-action:manipulation}
+.arena::before{content:"";position:absolute;left:0;right:0;bottom:0;height:46px;background:repeating-linear-gradient(90deg,#1b2418 0 30px,#18201a 30px 60px);border-top:2px dashed #f8717166}
+.m{position:absolute;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;max-width:34%;z-index:1;cursor:pointer;user-select:none}
+.m.tgt{z-index:3}
+.m .fr{background:#fff;color:#111;border-radius:10px;padding:4px 8px;font-size:13px;font-weight:600;text-align:center;box-shadow:0 2px 0 #0006;position:relative;line-height:1.25}
+.m .fr::after{content:"";position:absolute;bottom:-6px;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
+.m .fr small{display:block;font-size:10.5px;color:#666;font-weight:500}
+.m.tgt .fr{outline:3px solid var(--acc)}
+.m .hint{font:12px ui-monospace,monospace;color:var(--code);margin-top:3px;background:#000a;border-radius:6px;padding:1px 5px;white-space:nowrap}
+.m .bd{font-size:44px;line-height:1;margin-top:6px;filter:drop-shadow(0 4px 0 #0009);position:relative}
+.m.boss .bd{font-size:64px}
+.m .crown{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:28px}
+.m .hp{width:90px;height:7px;border-radius:4px;background:#0008;border:1px solid #fff4;margin-top:3px;overflow:hidden}
+.m .hp i{display:block;height:100%;background:var(--bad);transition:width .4s}
+.m .say{position:absolute;top:-26px;left:0;right:0;margin:auto;width:max-content;background:var(--warn);color:#211;font-size:12px;font-weight:700;padding:2px 7px;border-radius:9px;white-space:nowrap;animation:say 1.6s forwards;pointer-events:none}
+@keyframes say{0%{opacity:0;transform:scale(.6)}10%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+.m.dead{pointer-events:none;animation:die 1s forwards}
+.m.dead .fr,.m.dead .hint,.m.dead .hp{opacity:0;transition:opacity .2s}
+@keyframes die{0%{}30%{transform:translateX(-50%) scale(1.25)}100%{transform:translateX(-50%) translateY(-70px) scale(.8);opacity:0}}
+.m.wig .bd{animation:wg .45s}
+@keyframes wg{25%{transform:translateX(-7px) rotate(-8deg)}75%{transform:translateX(7px) rotate(8deg)}}
+#gun{position:absolute;left:50%;bottom:2px;width:52px;height:112px;margin-left:-26px;transform-origin:50% 88%;z-index:4;pointer-events:none;transition:transform .15s ease-out}
+#gun svg{width:100%;height:100%;overflow:visible}
+#gun .kick{transform-origin:50% 88%}
+#gun.fire .kick{animation:kick .18s}
+@keyframes kick{40%{transform:translateY(10px)}}
+#gun .mz{opacity:0;transform-origin:30px 0}
+#gun.fire .mz{animation:mz .16s}
+@keyframes mz{0%{opacity:1;transform:scale(.6)}100%{opacity:0;transform:scale(1.5)}}
+#gun .core{animation:core 1.6s infinite}
+@keyframes core{50%{opacity:.45}}
+.pj{position:absolute;left:0;top:0;z-index:5;pointer-events:none;font:700 15px ui-monospace,monospace;color:#eafff0;background:#0b3d1fcc;border:1px solid var(--acc);border-radius:7px;padding:1px 6px;white-space:nowrap;box-shadow:0 0 12px var(--acc)}
+.pj.miss{color:#ffe8e8;background:#4a1010cc;border-color:var(--bad);box-shadow:0 0 12px var(--bad)}
+.boom{position:absolute;font-size:46px;transform:translate(-50%,-50%);animation:bm .6s forwards;pointer-events:none;z-index:6}
+@keyframes bm{from{transform:translate(-50%,-50%) scale(.5)}to{transform:translate(-50%,-50%) scale(2);opacity:0}}
+.flash{position:absolute;inset:0;background:var(--bad);opacity:.35;animation:fd .4s forwards;pointer-events:none;z-index:7}
+@keyframes fd{to{opacity:0}}
+.hud{position:absolute;left:6px;bottom:6px;font-size:13px;z-index:4;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(50% - 40px)}
+.hud span{background:#000a;border:1px solid var(--line);border-radius:8px;padding:2px 7px}
+.hud2{position:absolute;right:6px;bottom:6px;font-size:11px;color:var(--mut);z-index:4;max-width:calc(50% - 40px);text-align:right}
+.side{border-left:1px solid var(--line);padding:10px;overflow:auto;background:var(--panel)}
+.side h3{margin:0 0 8px;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:1px}
+.mem{display:flex;flex-wrap:wrap;gap:8px}
+.mem .none{color:var(--mut);font-size:13px}
+.box{border:2px solid #8a6a3a;border-radius:6px;background:#2a2016;min-width:84px;max-width:100%;font-family:ui-monospace,monospace;font-size:12px;overflow:hidden}
+.box .nm{background:#8a6a3a;color:#fff;padding:1px 6px;font-weight:700}
+.box .vl{padding:4px 6px;font-size:14px;color:var(--warn);word-break:break-all}
+.box .vl.s{color:#9fe3b5}
+.box .ty{padding:0 6px 2px;color:var(--mut);font-size:10px}
+.box.fl{animation:fl .7s}
+@keyframes fl{0%{box-shadow:0 0 0 4px var(--acc);transform:scale(1.08)}}
+.bottom{border-top:1px solid var(--line);padding:6px 10px 8px;background:var(--panel)}
+.cons{font-family:ui-monospace,monospace;font-size:13px;height:4.4em;overflow:auto;margin-bottom:6px;white-space:pre-wrap}
+.cons .in{color:var(--mut)} .cons .out{color:#fff;font-weight:600} .cons .err{color:var(--bad)} .cons .tip{color:var(--warn)} .cons .good{color:var(--acc)}
+.inrow{display:flex;gap:6px;align-items:center}
+.inrow .pr{font-family:ui-monospace,monospace;color:var(--acc);font-weight:700}
+#in{flex:1;min-width:0;background:#0b0d12;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:16px;outline:none}
+#in:focus{border-color:var(--acc)}
+.sym{display:flex;gap:5px;margin-top:6px;overflow-x:auto;scrollbar-width:none}
+.sym button{flex:0 0 auto;background:#0b0d12;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:600 14px ui-monospace,monospace;color:var(--code)}
+.sym button.v{color:#e9c27a}
+.ov{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:50;padding:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:640px;width:100%;max-height:92dvh;overflow:auto;padding:16px 18px}
+.card h2{margin:0 0 8px;color:var(--acc)}
+.card p{margin:8px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+pre.py{background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;overflow:auto;margin:8px 0;color:#d6deeb;white-space:pre-wrap}
+pre.py .s{color:#9fe3b5} pre.py .c{color:var(--mut)} pre.py .f{color:var(--py2)} pre.py .n{color:#f9a8d4}
+.ms{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.mb{display:flex;align-items:center;gap:10px;text-align:left;background:#0b0d12;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.mb:hover:not(:disabled){border-color:var(--acc)}
+.mb:disabled{opacity:.5;cursor:not-allowed}
+.mb .e{font-size:28px}
+.mb small{display:block;color:var(--mut);font-size:12.5px}
+.mb .st{margin-left:auto;color:var(--warn);white-space:nowrap}
+.tbl{border-collapse:collapse;width:100%;font-size:13px}
+.tbl td{border-top:1px solid var(--line);padding:5px 6px;vertical-align:top}
+.tbl td:last-child{font-family:ui-monospace,monospace;color:var(--code)}
+@media (max-width:760px){
+  header{padding:12px 8px 5px;gap:5px} header h1{font-size:14px} .pill{font-size:12px;padding:2px 7px} .btn{padding:5px 9px}
+  .main{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  .side{border-left:0;border-top:1px solid var(--line);padding:5px 8px;max-height:19dvh}
+  .side h3{display:none}
+  .mem{flex-wrap:nowrap;overflow-x:auto} .box{flex:0 0 auto}
+  .m .fr{font-size:11.5px;padding:3px 6px} .m .bd{font-size:34px} .m.boss .bd{font-size:48px} .m .hint{font-size:11px}
+  .cons{height:4.3em;font-size:12px} #b-cheat .lbl{display:none}
+}
+@media (max-width:520px){ header h1 .lbl{display:none}  #gun{width:42px;height:92px;margin-left:-21px}
+}
+</style>
+
+<div class="app">
+  <header>
+    <h1>🧟<span class="lbl"> PRINT OF THE DEAD</span></h1>
+    <span class="pill" id="h-w">Menu</span>
+    <span class="pill" id="h-l"></span>
+    <span class="pill" id="h-s">0 pt</span>
+    <span class="sp"></span>
+    <button class="btn" id="b-cheat" title="Antisèche">📜<span class="lbl"> Antisèche</span></button>
+    <button class="btn" id="b-menu" title="Menu">☰</button>
+  </header>
+  <div class="main">
+    <div class="arena" id="ar">
+      <div id="gun"><svg viewBox="0 0 60 130" aria-label="Le Printeur 3000">
+        <g class="kick">
+          <g class="mz"><polygon points="30,-30 36,-10 50,-16 39,-3 54,4 34,2 30,14 26,2 6,4 21,-3 10,-16 24,-10" fill="#fde047"/><polygon points="30,-18 33,-6 42,-8 34,0 30,8 26,0 18,-8 27,-6" fill="#fff"/></g>
+          <rect x="21" y="0" width="18" height="9" rx="2" fill="#4b5563" stroke="#111" stroke-width="1.5"/>
+          <rect x="23" y="7" width="14" height="50" rx="3" fill="#9ca3af" stroke="#111" stroke-width="1.5"/>
+          <rect x="25" y="14" width="10" height="3" rx="1" fill="#4b5563"/><rect x="25" y="21" width="10" height="3" rx="1" fill="#4b5563"/><rect x="25" y="28" width="10" height="3" rx="1" fill="#4b5563"/>
+          <rect x="12" y="50" width="36" height="42" rx="7" fill="#3b77b8" stroke="#111" stroke-width="1.5"/>
+          <rect x="12" y="62" width="36" height="7" fill="#ffd43b"/>
+          <circle class="core" cx="30" cy="80" r="5" fill="#4ade80" stroke="#0a3" stroke-width="1"/>
+          <text x="30" y="58.5" text-anchor="middle" font-family="monospace" font-weight="700" font-size="6.5" fill="#fff">print()</text>
+          <path d="M18 90 L42 90 L46 127 Q46 129 44 129 L24 129 Q21 129 21 127 Z" fill="#ffd43b" stroke="#111" stroke-width="1.5"/>
+          <path d="M25 98h15M25 105h16M26 112h16M26 119h17" stroke="#b8901a" stroke-width="2"/>
+          <path d="M12 86 Q2 92 6 104 Q9 110 18 106" fill="none" stroke="#111" stroke-width="3"/>
+          <rect x="9" y="92" width="5" height="9" rx="2" fill="#4b5563"/>
+        </g></svg></div>
+      <div class="hud" id="hud"></div>
+      <div class="hud2" id="hud2"></div>
+    </div>
+    <div class="side"><h3>🧠 La mémoire de Python (les boîtes)</h3><div class="mem" id="mem"></div></div>
+  </div>
+  <div class="bottom">
+    <div class="cons" id="cons"></div>
+    <div class="inrow"><span class="pr">&gt;&gt;&gt;</span><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="tape ton code Python ici"><button class="btn ok" id="go" aria-label="Valider">⏎</button></div>
+    <div class="sym" id="sym"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rand=(a,b)=>a+Math.random()*(b-a), randi=(a,b)=>Math.floor(rand(a,b+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
+const COARSE=matchMedia('(pointer:coarse)').matches;
+const KEY='snt-print-dead';
+let D={stars:[],best:[],prof:false};
+try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&Array.isArray(s.stars)) D=Object.assign(D,s); }catch(e){}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(D)); }catch(e){} }
+function lev(a,b){ const d=Array.from({length:a.length+1},(_,i)=>[i]); for(let j=1;j<=b.length;j++) d[0][j]=j; for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[a.length][b.length]; }
+
+/* =====================================================================
+   Mini-interpréteur Python (une ligne) : print, variables, calculs, textes
+   ===================================================================== */
+class PyErr extends Error{ constructor(type,msg,tip){ super(msg); this.type=type; this.tip=tip||''; } }
+class PyFloat{ constructor(v){ this.v=v; } }
+class Builtin{ constructor(name,fn){ this.name=name; this.fn=fn; } }
+class PyType{ constructor(n){ this.n=n; } }
+let V={};
+const SE=(m,t)=>new PyErr('SyntaxError',m,t);
+const TE=(m,t)=>new PyErr('TypeError',m,t);
+function tname(v){ if(typeof v==='string') return 'str'; if(typeof v==='boolean') return 'bool'; if(typeof v==='number') return 'int'; if(v instanceof PyFloat) return 'float'; if(v===null) return 'NoneType'; if(v instanceof Builtin) return 'builtin_function_or_method'; if(v instanceof PyType) return 'type'; return 'object'; }
+function fstr(x){ if(!isFinite(x)) return x>0?'inf':'-inf'; if(Number.isInteger(x)&&Math.abs(x)<1e16) return x.toFixed(1); return String(x); }
+function pstr(v){ if(typeof v==='string') return v; if(typeof v==='boolean') return v?'True':'False'; if(typeof v==='number') return String(v); if(v instanceof PyFloat) return fstr(v.v); if(v===null) return 'None'; if(v instanceof Builtin) return `<built-in function ${v.name}>`; if(v instanceof PyType) return `<class '${v.n}'>`; return String(v); }
+function pyrepr(v){ if(typeof v==='string') return v.includes("'")&&!v.includes('"')?`"${v}"`:`'${v.replace(/'/g,"\\'")}'`; return pstr(v); }
+const isNum=x=>typeof x==='number'||typeof x==='boolean'||x instanceof PyFloat;
+const nv=x=>x instanceof PyFloat?x.v:+x;
+const same=(a,b)=>typeof a==='string'||typeof b==='string'?a===b:isNum(a)&&isNum(b)?nv(a)===nv(b):a===b;
+
+const TIP_CONCAT='On ne peut pas coller (+) un texte et un nombre. Utilise une virgule : print("Il reste", balles) ou transforme le nombre en texte : str(balles).';
+function binop(op,a,b){
+  if(op==='+'){
+    if(typeof a==='string'&&typeof b==='string'){ if(a.length+b.length>5000) throw new PyErr('Oups','texte trop long pour ce jeu'); return a+b; }
+    if(typeof a==='string') throw TE(`can only concatenate str (not "${tname(b)}") to str`,TIP_CONCAT);
+    if(typeof b==='string') throw TE(`unsupported operand type(s) for +: '${tname(a)}' and 'str'`,TIP_CONCAT);
+  }
+  if(op==='*'&&(typeof a==='string'||typeof b==='string')){
+    const [s,k]=typeof a==='string'?[a,b]:[b,a];
+    if(typeof k==='number'||typeof k==='boolean'){ const n=Math.max(0,+k); if(s.length*n>5000) throw new PyErr('Oups','texte beaucoup trop long pour ce jeu !'); return s.repeat(n); }
+    throw TE(`can't multiply sequence by non-int of type '${tname(k)}'`, typeof k==='string'?'On ne multiplie pas deux textes. Un texte × un nombre entier le répète : cri * 3.':'Un texte se répète un nombre ENTIER de fois : cri * 3.');
+  }
+  if(!isNum(a)||!isNum(b)) throw TE(`unsupported operand type(s) for ${op}: '${tname(a)}' and '${tname(b)}'`, typeof a==='string'||typeof b==='string'?'On ne fait pas de calcul avec du texte. "5" entre guillemets est un texte ; 5 sans guillemets est un nombre.':'Ce calcul n\'a pas de sens pour Python.');
+  const fl=a instanceof PyFloat||b instanceof PyFloat, x=nv(a), y=nv(b);
+  const ZD=m=>new PyErr('ZeroDivisionError',m,'On ne peut pas diviser par zéro, même pour tuer un zombie.');
+  let r;
+  switch(op){
+    case '+': r=x+y; break; case '-': r=x-y; break; case '*': r=x*y; break;
+    case '/': if(y===0) throw ZD('division by zero'); return new PyFloat(x/y);
+    case '//': if(y===0) throw ZD('integer division or modulo by zero'); r=Math.floor(x/y); break;
+    case '%': if(y===0) throw ZD('integer modulo by zero'); r=x-y*Math.floor(x/y); break;
+    case '**': r=x**y; if(!fl&&y<0) return new PyFloat(r); break;
+  }
+  return fl?new PyFloat(r):r;
+}
+function cmpop(op,a,b){
+  if(op==='=='||op==='!='){ const e=same(a,b); return op==='=='?e:!e; }
+  const bothS=typeof a==='string'&&typeof b==='string';
+  if(!bothS&&!(isNum(a)&&isNum(b))) throw TE(`'${op}' not supported between instances of '${tname(a)}' and '${tname(b)}'`,'On ne compare pas un texte et un nombre.');
+  const x=bothS?a:nv(a), y=bothS?b:nv(b);
+  return op==='<'?x<y:op==='>'?x>y:op==='<='?x<=y:x>=y;
+}
+function argc(name,args,n){ if(args.length!==n) throw TE(`${name}() takes exactly ${n===1?'one argument':n+' arguments'} (${args.length} given)`); }
+const BI={
+  print:new Builtin('print',(a,kw,c)=>{ const sep=kw.sep!==undefined?pstr(kw.sep):' '; c.out.push(a.map(pstr).join(sep)); return null; }),
+  len:new Builtin('len',(a)=>{ argc('len',a,1); if(typeof a[0]==='string') return [...a[0]].length; throw TE(`object of type '${tname(a[0])}' has no len()`,'len( ) compte les caractères d\'un TEXTE. Un nombre n\'a pas de longueur.'); }),
+  str:new Builtin('str',(a)=>{ argc('str',a,1); return pstr(a[0]); }),
+  int:new Builtin('int',(a)=>{ argc('int',a,1); const x=a[0]; if(typeof x==='string'){ if(/^\s*[+-]?\d+\s*$/.test(x)) return parseInt(x,10); throw new PyErr('ValueError',`invalid literal for int() with base 10: ${pyrepr(x)}`,'Ce texte ne contient pas un nombre entier.'); } if(isNum(x)) return Math.trunc(nv(x)); throw TE(`int() argument must be a string or a number, not '${tname(x)}'`); }),
+  float:new Builtin('float',(a)=>{ argc('float',a,1); const x=a[0]; if(typeof x==='string'){ const f=parseFloat(x); if(/^\s*[+-]?(\d+\.?\d*|\.\d+)\s*$/.test(x)) return new PyFloat(f); throw new PyErr('ValueError',`could not convert string to float: ${pyrepr(x)}`); } if(isNum(x)) return new PyFloat(nv(x)); throw TE(`float() argument must be a string or a real number, not '${tname(x)}'`); }),
+  type:new Builtin('type',(a)=>{ argc('type',a,1); return new PyType(tname(a[0])); }),
+  abs:new Builtin('abs',(a)=>{ argc('abs',a,1); if(!isNum(a[0])) throw TE(`bad operand type for abs(): '${tname(a[0])}'`); return a[0] instanceof PyFloat?new PyFloat(Math.abs(a[0].v)):Math.abs(+a[0]); }),
+  round:new Builtin('round',(a)=>{ if(!a.length||!isNum(a[0])) throw TE('round() attend un nombre'); if(a.length>1){ const p=10**nv(a[1]); return new PyFloat(Math.round(nv(a[0])*p)/p); } return Math.round(nv(a[0])); }),
+  max:new Builtin('max',(a)=>{ if(a.length<2) throw TE('max() attend au moins deux valeurs ici'); return a.reduce((m,x)=>cmpop('>',x,m)?x:m); }),
+  min:new Builtin('min',(a)=>{ if(a.length<2) throw TE('min() attend au moins deux valeurs ici'); return a.reduce((m,x)=>cmpop('<',x,m)?x:m); }),
+  input:new Builtin('input',()=>{ throw new PyErr('Oups','input() attend que quelqu\'un tape au clavier… pas pendant une attaque de zombies !','On verra input( ) plus tard. Ici, écris directement la valeur.'); })
+};
+const KW=new Set(['if','else','elif','for','while','def','return','import','from','class','and','or','not','in','is','lambda','with','try','except','pass','break','continue','global','del','assert','yield','raise','as','finally','nonlocal']);
+
+function tokenize(s){
+  if(/^[ \t]+\S/.test(s)) throw new PyErr('IndentationError','unexpected indent','Pas d\'espace au tout début de la ligne : en Python, le décalage (l\'indentation) a un sens.');
+  const T=[]; let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(c===' '||c==='\t'){ i++; continue; }
+    if(c==='#') break;
+    let f=false;
+    if((c==='f'||c==='F')&&(s[i+1]==='"'||s[i+1]==="'")){ f=true; i++; }
+    const q=s[i];
+    if(q==='"'||q==="'"){
+      let j=i+1, v='';
+      while(j<s.length&&s[j]!==q){ if(s[j]==='\\'&&j+1<s.length){ const e=s[j+1]; v+=e==='n'?'\n':e==='t'?'\t':e; j+=2; } else { v+=s[j]; j++; } }
+      if(j>=s.length) throw SE('unterminated string literal (detected at line 1)','Un guillemet a été ouvert mais jamais fermé : un texte commence ET finit par un guillemet, comme "LUNDI".');
+      T.push({k:f?'fstr':'str',v}); i=j+1; continue;
+    }
+    if(/[0-9]/.test(c)||(c==='.'&&/[0-9]/.test(s[i+1]||''))){
+      const m=/^\d*\.?\d*/.exec(s.slice(i))[0], after=s[i+m.length]||'';
+      if(/[\p{L}_]/u.test(after)) throw SE('invalid decimal literal','Un nom de variable ne commence jamais par un chiffre (écris ail2, pas 2ail). Et pour multiplier, il faut l\'étoile : 2 * ail.');
+      if(after===',') { /* ok : virgule entre deux arguments */ }
+      T.push({k:'num',v:m.includes('.')?new PyFloat(parseFloat(m)):parseInt(m,10)}); i+=m.length; continue;
+    }
+    if(/[\p{L}_]/u.test(c)){ const m=/^[\p{L}_][\p{L}\p{N}_]*/u.exec(s.slice(i))[0]; T.push({k:'name',v:m}); i+=m.length; continue; }
+    const two=s.substr(i,2);
+    if(['+=','-=','*=','/=','==','!=','<=','>=','//','**'].includes(two)){ T.push({k:'op',v:two}); i+=2; continue; }
+    if('+-*/%()=,<>:[].{}'.includes(c)){ T.push({k:'op',v:c}); i++; continue; }
+    const code='U+'+c.codePointAt(0).toString(16).toUpperCase().padStart(4,'0');
+    let tip='Ce caractère ne fait pas partie du langage Python.';
+    if('«»“”„'.includes(c)) tip='Utilise les guillemets droits " (touche 3 du clavier), pas les guillemets « » ou “ ”.';
+    else if(c==='×') tip='En Python, la multiplication s\'écrit avec une étoile : 6 * 7.';
+    else if(c==='÷') tip='En Python, la division s\'écrit avec / : 10 / 2.';
+    else if(c===';') tip='Pas besoin de point-virgule à la fin d\'une ligne en Python.';
+    else if(c==='!') tip='Le point d\'exclamation va DANS le texte, entre les guillemets : print("BOUH !").';
+    throw SE(`invalid character '${c}' (${code})`,tip);
+  }
+  T.push({k:'end'}); return T;
+}
+
+function parse(T){
+  let i=0;
+  const op=v=>T[i].k==='op'&&T[i].v===v;
+  const NOTCLOSED=()=>SE("'(' was never closed",'Une parenthèse a été ouverte mais jamais fermée : ajoute ) à la fin.');
+  if(T[0].k==='end') return {t:'empty'};
+  for(const t of T) if(t.k==='name'&&KW.has(t.v)) throw new PyErr('Patience',`« ${t.v} » est bien un mot de Python, mais il n'est pas au programme de ce niveau.`,'Ici on utilise seulement print( ), les variables (nom = valeur) et les calculs.');
+  if(T[0].k==='name'&&T[0].v==='print'&&T[1].k!=='end'&&!(T[1].k==='op'&&['(','=','+=','-=','*=','/=','.'].includes(T[1].v)))
+    throw SE("Missing parentheses in call to 'print'. Did you mean print(...)?",'En Python, print a besoin de parenthèses : print("LUNDI").');
+  if(T[0].k==='name'&&T[1].k==='op'&&['=','+=','-=','*=','/='].includes(T[1].v)){
+    const n=T[0].v, o=T[1].v; i=2;
+    if(T[i].k==='end') throw SE('invalid syntax',`Il manque la valeur après le ${o} : par exemple ${n} ${o} 3`);
+    const e=expr(); endCheck(); return {t:'assign',n,op:o,e};
+  }
+  const e=expr();
+  if(op('=')){ const kind=['num','str','const','fstr'].includes(e.t)?'literal':e.t==='call'?'function call':'expression';
+    throw SE(`cannot assign to ${kind} here. Maybe you meant '==' instead of '='?`,'Le = range la valeur de DROITE dans la boîte de GAUCHE. À gauche, il faut un NOM de variable : ail = 3 (et pas 3 = ail).'); }
+  endCheck(); return {t:'expr',e};
+
+  function endCheck(){
+    if(T[i].k==='end') return;
+    if(op(')')) throw SE("unmatched ')'",'Il y a une parenthèse fermante de trop.');
+    if(T[0].k==='name'&&T[1].k==='name') throw SE('invalid syntax','Pas d\'espace dans un nom de variable : écris mon_arme (avec un tiret bas _), pas mon arme.');
+    throw SE('invalid syntax','Python ne comprend pas cette ligne. Vérifie les guillemets, les parenthèses et les opérateurs (+ - * /).');
+  }
+  function expr(){ let a=arith(); if(T[i].k==='op'&&['==','!=','<','>','<=','>='].includes(T[i].v)){ const o=T[i++].v; a={t:'cmp',op:o,a,b:arith()}; } return a; }
+  function arith(){ let a=term(); while(op('+')||op('-')){ const o=T[i++].v; a={t:'bin',op:o,a,b:term()}; } return a; }
+  function term(){ let a=unary(); while(op('*')||op('/')||op('//')||op('%')){ const o=T[i++].v; a={t:'bin',op:o,a,b:unary()}; } return a; }
+  function unary(){ if(op('-')){ i++; return {t:'neg',a:unary()}; } if(op('+')){ i++; return unary(); } return power(); }
+  function power(){ const a=primary(); if(op('**')){ i++; return {t:'bin',op:'**',a,b:unary()}; } return a; }
+  function primary(){
+    const t=T[i];
+    if(t.k==='num'){ i++; return {t:'num',v:t.v}; }
+    if(t.k==='str'||t.k==='fstr'){ let v='', f=false; while(T[i].k==='str'||T[i].k==='fstr'){ v+=T[i].v; f=f||T[i].k==='fstr'; i++; } return {t:f?'fstr':'str',v}; }
+    if(t.k==='name'){
+      i++;
+      if(t.v==='True'||t.v==='False'||t.v==='None') return {t:'const',v:t.v==='True'?true:t.v==='False'?false:null};
+      let n={t:'name',n:t.v};
+      if(op('.')) throw new PyErr('Patience','Le point (objet.méthode) sert aux objets : c\'est le niveau 2, « Python of the Dead » !','Ici, pas de point : juste print( ), des variables et des calculs.');
+      if(op('[')) throw new PyErr('Patience','Les crochets [ ] (listes) sont pour le niveau 2.','');
+      while(op('(')){
+        i++; const args=[], kw={};
+        while(!op(')')){
+          if(T[i].k==='end') throw NOTCLOSED();
+          if(T[i].k==='name'&&T[i+1].k==='op'&&T[i+1].v==='='){ const k=T[i].v; i+=2; kw[k]=expr(); }
+          else args.push(expr());
+          if(op(',')){ i++; continue; }
+          if(op(')')) break;
+          if(T[i].k==='end') throw NOTCLOSED();
+          throw SE('invalid syntax. Perhaps you forgot a comma?','Entre deux éléments dans les parenthèses, il faut une virgule (ou un + pour coller deux textes).');
+        }
+        i++; n={t:'call',f:n,args,kw};
+      }
+      return n;
+    }
+    if(op('(')){ i++; if(T[i].k==='end') throw NOTCLOSED(); const e=expr(); if(T[i].k==='end') throw NOTCLOSED(); if(!op(')')) throw SE('invalid syntax. Perhaps you forgot a comma?','Il manque une virgule ou un opérateur.'); i++; return e; }
+    if(t.k==='end') throw SE('invalid syntax','La ligne s\'arrête trop tôt : il manque quelque chose à la fin (un nombre, un texte, une parenthèse ?).');
+    if(op(')')) throw SE("unmatched ')'",'Il y a une parenthèse fermante de trop.');
+    if(op('[')) throw new PyErr('Patience','Les crochets [ ] (listes) sont pour le niveau 2.','');
+    throw SE('invalid syntax','Python ne comprend pas cette ligne. Vérifie les guillemets, les parenthèses et les opérateurs.');
+  }
+}
+
+function ev(n,c){
+  switch(n.t){
+    case 'num': case 'str': case 'const': return n.v;
+    case 'fstr': return n.v.replace(/\{([^{}]*)\}/g,(_,e)=>{ const st=parse(tokenize(e.trim())); if(st.t!=='expr') throw SE('f-string: invalid syntax'); return pstr(ev(st.e,c)); });
+    case 'name': if(Object.prototype.hasOwnProperty.call(V,n.n)) return V[n.n]; if(BI[n.n]) return BI[n.n]; if(n.n==='str'||n.n==='int') return BI[n.n]; nameErr(n.n);
+    case 'neg': { const a=ev(n.a,c); if(!isNum(a)) throw TE(`bad operand type for unary -: '${tname(a)}'`); return a instanceof PyFloat?new PyFloat(-a.v):-a; }
+    case 'bin': return binop(n.op,ev(n.a,c),ev(n.b,c));
+    case 'cmp': return cmpop(n.op,ev(n.a,c),ev(n.b,c));
+    case 'call': {
+      const f=ev(n.f,c);
+      if(!(f instanceof Builtin)){ if(f instanceof PyType) return BI[f.n]?BI[f.n].fn(n.args.map(a=>ev(a,c)),{},c):null;
+        throw TE(`'${tname(f)}' object is not callable`,`${n.f.n||'Cette valeur'} est une boîte qui contient ${pyrepr(f)}, pas une commande : on ne met pas de parenthèses après.`); }
+      const kw={}; for(const k in n.kw) kw[k]=ev(n.kw[k],c);
+      return f.fn(n.args.map(a=>ev(a,c)),kw,c);
+    }
+  }
+  throw SE('invalid syntax');
+}
+let screenTexts=()=>[], screenVars=()=>[];
+function nameErr(n){
+  const cands=[...Object.keys(V),...Object.keys(BI)];
+  const ci=cands.find(k=>k!==n&&k.toLowerCase()===n.toLowerCase());
+  const close=ci||cands.map(k=>[k,lev(k,n)]).filter(x=>x[1]<=(n.length<3?1:2)).sort((a,b)=>a[1]-b[1]).map(x=>x[0])[0];
+  let msg=`name '${n}' is not defined`+(close?`. Did you mean: '${close}'?`:''), tip;
+  const low=n.toLowerCase();
+  if(screenVars().includes(n)) tip=`La boîte ${n} n'existe pas encore : crée-la d'abord avec ${n} = … (regarde la mémoire de Python).`;
+  else if(screenTexts().some(w=>w.toLowerCase().split(/\s+/).includes(low))) tip=`Sans guillemets, Python cherche une boîte (une variable) appelée ${n}… qui n'existe pas. Pour du texte, mets des guillemets : "${n}".`;
+  else if(ci) tip=`Python fait la différence entre majuscules et minuscules : écris ${ci}.`;
+  else if(close) tip=`Faute de frappe ? Python connaît ${close}.`;
+  else tip=`La boîte ${n} n'existe pas encore. Crée-la d'abord (${n} = …), ou mets des guillemets si c'est du texte.`;
+  throw new PyErr('NameError',msg,tip);
+}
+function exec(src){
+  const st=parse(tokenize(src));
+  const c={src,st,out:[],before:Object.assign({},V),assigned:null,aug:false,isPrint:false,echo:undefined};
+  if(st.t==='empty') return c;
+  if(st.t==='assign'){
+    if(BI[st.n]) throw new PyErr('Oups',`tu allais écraser ${st.n} !`,`Python te laisserait faire, mais ensuite ${st.n}( ) ne marcherait plus. Choisis un autre nom de variable.`);
+    let v=ev(st.e,c);
+    if(st.op!=='='){ if(!(st.n in V)) nameErr(st.n); v=binop(st.op[0],V[st.n],v); }
+    V[st.n]=v; c.assigned=st.n; c.aug=st.op!=='='; c.rhs=st.e;
+  } else {
+    const v=ev(st.e,c);
+    c.isPrint=st.e.t==='call'&&st.e.f.t==='name'&&st.e.f.n==='print';
+    if(v!==null) c.echo=pyrepr(v);
+  }
+  return c;
+}
+function uses(node,n){ if(!node||typeof node!=='object') return false; if(node.t==='name'&&node.n===n) return true; if(node.t==='fstr') return new RegExp('\\{[^}]*\\b'+n+'\\b').test(node.v); return Object.values(node).some(x=>Array.isArray(x)?x.some(y=>uses(y,n)):typeof x==='object'&&x!==null&&uses(x,n)); }
+const usesIn=(c,n)=>uses(c.st,n)||(c.aug&&c.assigned===n);
+const printed=c=>c.out.join('\n');
+
+/* =====================================================================
+   Les tâches : une phrase en français, une ligne modèle, une vérification
+   par l'EFFET (ce qui est affiché, ce que contient la mémoire)
+   ===================================================================== */
+function tText(fr,w){ return {fr,code:`print("${w}")`,ok(c){
+  if(!c.isPrint) return false; const o=printed(c);
+  if(o===w) return true;
+  if(o.trim()===w) return 'Attention aux espaces : tout ce qui est entre les guillemets est affiché, même les espaces.';
+  if(o.toLowerCase()===w.toLowerCase()) return `Presque ! Python fait la différence entre majuscules et minuscules : il faut exactement ${w}`;
+  return false; }}; }
+function tNum(fr,n){ return {fr,code:`print(${n})`,ok(c){ return c.isPrint&&printed(c)===String(n); }}; }
+function tCalc(fr,a,o,b){ const r=o==='*'?a*b:o==='+'?a+b:a-b; return {fr,code:`print(${a} ${o} ${b})`,ok(c){
+  if(!c.isPrint) return false; const p=printed(c);
+  if(p===String(r)) return true;
+  if(p.replace(/\s/g,'')===`${a}${o}${b}`) return `Entre guillemets, Python ne calcule pas : il recopie le texte. Enlève les guillemets : print(${a} ${o} ${b})`;
+  return false; }}; }
+function tSet(fr,v,val){ const code=`${v} = ${typeof val==='string'?'"'+val+'"':val}`; return {fr,code,v,ok(c){
+  if(c.assigned===v&&same(V[v],val)&&typeof V[v]===typeof val) return true;
+  if(c.assigned===v&&typeof val==='number'&&typeof V[v]==='string'&&V[v]===String(val)) return `"${val}" entre guillemets, c'est du texte. Pour un nombre, pas de guillemets : ${code}`;
+  if(c.assigned&&c.assigned!==v&&same(V[c.assigned],val)) return `Bonne valeur, mais mauvaise boîte : la variable doit s'appeler ${v}.`;
+  if(c.assigned===v&&typeof val==='string'&&typeof V[v]==='string'&&V[v].toLowerCase()===val.toLowerCase()) return `Presque : majuscules et minuscules comptent. ${code}`;
+  if(c.isPrint&&printed(c)===String(val)) return `Là tu as tiré, mais il fallait RANGER la valeur dans la boîte ${v} : ${code}`;
+  return false; }}; }
+function tShowVar(fr,v){ return {fr,code:`print(${v})`,ok(c){
+  if(!c.isPrint) return false;
+  if(usesIn(c,v)&&printed(c)===pstr(V[v])) return true;
+  if(printed(c)===v) return `Avec des guillemets, tu tires le MOT « ${v} » 🙃. Sans guillemets, tu tires ce qu'il y a DANS la boîte : print(${v})`;
+  return false; }}; }
+function tFire(fr,v,want){ return {fr,code:`print(${v})`,ok(c){
+  if(!c.isPrint) return false;
+  if(usesIn(c,v)&&printed(c)===want) return true;
+  if(printed(c)===v) return `Tu as tiré le MOT « ${v} »… Le monstre rigole. Sans guillemets, tu tires le CONTENU de la boîte : print(${v})`;
+  if(usesIn(c,v)) return `La boîte ${v} contient ${pyrepr(V[v])}, pas "${want}". Range d'abord la bonne valeur : ${v} = "${want}"`;
+  if(printed(c)===want) return `Ce monstre exige que tu tires avec la boîte ${v} : print(${v})`;
+  return false; }}; }
+function tCalcVar(fr,v,code,f,need){ return {fr,code,ok(c){
+  if(c.assigned!==v) return false;
+  const b=c.before[v]; if(!isNum(b)) return false;
+  const want=f(nv(b)); if(!(isNum(V[v])&&Math.abs(nv(V[v])-want)<1e-9)) return false;
+  if(!usesIn(c,v)) return `Le loup-garou a vu que tu as fait le calcul de tête 😏 Laisse Python calculer avec la boîte : ${code}`;
+  return true; }}; }
+function tPrintExpr(fr,code,want,need){ return {fr,code,ok(c){
+  if(!c.isPrint) return false; const w=want();
+  if(printed(c)!==w) { if(need.length&&need.every(n=>usesIn(c,n))&&printed(c).replace(/\s/g,'')===w.replace(/\s/g,'')) return 'Presque : regarde les espaces ! Dans "Salut " l\'espace est avant le guillemet fermant.'; return false; }
+  const miss=need.filter(n=>!usesIn(c,n));
+  if(miss.length) return `Bonne réponse, mais ce monstre veut que tu utilises la boîte ${miss.join(' et ')} : ${code}`;
+  return true; }}; }
+
+/* ---------------- monstres ---------------- */
+const KIND={
+  zombie:{em:['🧟','🧟‍♂️','🧟‍♀️'],dead:'😵',msg:()=>pick(['😵 Le zombie s\'évanouit.','😵 Trop dur pour lui : il retourne se coucher.','😵 Zombie KO !'])},
+  squel:{em:['💀'],dead:'🦴',msg:()=>'🦴 Le squelette tombe en morceaux.'},
+  vamp:{em:['🧛','🧛‍♂️','🧛‍♀️'],dead:'🦇',msg:()=>'🦇 Le vampire se change en chauve-souris et s\'enfuit !'},
+  ghost:{em:['👻'],dead:'💨',msg:()=>'💨 On a dit son nom : le fantôme s\'évapore !'},
+  wolf:{em:['🐺'],dead:'🐶',msg:()=>'🐶 Le loup-garou redevient un gentil toutou.'},
+  boss:{em:['🧟‍♂️'],dead:'👑',msg:()=>'👑 Bernard, roi des zombies, est vaincu !'}
+};
+const WORDS=['LUNDI','DEVOIRS','BROCOLI','INTERRO','PISCINE','PAS DE WIFI','RANGE TA CHAMBRE','BATTERIE 1%','SHAMPOING','BISOU','salade','Bonne nuit','EPINARDS','REVEIL'];
+const NAMES=['Kevin','Brenda','Gaspard','Jean-Michel','Ghislaine','Bernadette','Dylan','Josiane'];
+const CRIS=['AAAH','GRRR','OUGA','MIAOU','BEEE','HOUHOU'];
+const ARMES=[['ail','l\'ail'],['soleil','le soleil'],['pieu','le pieu'],['miroir','le miroir']];
+const mon=(kind,...steps)=>({kind,steps});
+
+function g1(){
+  const s=G.spawned, w=pick(WORDS), r=Math.random();
+  if(s>=3&&r<.25){ const n=pick([13,404,666,0,7]); return mon('squel',tNum(`Ce squelette a peur du nombre ${n}`,n)); }
+  if(s>=5&&r<.5){ const [a,o,b]=pick([[6,'*',7],[12,'+',30],[9,'*',9],[100,'-',58],[15,'*',4],[25,'+',17]]); return mon('zombie',tCalc(`Zombie matheux : affiche le résultat de ${a} ${o==='*'?'×':o} ${b}`,a,o,b)); }
+  return mon('zombie',tText(pick([`Ce zombie déteste le mot ${w}`,`Crie-lui : ${w}`,`Il fuit si tu lui dis ${w}`]),w));
+}
+function g2(){
+  const r=Math.random();
+  if(typeof V.ail==='number'&&r<.18) return mon('vamp',tShowVar('Montre-lui ton ail : affiche ail','ail'));
+  if(typeof V.arme==='string'&&r<.36){ const a=ARMES.find(x=>x[0]===V.arme); return mon('vamp',tFire(`Il craint ${a?a[1]:V.arme} : tire arme`,'arme',V.arme)); }
+  if(r<.55){ const n=randi(2,9); return mon('vamp',tSet(`Crée la variable ail qui vaut ${n}`,'ail',n)); }
+  if(r<.78){ const nm=pick(NAMES); return mon('ghost',tSet(`Ce fantôme s'appelle ${nm} : range "${nm}" dans nom`,'nom',nm),tFire('Dis son nom : affiche nom','nom',nm)); }
+  const a=pick(ARMES.filter(x=>x[0]!==V.arme));
+  return mon('vamp',tSet(`Il craint ${a[1]} : range "${a[0]}" dans arme`,'arme',a[0]),tFire('Arme chargée ! Tire arme','arme',a[0]));
+}
+function g3(){
+  if(typeof V.balles!=='number') return mon('wolf',tSet('Remets 6 balles en argent dans balles','balles',6));
+  const b=V.balles, r=Math.random();
+  if(r<.2){ const k=randi(2,6); return mon('wolf',tCalcVar(`Tu ramasses ${k} balles : ajoute ${k} à balles`,'balles',`balles = balles + ${k}`,x=>x+k)); }
+  if(r<.36&&b>=2) return mon('wolf',tCalcVar('Tire une balle : enlève 1 à balles','balles','balles = balles - 1',x=>x-1));
+  if(r<.48&&b<=25) return mon('wolf',tCalcVar('Bonus ! Double tes balles','balles','balles = balles * 2',x=>x*2));
+  if(r<.6) return mon('wolf',tShowVar('Compte tes balles : affiche balles','balles'));
+  if(r<.72){ const k=pick([10,100,3]); return mon('wolf',tPrintExpr(`Ce loup-garou meurt si tu affiches balles + ${k}`,`print(balles + ${k})`,()=>pstr(binop('+',V.balles,k)),['balles'])); }
+  if(r<.84) return mon('wolf',tPrintExpr('Partage avec un ami : affiche balles / 2','print(balles / 2)',()=>pstr(binop('/',V.balles,2)),['balles']));
+  const k=randi(2,5); return mon('wolf',tSet(`Crée lunes qui vaut ${k}`,'lunes',k),tPrintExpr('Pleine lune ! Affiche balles * lunes','print(balles * lunes)',()=>typeof V.lunes==='number'?pstr(binop('*',V.balles,V.lunes)):'?',['balles','lunes']));
+}
+function g4(){
+  if(typeof V.nom!=='string') return mon('zombie',tSet('Ce zombie s\'appelle Kevin : range "Kevin" dans nom','nom','Kevin'));
+  if(typeof V.cri!=='string') return mon('zombie',tSet('Range "BOUH" dans cri','cri','BOUH'));
+  const r=Math.random();
+  if(r<.18) return mon('zombie',tPrintExpr('Dis-lui bonjour : affiche "Salut " + nom','print("Salut " + nom)',()=>'Salut '+V.nom,['nom']));
+  if(r<.32){ const nm=pick(NAMES.filter(x=>x!==V.nom)); return mon('zombie',tSet(`Ce zombie s'appelle ${nm} : change nom`,'nom',nm)); }
+  if(r<.46) return mon('zombie',tPrintExpr('Fais-lui peur : affiche cri 3 fois','print(cri * 3)',()=>V.cri.repeat(3),['cri']));
+  if(r<.58){ const k=pick(CRIS.filter(x=>x!==V.cri)); return mon('zombie',tSet(`Change ton cri en ${k}`,'cri',k)); }
+  if(r<.72&&typeof V.balles==='number') return mon('zombie',tPrintExpr('Annonce : Il reste … balles (avec des virgules)','print("Il reste", balles, "balles")',()=>`Il reste ${pstr(V.balles)} balles`,['balles']));
+  if(r<.82&&!V.nom.includes(' le zombie')&&V.nom.length<30) return mon('zombie',{fr:'Donne-lui un titre : ajoute " le zombie" à nom',code:'nom = nom + " le zombie"',ok(c){ if(c.assigned!=='nom') return false; if(V.nom===c.before.nom+' le zombie'&&usesIn(c,'nom')) return true; if(V.nom===c.before.nom+' le zombie') return 'Ça marche, mais utilise la boîte : nom = nom + " le zombie"'; if(V.nom===c.before.nom+'le zombie') return 'Il manque l\'espace au début : " le zombie"'; return false; }});
+  if(r<.9) return mon('zombie',tPrintExpr('Combien de lettres dans son nom ? affiche len(nom)','print(len(nom))',()=>String([...V.nom].length),['nom']));
+  return mon('ghost',tPrintExpr('Fantôme bavard : affiche nom + " dit " + cri','print(nom + " dit " + cri)',()=>V.nom+' dit '+V.cri,['nom','cri']));
+}
+function g5(){ const r=Math.random(); return r<.22?g1():r<.48?g2():r<.74?g3():g4(); }
+function bossGen(){
+  const vieOk=c=>c.assigned==='vie';
+  return mon('boss',
+    tSet('BOSS Bernard a 100 points de vie : crée vie qui vaut 100','vie',100),
+    tCalcVar('Retire-lui 60 points de vie','vie','vie = vie - 60',x=>x-60),
+    tCalcVar('Encore ! Retire-lui les 40 derniers','vie','vie = vie - 40',x=>x-40),
+    {fr:'Vérifie qu\'il est à 0 : affiche vie',code:'print(vie)',ok(c){ if(!c.isPrint) return false; if(usesIn(c,'vie')&&printed(c)==='0'&&same(V.vie,0)) return true; if(usesIn(c,'vie')) return `vie vaut ${pstr(V.vie)}, pas 0 : retire ce qu'il faut (vie = vie - ${pstr(V.vie)})`; return false; }});
+}
+
+const M=[
+  {e:'📢',t:'print( ) tire du texte',n:10,T:24,max:2,hintN:4,gen:g1,setup:[],
+    intro:`<p>Les zombies du lycée ont une faiblesse : certains mots les font fuir (essaie <b>LUNDI</b>…).</p>
+      <p>Ton arme, le <b>Printeur 3000</b>, tire tout ce que tu mets dans <code>print( )</code>. Le <b>texte</b> se met entre <b>guillemets</b>, les <b>nombres</b> et les <b>calculs</b> sans guillemets.</p>
+      <pre class="py"><span class="f">print</span>(<span class="s">"LUNDI"</span>)      <span class="c"># tire le mot LUNDI</span>
+<span class="f">print</span>(<span class="n">13</span>)           <span class="c"># tire le nombre 13</span>
+<span class="f">print</span>(<span class="n">6</span> * <span class="n">7</span>)        <span class="c"># Python calcule : tire 42</span></pre>`,
+    lesson:'🧠 <b>À retenir</b> : <code>print("texte")</code> affiche le texte <b>tel quel</b> (guillemets obligatoires). Sans guillemets, Python <b>calcule</b> (<code>print(6 * 7)</code> → 42) ou cherche une <b>variable</b> : <code>print(LUNDI)</code> → NameError.'},
+  {e:'📦',t:'Les variables (boîtes)',n:12,T:26,max:2,hintN:4,gen:g2,setup:[],
+    intro:`<p>Les vampires sont plus coriaces : il faut <b>préparer</b> tes munitions avant de tirer.</p>
+      <p>Une <b>variable</b>, c'est une <b>boîte avec un nom</b>. Le signe <code>=</code> veut dire « <b>range dans</b> » (pas « égal » !). Regarde la mémoire de Python : chaque boîte apparaît.</p>
+      <pre class="py">arme = <span class="s">"ail"</span>     <span class="c"># range le texte "ail" dans la boîte arme</span>
+<span class="f">print</span>(arme)      <span class="c"># tire ce qu'il y a DANS la boîte : ail</span>
+<span class="f">print</span>(<span class="s">"arme"</span>)    <span class="c"># tire le MOT arme… le vampire rigole</span>
+ail = <span class="n">3</span>          <span class="c"># une boîte peut aussi contenir un nombre</span></pre>`,
+    lesson:'🧠 <b>À retenir</b> : <code>arme = "ail"</code> crée une boîte <b>arme</b> et range <b>"ail"</b> dedans. Si on range autre chose, l\'ancienne valeur est <b>remplacée</b>. <code>print(arme)</code> affiche le <b>contenu</b> ; <code>print("arme")</code> affiche le <b>mot</b>.'},
+  {e:'🐺',t:'Calculer avec les boîtes',n:12,T:26,max:2,hintN:4,gen:g3,setup:[tSet('Tu as 6 balles en argent : crée la boîte balles','balles',6)],
+    intro:`<p>Les loups-garous ne craignent que les <b>balles en argent</b>. Il va falloir bien compter.</p>
+      <p><code>balles = balles + 4</code> : Python calcule d'abord <b>à droite</b> avec l'ancienne valeur (6 + 4 = 10), puis range le résultat <b>à gauche</b> dans la boîte. Opérateurs : <code>+ - * /</code>.</p>
+      <pre class="py">balles = <span class="n">6</span>
+balles = balles + <span class="n">4</span>   <span class="c"># maintenant 10</span>
+balles = balles - <span class="n">1</span>   <span class="c"># maintenant 9</span>
+<span class="f">print</span>(balles * <span class="n">2</span>)    <span class="c"># affiche 18 (la boîte garde 9)</span>
+<span class="f">print</span>(balles / <span class="n">2</span>)    <span class="c"># 4.5 : / donne toujours un nombre à virgule</span></pre>`,
+    lesson:'🧠 <b>À retenir</b> : <code>balles = balles + 4</code> n\'est pas une équation : c\'est « calcule balles + 4, puis range le résultat dans balles ». Raccourci : <code>balles += 4</code>. La division <code>/</code> donne un <b>float</b> : <code>10 / 2</code> → <code>5.0</code>.'},
+  {e:'🗣️',t:'Texte et variables',n:12,T:28,max:2,hintN:4,gen:g4,setup:[tSet('Le zombie s\'appelle Kevin : range "Kevin" dans nom','nom','Kevin'),tSet('Son cri de guerre : range "BOUH" dans cri','cri','BOUH')],
+    intro:`<p>Ces zombies-là ont un <b>prénom</b> et ils détestent qu'on le prononce.</p>
+      <p>Le <code>+</code> <b>colle</b> deux textes, <code>*</code> <b>répète</b> un texte, la <b>virgule</b> dans print met un espace et accepte texte <b>et</b> nombres.</p>
+      <pre class="py"><span class="f">print</span>(<span class="s">"Salut "</span> + nom)             <span class="c"># Salut Kevin</span>
+<span class="f">print</span>(cri * <span class="n">3</span>)                    <span class="c"># BOUHBOUHBOUH</span>
+<span class="f">print</span>(<span class="s">"Il reste"</span>, balles, <span class="s">"balles"</span>) <span class="c"># Il reste 6 balles</span>
+<span class="f">print</span>(<span class="s">"Il reste "</span> + balles)       <span class="c"># TypeError : texte + nombre interdit</span></pre>`,
+    lesson:'🧠 <b>À retenir</b> : <code>+</code> colle deux <b>textes</b> (pense aux espaces !), <code>cri * 3</code> répète, <code>len(nom)</code> compte les lettres. Pour mélanger texte et nombre dans print, utilise la <b>virgule</b> : <code>print("Il reste", balles, "balles")</code>.'},
+  {e:'👑',t:'La horde et le roi',n:16,T:21,max:3,hintN:0,gen:g5,boss:1,setup:[],
+    intro:`<p>Tout le monde arrive en même temps : zombies, vampires, fantômes, loups-garous… Et à la fin, <b>Bernard, roi des zombies</b>. Sa barre de vie, c'est <b>ta</b> variable <code>vie</code> !</p>
+      <p>Plus d'indices sous les monstres : <b>touche un monstre</b> pour voir son code (−3 points).</p>`,
+    lesson:'🧠 <b>À retenir</b> : un programme, c\'est des <b>boîtes</b> (variables) qui changent au fil des lignes, et des <b>print</b> qui montrent ce qu\'il y a dedans. Tu viens de faire les bases de Python !'}
+];
+const ERRDOC={NameError:'Nom inconnu : variable pas créée, faute de frappe, majuscule, ou texte sans guillemets',SyntaxError:'Python ne comprend pas la phrase (parenthèse, guillemet, espace dans un nom…)',TypeError:'Mélange interdit (texte + nombre…) ou parenthèses en trop',IndentationError:'Espace au début de la ligne',ZeroDivisionError:'Division par zéro',ValueError:'Valeur impossible à convertir',Oups:'Protection du jeu',Patience:'Commande d\'un niveau suivant'};
+
+/* =====================================================================
+   Le jeu
+   ===================================================================== */
+let G=null, last=0;
+screenVars=()=>G?G.m.flatMap(z=>z.steps.flatMap(s=>s.code.replace(/"[^"]*"/g,'').match(/[\p{L}_][\p{L}\p{N}_]*/gu)||[])):[];
+screenTexts=()=>G?G.m.flatMap(z=>{ const s=z.steps[z.i]; return [...(s.code.match(/"[^"]*"/g)||[]).map(x=>x.slice(1,-1)), s.fr]; }):[];
+function line(cls,t){ const c=$('#cons'), d=document.createElement('div'); d.className=cls; d.textContent=t; c.appendChild(d); while(c.children.length>40) c.firstChild.remove(); c.scrollTop=c.scrollHeight; }
+function drawMem(flash){
+  const ks=Object.keys(V);
+  $('#mem').innerHTML=ks.length?ks.map(k=>{ const v=V[k], s=typeof v==='string'; return `<div class="box${k===flash?' fl':''}"><div class="nm">${esc(k)}</div><div class="vl${s?' s':''}">${esc(s?'"'+v+'"':pstr(v))}</div><div class="ty">${tname(v)}</div></div>`; }).join(''):'<div class="none">Aucune boîte pour l\'instant. Crée une variable : <code>ail = 3</code></div>';
+  drawSym();
+}
+const SYM=['print(','"','(',')','=','+','-','*','/',',','_'];
+function drawSym(){
+  const vs=Object.keys(V).slice(-5);
+  $('#sym').innerHTML=SYM.map(s=>`<button data-s="${esc(s)}">${esc(s)}</button>`).join('')+vs.map(s=>`<button class="v" data-s="${esc(s)}">${esc(s)}</button>`).join('');
+}
+$('#sym').addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b) return; e.preventDefault(); const i=$('#in'), s=b.dataset.s, a=i.selectionStart??i.value.length, z=i.selectionEnd??a; let ins=s, back=0; if(s==='"'&&a===z&&!/"/.test(i.value.slice(a))) { ins='""'; back=1; } i.value=i.value.slice(0,a)+ins+i.value.slice(z); const p=a+ins.length-back; i.setSelectionRange(p,p); i.focus(); });
+function hud(){
+  $('#h-l').textContent=G?'❤️'.repeat(Math.max(0,G.lives))+'🖤'.repeat(Math.max(0,3-G.lives)):'';
+  $('#h-s').textContent=(G?G.score:0)+' pt';
+  const Mi=G&&M[G.w];
+  $('#hud').innerHTML=G?`<span>🎯 ${G.done} / ${Mi.n+(Mi.boss?1:0)}</span>`:'';
+  $('#hud2').textContent=G&&G.setup<0?'👆 touche un monstre = indice (−3)':'';
+}
+function startMission(w){
+  closeOv(); clearMonsters();
+  V={}; $('#cons').innerHTML='';
+  G={w,lives:3,score:0,done:0,spawned:0,m:[],next:1,setup:0,errs:{},tries:0,ok:0,pause:true,over:false,bossOut:false};
+  const pre=[]; for(let i=0;i<w;i++) pre.push(...M[i].setup);
+  pre.forEach(t=>{ try{ exec(t.code); }catch(e){} });
+  if(pre.length){ line('in','# déjà dans la mémoire :'); pre.forEach(t=>line('in','>>> '+t.code)); }
+  $('#h-w').textContent=`Mission ${w+1}`;
+  drawMem(); hud();
+  ov(`<h2>${M[w].e} Mission ${w+1} · ${M[w].t}</h2>${M[w].intro}<div class="row"><button class="btn ok" data-act="go">C'est parti ! ▶</button><button class="btn" data-act="menu">Menu</button></div>`);
+  last=performance.now(); kick();
+}
+let RAF=0; function kick(){ cancelAnimationFrame(RAF); RAF=requestAnimationFrame(loop); }
+function go(){ closeOv(); if(!G) return; G.started=true; G.pause=false; if(G.setup===0) setupStep(); last=performance.now(); focusIn(); }
+function focusIn(){ if(!COARSE) $('#in').focus(); }
+function setupStep(){
+  const s=M[G.w].setup[G.setup];
+  if(!s){ G.setup=-1; line('good','🧟 Les monstres arrivent ! Tape le code qui correspond à leur bulle.'); hud(); return; }
+  line('tip',`🛠️ ${s.fr} :  ${s.code}`);
+}
+function clearMonsters(){ document.querySelectorAll('.m,.pj,.boom').forEach(e=>e.remove()); }
+function spawn(boss){
+  const Mi=M[G.w]; let m, k=0;
+  do{ m=boss?bossGen():Mi.gen(); k++; }while(k<15&&G.m.some(z=>z.steps[z.i].code===m.steps[0].code||z.steps[z.i].fr===m.steps[0].fr));
+  const K=KIND[m.kind], el=document.createElement('div');
+  el.className='m'+(boss?' boss':'');
+  const lanes=($('#ar').clientWidth<600?[20,50,80]:[16,38,62,84]).map(x=>[x,Math.min(999,...G.m.map(o=>Math.abs(o.x-x)+(o.y>.4?60:0)))]).sort((a,b)=>b[1]-a[1]);
+  const x=boss?50:lanes[Math.random()<.75?0:1][0]+rand(-3,3);
+  el.style.left=x+'%'; el.style.top='-120px';
+  const z=Object.assign(m,{el,x,y:0,i:0,em:pick(K.em),boss:!!boss,T:Mi.T*(boss?2.2:rand(.9,1.1))*(COARSE?1.3:1),hint:!boss&&G.spawned<Mi.hintN,reveal:false,miss:0});
+  el.onclick=()=>{ if(z.reveal||z.hint||!G||G.pause) return; z.reveal=true; G.score=Math.max(0,G.score-3); render(z); hud(); focusIn(); };
+  $('#ar').appendChild(el); render(z);
+  G.m.push(z); if(!boss) G.spawned++;
+}
+function render(z){
+  const s=z.steps[z.i], n=z.steps.length;
+  const hp=z.boss?`<div class="hp"><i style="width:${typeof V.vie==='number'&&z.i>0?Math.max(0,Math.min(100,nv(V.vie))):100}%"></i></div>`:'';
+  z.el.innerHTML=`<div class="fr">${esc(s.fr)}${n>1?`<small>étape ${z.i+1} / ${n}</small>`:''}</div>${z.hint||z.reveal?`<div class="hint">${esc(s.code)}</div>`:''}${hp}<div class="bd">${z.boss?'<span class="crown">👑</span>':''}${z.em}</div>`;
+}
+function loop(now){
+  if(!G||G.over) return;
+  const dt=Math.min(.1,(now-last)/1000); last=now;
+  if(!G.pause&&G.setup<0){
+    const Mi=M[G.w];
+    G.next-=dt; if(!G.m.length) G.next=Math.min(G.next,.6);
+    if(G.next<=0&&G.m.length<Mi.max&&G.spawned<Mi.n){ spawn(false); G.next=rand(4,7)*(COARSE?1.25:1); }
+    if(Mi.boss&&G.spawned>=Mi.n&&!G.bossOut&&!G.m.length){ G.bossOut=true; spawn(true); line('err','👑 Le sol tremble… BERNARD, ROI DES ZOMBIES arrive !'); }
+    const H=$('#ar').clientHeight;
+    for(const z of [...G.m]){
+      z.y+=dt/z.T;
+      const span=Math.max(60,H-z.el.offsetHeight-52);
+      z.el.style.top=(4+z.y*span)+'px';
+      const W=$('#ar').clientWidth, hw=z.el.offsetWidth/2+4; z.el.style.left=Math.max(hw,Math.min(W-hw,z.x/100*W))+'px';
+      if(z.y>=1) bite(z);
+    }
+    aim();
+    if(G.done>=Mi.n+(Mi.boss?1:0)&&!G.m.length){ G.over=true; const g=G; setTimeout(()=>{ if(G===g) win(); },700); return; }
+  }
+  RAF=requestAnimationFrame(loop);
+}
+const nearest=()=>G&&G.m.length?G.m.reduce((a,z)=>z.y>a.y?z:a):null;
+function aim(){
+  const t=nearest(); G.m.forEach(z=>z.el.classList.toggle('tgt',z===t));
+  const gun=$('#gun'); if(!t){ gun.style.transform='rotate(0deg)'; return; }
+  const ar=$('#ar').getBoundingClientRect(), r=t.el.querySelector('.bd').getBoundingClientRect();
+  const dx=r.left+r.width/2-(ar.left+ar.width/2), dy=(ar.bottom-90)-(r.top+r.height/2);
+  gun.style.transform=`rotate(${Math.max(-70,Math.min(70,Math.atan2(dx,Math.max(20,dy))*180/Math.PI))}deg)`;
+}
+function bite(z){
+  G.m=G.m.filter(x=>x!==z); z.el.remove(); G.lives--; G.done++;
+  const f=document.createElement('div'); f.className='flash'; $('#ar').appendChild(f); setTimeout(()=>f.remove(),400);
+  line('err',`🩸 Morsure ! « ${z.steps[z.i].fr} » s'écrivait :  ${z.steps[z.i].code}`);
+  hud(); if(G.lives<=0) lose();
+}
+function fire(text,target,good){
+  const gun=$('#gun'); gun.classList.remove('fire'); void gun.offsetWidth; gun.classList.add('fire');
+  const ar=$('#ar').getBoundingClientRect(), gr=gun.getBoundingClientRect();
+  const x0=ar.width/2, y0=gr.top-ar.top+10;
+  let x1=x0, y1=-40;
+  if(target){ const r=target.el.querySelector('.bd').getBoundingClientRect(); x1=r.left-ar.left+r.width/2; y1=r.top-ar.top+r.height/2; }
+  const p=document.createElement('div'); p.className='pj'+(good?'':' miss'); p.textContent=text.length>26?text.slice(0,25)+'…':text||' ';
+  $('#ar').appendChild(p);
+  const w=p.offsetWidth, h=p.offsetHeight;
+  const a=p.animate([{transform:`translate(${x0-w/2}px,${y0-h/2}px) scale(.6)`},{transform:`translate(${x1-w/2}px,${y1-h/2}px) scale(1)`}],{duration:260,easing:'ease-in'});
+  a.onfinish=()=>{ p.remove(); if(target) boom(x1,y1,good?'💥':'💨'); };
+}
+function boom(x,y,e){ const b=document.createElement('div'); b.className='boom'; b.textContent=e; b.style.left=x+'px'; b.style.top=y+'px'; $('#ar').appendChild(b); setTimeout(()=>b.remove(),600); }
+function say(z,t){ const s=document.createElement('div'); s.className='say'; s.textContent=t; z.el.appendChild(s); setTimeout(()=>s.remove(),1600); }
+const TAUNTS=['Même pas mal 😏','C\'est tout ?','Raté, humain !','Mmmh… cerveau…','Tu tires à blanc !','Hahaha !','Chatouilles 😂'];
+
+function submit(){
+  const inp=$('#in'); const src=fixQuotes(inp.value); if(!src.trim()) return;
+  inp.value=''; HIST.push(src); hi=HIST.length;
+  line('in','>>> '+src);
+  if(/^\s*snt-prof\s*$/i.test(src)){ D.prof=true; M.forEach((_,i)=>D.stars[i]=D.stars[i]||0); save(); line('good','👩‍🏫 Mode prof : toutes les missions sont débloquées.'); if(!G) menu(); return; }
+  const playing=G&&!G.pause&&!G.over;
+  let c;
+  try{ c=exec(src); }
+  catch(e){ showErr(e,src); if(playing){ G.tries++; G.m.length&&say(nearest(),pick(TAUNTS)); } hud(); return; }
+  c.out.forEach(o=>line('out',o));
+  if(c.echo!==undefined&&!c.isPrint){ line('out',c.echo); if(playing) line('tip','(La console montre la valeur, mais le Printeur ne tire que ce qui passe par print( ).)'); }
+  drawMem(c.assigned);
+  G&&G.m.forEach(render);
+  if(!playing){ if(c.isPrint) fire(printed(c),null,true); return; }
+  if(G.setup>=0){
+    const t=M[G.w].setup[G.setup], r=t.ok(c); G.tries++;
+    if(r===true){ G.ok++; line('good','✅ Boîte créée : regarde la mémoire de Python.'); G.setup++; setupStep(); }
+    else line('tip',typeof r==='string'?r:`Ce n'est pas ce qui était demandé. Tape :  ${t.code}`);
+    hud(); return;
+  }
+  G.tries++;
+  const order=[...G.m].sort((a,b)=>b.y-a.y);
+  let hit=null, tip=null, tipZ=null;
+  for(const z of order){ const r=z.steps[z.i].ok(c); if(r===true){ hit=z; break; } if(typeof r==='string'&&!tip){ tip=r; tipZ=z; } }
+  if(c.isPrint) fire(printed(c),hit||tipZ||order[0],!!hit);
+  else if(hit){ const v=V[c.assigned]; fire(`${c.assigned} = ${typeof v==='string'?'"'+v+'"':pstr(v)}`,hit,true); }
+  if(hit){ G.ok++; advance(hit); }
+  else {
+    if(tip){ line('tip',tip); tipZ.miss++; if(tipZ.miss>=2&&!tipZ.reveal){ tipZ.reveal=true; render(tipZ); } }
+    else nearMiss(c);
+    const tz=tipZ||order[0]; if(tz&&c.isPrint) setTimeout(()=>tz.el.isConnected&&say(tz,pick(TAUNTS)),270);
+  }
+  hud();
+}
+function advance(z){
+  z.i++;
+  if(z.i>=z.steps.length){
+    G.m=G.m.filter(x=>x!==z); G.done++;
+    const pts=z.boss?50:10+Math.round((1-Math.max(0,z.y))*10)+(z.steps.length-1)*5; G.score+=pts;
+    line('good',`${KIND[z.kind].msg()} (+${pts})`);
+    setTimeout(()=>{ const bd=z.el.querySelector('.bd'); if(bd) bd.textContent=KIND[z.kind].dead; z.el.classList.add('dead'); setTimeout(()=>z.el.remove(),1000); },260);
+  } else {
+    z.y=Math.max(0,z.y-.12); z.reveal=false; G.score+=5;
+    line('good',z.boss?`👑 Touché ! Il reste ${pstr(V.vie)} points de vie à Bernard.`:z.kind==='ghost'?'👻 Le fantôme tremble : son nom est dans ta mémoire…':z.kind==='vamp'?'🧄 Arme chargée ! Maintenant, tire.':'✅ Bien ! Étape suivante.');
+    setTimeout(()=>{ if(!z.el.isConnected) return; render(z); z.el.classList.remove('wig'); void z.el.offsetWidth; z.el.classList.add('wig'); },260);
+  }
+}
+function nearMiss(c){
+  const n=s=>s.replace(/\s+/g,'').replace(/'/g,'"');
+  const src=n(c.src);
+  const best=G.m.map(z=>[z,lev(n(z.steps[z.i].code),src)]).sort((a,b)=>a[1]-b[1])[0];
+  if(best&&best[1]<=Math.max(3,n(best[0].steps[best[0].i].code).length*.4)){ const z=best[0]; z.miss++; line('tip',`Presque ! « ${z.steps[z.i].fr} » s'écrit :  ${z.steps[z.i].code}`); if(!z.reveal){ z.reveal=true; render(z); } }
+  else if(c.assigned) line('tip',`La boîte ${c.assigned} a bien été remplie, mais aucun monstre n'attendait ça.`);
+  else if(c.isPrint) line('tip','Ton tir ne correspond à aucun monstre : relis bien leur bulle.');
+}
+function showErr(e,src){
+  if(!(e instanceof PyErr)){ line('err','Erreur : '+e.message); console.error(e); return; }
+  line('err',`${e.type}: ${e.message}`);
+  let tip=e.tip;
+  if(e.type==='SyntaxError'&&!/["']/.test(src)&&G){ const w=screenTexts().find(w=>w.length>1&&src.toLowerCase().includes(w.toLowerCase())&&!/[=(]/.test(w)); if(w) tip=`Du texte se met entre guillemets : print("${w}")`; }
+  if(tip) line('tip','💡 '+tip);
+  if(G) G.errs[e.type]=(G.errs[e.type]||0)+1;
+}
+function fixQuotes(s){ return s.replace(/[“”„«»]/g,'"').replace(/[‘’‚]/g,"'").replace(/ /g,' '); }
+
+/* ---------------- fin de mission ---------------- */
+function stars(){ const acc=G.ok/Math.max(1,G.tries); return 1+(G.lives>=2?1:0)+(acc>=.75?1:0); }
+function win(){
+  const st=stars(), w=G.w, acc=Math.round(100*G.ok/Math.max(1,G.tries));
+  D.stars[w]=Math.max(D.stars[w]||0,st); D.best[w]=Math.max(D.best[w]||0,G.score); save();
+  const errs=Object.entries(G.errs).sort((a,b)=>b[1]-a[1]);
+  ov(`<h2>✅ Mission ${w+1} réussie !</h2>
+    <p style="font-size:24px;color:var(--warn);margin:4px 0">${'★'.repeat(st)}${'☆'.repeat(3-st)}</p>
+    <p>${G.score} points · ${acc} % de lignes justes · ${G.lives} vie${G.lives>1?'s':''} restante${G.lives>1?'s':''}</p>
+    ${errs.length?`<p>Tes erreurs Python :</p><table class="tbl">${errs.map(([t,n])=>`<tr><td>${ERRDOC[t]||''}</td><td>${t} × ${n}</td></tr>`).join('')}</table>`:'<p>Aucune erreur Python : propre !</p>'}
+    <p>${M[w].lesson}</p>
+    <div class="row">${w+1<M.length?`<button class="btn ok" data-w="${w+1}">Mission ${w+2} ▶</button>`:'<button class="btn ok" data-act="fin">Le bilan ▶</button>'}<button class="btn" data-w="${w}">Rejouer</button><button class="btn" data-act="menu">Menu</button></div>`);
+}
+function lose(){
+  G.over=true; clearMonsters();
+  ov(`<h2 style="color:var(--bad)">🧟 Dévoré !</h2><p>Tu as éliminé ${G.done} monstre${G.done>1?'s':''} sur ${M[G.w].n}.</p><p>Astuce : ouvre l'antisèche 📜 et regarde la mémoire de Python avant de taper. Touche un monstre pour voir son code.</p><div class="row"><button class="btn ok" data-w="${G.w}">Recommencer</button><button class="btn" data-act="menu">Menu</button></div>`);
+}
+const RECAP=`<table class="tbl">
+  <tr><td>Afficher (tirer) un texte</td><td>print("LUNDI")</td></tr>
+  <tr><td>Afficher un nombre, un calcul</td><td>print(13) · print(6 * 7)</td></tr>
+  <tr><td>Créer une boîte (variable)</td><td>ail = 3 · arme = "soleil"</td></tr>
+  <tr><td>Afficher le contenu d'une boîte</td><td>print(arme)</td></tr>
+  <tr><td>Changer une boîte avec un calcul</td><td>balles = balles + 4</td></tr>
+  <tr><td>Coller / répéter du texte</td><td>"Salut " + nom · cri * 3</td></tr>
+  <tr><td>Texte et nombre ensemble</td><td>print("Il reste", balles, "balles")</td></tr>
+  <tr><td>Longueur d'un texte</td><td>len(nom)</td></tr>
+</table>`;
+function finale(){
+  const tot=M.reduce((s,_,i)=>s+(D.stars[i]||0),0);
+  ov(`<h2>🏆 Survivant de la nuit</h2><p style="font-size:22px;color:var(--warn)">${tot} ★ sur ${M.length*3}</p>${RECAP}
+    <p>Prochain niveau : <b>Python of the Dead</b>, où ton arme devient un <b>objet</b> avec ses méthodes (<code>gun.reload()</code>).</p>
+    <div class="row"><button class="btn ok" data-act="menu">Menu</button></div>`);
+}
+const CHEAT=`<h2>📜 Antisèche</h2>${RECAP}
+  <p><b>Les erreurs les plus fréquentes</b></p>
+  <table class="tbl">
+    <tr><td>Texte sans guillemets : Python cherche une variable</td><td>NameError: name 'LUNDI' is not defined</td></tr>
+    <tr><td>Majuscule en trop</td><td>NameError: name 'Print' is not defined</td></tr>
+    <tr><td>Oubli des parenthèses</td><td>SyntaxError: Missing parentheses in call to 'print'</td></tr>
+    <tr><td>Guillemet pas fermé</td><td>SyntaxError: unterminated string literal</td></tr>
+    <tr><td>Parenthèse pas fermée</td><td>SyntaxError: '(' was never closed</td></tr>
+    <tr><td>Valeur à gauche du =</td><td>SyntaxError: cannot assign to literal</td></tr>
+    <tr><td>Texte + nombre</td><td>TypeError: can only concatenate str (not "int") to str</td></tr>
+  </table>
+  <p>Le signe <code>=</code> veut dire « range dans la boîte ». <code>"ail"</code> est un texte, <code>ail</code> est le nom d'une boîte.</p>
+  <div class="row"><button class="btn ok" data-act="resume">Reprendre</button></div>`;
+
+/* ---------------- écrans ---------------- */
+function ov(html){ closeOv(); const o=document.createElement('div'); o.className='ov'; o.innerHTML=`<div class="card">${html}</div>`; document.body.appendChild(o); return o; }
+function closeOv(){ document.querySelectorAll('.ov').forEach(o=>o.remove()); }
+function unlocked(i){ return i===0||D.prof||(D.stars[i-1]||0)>0; }
+function menu(){
+  if(G){ G.over=true; } G=null; clearMonsters(); V={}; drawMem(); hud(); $('#h-w').textContent='Menu'; $('#gun').style.transform='';
+  ov(`<h2>🧟 Print of the Dead</h2>
+    <p>La nuit tombe sur le lycée. Zombies, vampires, fantômes et loups-garous arrivent, et ta seule arme est le <b>Printeur 3000</b> : il tire du <b>Python</b>.</p>
+    <p>Chaque monstre porte une bulle en français. Tape la ligne de Python qui fait exactement cela, puis <b>Entrée</b>. Regarde la <b>mémoire de Python</b> : tes variables y apparaissent comme des boîtes.</p>
+    <div class="ms">${M.map((m,i)=>{ const L=!unlocked(i), s=D.stars[i]||0; return `<button class="mb" data-w="${i}" ${L?'disabled':''}><span class="e">${L?'🔒':m.e}</span><span><b>Mission ${i+1} · ${m.t}</b><small>${['print("…"), nombres et calculs','créer une boîte : arme = "ail", print(arme)','balles = balles + 4, / et *','"Salut " + nom, cri * 3, virgules dans print','tout mélangé + le boss Bernard'][i]}</small></span><span class="st">${'★'.repeat(s)}${'☆'.repeat(3-s)}</span></button>`; }).join('')}</div>
+    <p style="color:var(--mut);font-size:13px;margin-top:12px">Python niveau 1 · entraînement sans note, progression gardée dans ce navigateur. Au menu, la console marche aussi : essaie <code>print("Bonjour")</code>. Code prof : tape <code>SNT-PROF</code> dans la console.</p>
+    <div class="row"><button class="btn" data-act="sandbox">🧪 Console libre</button></div>`);
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-w],[data-act]'); if(!b||b.closest('#sym')) return;
+  if(b.dataset.w!==undefined) return startMission(+b.dataset.w);
+  const a=b.dataset.act;
+  if(a==='go') go();
+  else if(a==='menu') menu();
+  else if(a==='fin') finale();
+  else if(a==='resume'){ closeOv(); if(G&&!G.over){ if(!G.started) return go(); G.pause=false; last=performance.now(); } focusIn(); }
+  else if(a==='sandbox'){ closeOv(); line('good','🧪 Console libre : essaie print("Bonjour"), ail = 3, print(ail * 2)… Bouton ☰ pour revenir au menu.'); $('#in').focus(); }
+});
+const HIST=[]; let hi=0;
+$('#in').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){ e.preventDefault(); submit(); }
+  else if(e.key==='ArrowUp'&&HIST.length){ e.preventDefault(); hi=Math.max(0,hi-1); e.target.value=HIST[hi]; }
+  else if(e.key==='ArrowDown'&&HIST.length){ e.preventDefault(); hi=Math.min(HIST.length,hi+1); e.target.value=HIST[hi]||''; }
+});
+$('#go').onclick=()=>{ submit(); $('#in').focus(); };
+$('#b-cheat').onclick=()=>{ if(G&&!G.over){ if(G.pause&&document.querySelector('.ov')) { /* écran d'intro ouvert */ } else G.pause=true; } ov(CHEAT); };
+$('#b-menu').onclick=menu;
+drawMem(); hud(); menu();
+</script>
+</body></html>
