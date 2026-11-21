@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Message en route</title>
+<!-- version affichée : à augmenter à chaque mise à jour -->
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v2 · 09/11/2026</div>
+<style>
+:root{color-scheme:dark;--bg:#0d0f14;--panel:#161a23;--panel2:#1d2330;--line:#2a3142;--txt:#e7ecf3;--mut:#8b96a8;--acc:#4ade80;--warn:#fbbf24;--bad:#f87171;--blue:#60a5fa}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:9px 13px}
+button:active{transform:scale(.97)}
+button.pri{background:#166534;border-color:#22c55e;font-weight:700}
+button.warn{background:#713f12;border-color:var(--warn)}
+button:disabled{opacity:.45;cursor:default}
+.wrap{max-width:760px;margin:0 auto;padding:18px 12px 30px}
+header{display:flex;align-items:center;gap:8px;justify-content:space-between;margin-bottom:8px}
+header h1{font-size:19px;margin:0}
+.mut{color:var(--mut)}
+.hidden{display:none!important}
+/* menu */
+#chaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.chap{position:relative;text-align:left;padding:12px;border-radius:12px;background:var(--panel);min-height:96px}
+.chap b{display:block;font-size:15px}
+.chap .n{font-size:12px;color:var(--mut)}
+.chap .st{position:absolute;right:10px;top:8px;color:var(--warn);letter-spacing:1px}
+.chap.locked{filter:blur(2.5px);opacity:.5;pointer-events:none}
+.chap .f{display:inline-block;margin-top:6px;font-size:11px;padding:1px 6px;border-radius:6px;color:#000;font-weight:700}
+/* game */
+#mission{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:8px}
+#mission .t{font-weight:700}
+#netbox{position:relative;background:#0a0c11;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+#net{display:block;width:100%;height:auto;touch-action:manipulation}
+#gauge{position:absolute;left:8px;top:6px;font-size:12px;color:var(--bad);font-weight:700}
+#screen{margin-top:8px;background:#04130a;border:1px solid #14532d;border-radius:10px;padding:7px 10px;font:13px/1.35 ui-monospace,Consolas,monospace;color:#86efac;min-height:52px;word-break:break-all}
+#screen .lb{font:600 11px system-ui,sans-serif;color:#4ade80aa;display:block;margin-bottom:2px}
+#screen .ok{color:#fff;background:#166534;padding:0 4px;border-radius:4px}
+#screen .ko{color:#fff;background:#991b1b;padding:0 4px;border-radius:4px}
+#screen .nz{color:#3f6f52}
+#pkbox{margin-top:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+#pkbox .lb{font-size:12px;color:var(--mut)}
+#packet{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;align-items:stretch}
+.wag{border-radius:8px;padding:4px 7px;color:#05070a;font-weight:700;font-size:12px;line-height:1.2;min-width:52px;text-align:center;border:2px solid transparent;animation:pop .45s}
+.wag small{display:block;font-weight:600;font-size:11px;opacity:.85;font-family:ui-monospace,Consolas,monospace;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wag.need{border-color:#fff;animation:blink 1s infinite;cursor:pointer}
+.wag.data{background:#cbd5e1;flex:1 1 140px}
+@keyframes pop{0%{transform:scale(.2);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes blink{50%{border-color:transparent}}
+#actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+#actions button{flex:1 1 auto}
+#btnSend{font-size:17px}
+/* sheet */
+#veil{position:fixed;inset:0;background:#000b;z-index:50;display:flex;align-items:flex-end;justify-content:center}
+#sheet{background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:16px 16px 0 0;width:100%;max-width:640px;max-height:88vh;overflow:auto;padding:16px 14px 20px;animation:up .25s}
+@media(min-width:700px){#veil{align-items:center}#sheet{border-radius:16px;border-bottom:1px solid var(--line)}}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+#sheet h2{margin:0 0 8px;font-size:18px}
+#sheet .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#sheet .btns button{flex:1 1 140px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;margin-top:8px}
+.grid2 button{text-align:left}
+.box{background:var(--panel2);border-radius:10px;padding:8px 10px;margin:8px 0}
+.err{background:#450a0a;border:1px solid #b91c1c;border-radius:10px;padding:8px 10px;margin:8px 0;font-family:ui-monospace,Consolas,monospace}
+.real{font-size:13px;color:#a5b4fc}
+.bits{display:flex;gap:4px;justify-content:center;margin:10px 0;flex-wrap:wrap}
+.bit{width:44px;text-align:center}
+.bit button{width:44px;height:48px;font:700 22px ui-monospace,monospace;padding:0}
+.bit button.on{background:#14532d;border-color:var(--acc)}
+.bit span{font-size:11px;color:var(--mut)}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+table.t td,table.t th{border:1px solid var(--line);padding:3px 6px;text-align:left}
+.stepper{display:flex;align-items:center;gap:10px;justify-content:center;margin:10px 0}
+.stepper b{font-size:28px;min-width:60px;text-align:center}
+.stepper button{width:52px;font-size:22px}
+.stars{color:var(--warn);font-size:30px;letter-spacing:4px;text-align:center}
+.qa{margin:6px 0}
+.qa .a{background:#172554;border-radius:8px;padding:6px 9px;margin-top:4px}
+#anat{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+#anat div{padding:5px 7px;border-radius:7px;color:#05070a;font-size:12px;font-weight:700}
+.layer{font-size:12px;margin:3px 0}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>📨 Message en route</h1>
+    <div style="display:flex;gap:6px">
+      <span id="totStars" class="mut" style="align-self:center"></span>
+      <button id="btnMenu" class="hidden">☰ Menu</button>
+    </div>
+  </header>
+
+  <section id="menu">
+    <p class="mut" style="margin:0">Tu veux envoyer un message à un autre ordinateur. Au début, tu n'as que… le texte. À chaque échec, observe ce qui se passe sur le fil, pose des questions, et ajoute <b>l'information qui manque</b>. Petit à petit, tu vas reconstruire un vrai paquet réseau&nbsp;!</p>
+    <div id="chaps"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button id="btnAnat">🧩 Le paquet complet</button>
+      <button id="btnProf">🔑 Mode enseignant</button>
+      <button id="btnReset">↺ Effacer ma progression</button>
+    </div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div id="mission"><div class="t" id="mTitle"></div><div id="mText" class="mut"></div></div>
+    <div id="netbox"><svg id="net" viewBox="0 0 400 230"></svg><div id="gauge"></div></div>
+    <div id="screen"><span class="lb" id="scrLb">📺 Écran du destinataire</span><span id="scr"></span></div>
+    <div id="pkbox"><span class="lb">🚂 Ton paquet, dans l'ordre où il part sur le fil (touche un wagon qui clignote pour le remplir)</span><div id="packet"></div></div>
+    <div id="actions">
+      <button id="btnSend" class="pri">📤 Envoyer</button>
+      <button id="btnAdd">➕ Ajouter une information</button>
+      <button id="btnAsk">❓ Poser une question</button>
+      <button id="btnSol" class="warn hidden">💡 Solution</button>
+    </div>
+  </section>
+</div>
+<div id="veil" class="hidden"><div id="sheet"></div></div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const NS="http://www.w3.org/2000/svg";
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- champs du paquet ---------- */
+const ORDER=["start","len","ttl","src","dst","port","seq","ack","data","sum"];
+const F={
+ bin:{opt:"🔢 Traduire le contenu en 0 et 1",name:"Contenu en binaire",color:"#cbd5e1",
+   expl:"Un fil ne transporte que du courant : <b>1 = courant, 0 = pas de courant</b>. Chaque caractère a un numéro (table <b>ASCII</b>) que l'on écrit en binaire sur 8 bits, c'est-à-dire <b>1 octet</b>.",
+   real:"Données (couche application) codées en octets"},
+ start:{opt:"🚩 Un signal « ATTENTION, ÇA COMMENCE ! »",name:"Début",short:"DÉBUT",color:"#f59e0b",
+   expl:"Les vrais réseaux (Ethernet) envoient d'abord un <b>préambule</b> : 10101010 10101010 … 10101011. C'est un motif facile à reconnaître qui veut dire « un message commence MAINTENANT ».",
+   real:"Préambule Ethernet (couche accès réseau)"},
+ len:{opt:"📏 La longueur du message",name:"Longueur",short:"LONG",color:"#facc15",
+   expl:"Le champ <b>Longueur</b> dit combien d'octets il faut lire. Le destinataire sait donc où le message s'arrête… et où commence le suivant.",
+   real:"Champ « Longueur totale » de l'en-tête IP"},
+ dst:{opt:"📮 L'adresse du destinataire",name:"Adresse destination",short:"IP DEST",color:"#60a5fa",
+   expl:"Chaque machine a une <b>adresse IP</b> (4 nombres de 0 à 255, ex. 192.168.1.57). Le routeur lit l'adresse de destination et choisit la bonne sortie, comme un centre de tri postal.",
+   real:"Adresse IP destination (en-tête IP)"},
+ src:{opt:"↩️ L'adresse de l'expéditeur (toi)",name:"Adresse source",short:"IP SRC",color:"#22d3ee",
+   expl:"L'<b>adresse IP source</b> permet de te répondre… et de te renvoyer les messages d'erreur ! Sans elle, impossible de revenir vers toi.",
+   real:"Adresse IP source (en-tête IP)"},
+ port:{opt:"🚪 Le numéro de l'application qui doit recevoir",name:"Port",short:"PORT",color:"#a78bfa",
+   expl:"Sur un ordinateur, plusieurs applications utilisent le réseau en même temps. Le <b>numéro de port</b> indique laquelle doit recevoir le message (80 et 443 : web, 25 : courriel…).",
+   real:"Ports source et destination (en-tête TCP)"},
+ seq:{opt:"#️⃣ Un numéro d'ordre sur chaque paquet",name:"N° d'ordre",short:"N°",color:"#f472b6",
+   expl:"Un long message est découpé en <b>paquets</b> qui peuvent prendre des chemins différents et arriver dans le désordre. Le <b>numéro de séquence</b> permet de les remettre dans l'ordre.",
+   real:"Numéro de séquence (en-tête TCP)"},
+ sum:{opt:"✅ Un code de vérification calculé sur les bits",name:"Contrôle",short:"CTRL",color:"#4ade80",
+   expl:"La <b>somme de contrôle</b> est un nombre calculé à partir de tous les bits du paquet. Le destinataire refait le calcul : si le résultat ne correspond pas, le paquet a été abîmé en route.",
+   real:"Somme de contrôle / checksum (TCP, IP et Ethernet en ont une)"},
+ ack:{opt:"📨 Demander un accusé de réception",name:"Accusé de réception",short:"ACK",color:"#34d399",
+   expl:"Avec <b>TCP</b>, le destinataire renvoie un <b>accusé de réception (ACK)</b> pour chaque paquet reçu. Pas d'ACK au bout d'un moment ? L'expéditeur renvoie le paquet.",
+   real:"Numéro d'accusé de réception ACK (en-tête TCP)"},
+ ttl:{opt:"⏳ Une durée de vie (nombre de routeurs maximum)",name:"Durée de vie",short:"TTL",color:"#f87171",
+   expl:"Le <b>TTL</b> (Time To Live) est un compteur que chaque routeur diminue de 1. Arrivé à 0, le paquet est détruit et un message d'erreur est renvoyé : un paquet ne peut plus tourner en rond pour toujours.",
+   real:"TTL, durée de vie (en-tête IP)"}
+};
+const DISTRACT=[
+ {opt:"🎨 La couleur du texte",fb:"Le fil, les routeurs et l'ordinateur se moquent de la couleur : ça ne change rien au voyage du message."},
+ {opt:"🕒 L'heure d'envoi",fb:"L'heure peut être intéressante, mais elle n'aide pas le message à arriver."},
+ {opt:"😀 Un emoji d'humeur",fb:"Sympa… mais c'est du contenu en plus, pas une information utile au réseau."},
+ {opt:"🔑 Ton mot de passe",fb:"Jamais ! On ne met pas son mot de passe dans un message, et ça n'aide pas du tout à l'acheminer."},
+ {opt:"🔤 La police d'écriture",fb:"La police, c'est de la mise en forme : les machines du réseau ne s'en servent pas."},
+ {opt:"🏷️ Ton prénom écrit en toutes lettres",fb:"Les machines du réseau ne lisent pas les prénoms : elles utilisent des numéros (des adresses)."},
+ {opt:"🔊 Envoyer plus fort (plus de courant)",fb:"Plus fort ne règle rien ici : le problème n'est pas la puissance du signal."},
+ {opt:"🚨 La mention URGENT",fb:"Les machines du réseau ne lisent pas ton texte : « URGENT » ne change rien à ce problème."}
+];
+
+/* ---------- carnet d'adresses ---------- */
+const IP={me:"192.168.1.10",lea:"192.168.1.23",tom:"192.168.1.42",ines:"192.168.1.57"};
+const WHO={me:"Alice",lea:"Bob",tom:"Tom",ines:"Inès"};
+const PORTS=[[80,"🌐 Web (http)"],[443,"🔒 Web sécurisé (https)"],[25,"✉️ Courriel"],[5222,"💬 Messagerie"],[27015,"🎮 Jeu en ligne"]];
+
+/* ---------- réseaux ---------- */
+const LAYOUTS={
+ A:{nodes:{me:[45,110,"💻","Alice (toi)"],lea:[355,110,"💻","Bob"]},edges:[["me","lea"]]},
+ B:{nodes:{me:[45,110,"💻","Alice (toi)"],r1:[190,110,"🔀","Routeur"],lea:[345,38,"💻","Bob"],tom:[355,110,"💻","Tom"],ines:[345,185,"💻","Inès"]},
+    edges:[["me","r1"],["r1","lea"],["r1","tom"],["r1","ines"]]},
+ C:{nodes:{me:[32,110,"💻","Alice (toi)"],r1:[110,110,"🔀","R1"],r2:[200,38,"🔀","R2"],r3:[200,185,"🔀","R3"],r4:[290,110,"🔀","R4"],lea:[368,110,"💻","Bob"]},
+    edges:[["me","r1"],["r1","r2"],["r1","r3"],["r2","r4"],["r3","r4"],["r4","lea"]]}
+};
+
+/* ---------- chapitres ---------- */
+const LONGMSG="RDV A 14H AU CDI";
+const PARTS=["RDV ","A 14","H AU"," CDI"];
+const CH=[
+ {id:"bin",title:"Le fil",layout:"A",to:"lea",need:["bin"],
+  mission:"Écris un message pour Bob et envoie-le sur le fil qui relie vos deux ordinateurs (toi, tu es Alice).",
+  q:[["Qu'est-ce qui peut circuler dans un fil électrique ?","Seulement du courant : soit il passe, soit il ne passe pas. Pas de lettres !"],
+     ["Bob, tu as reçu quelque chose ?","Bob (dans le couloir) : « Rien du tout, mon écran est vide. »"],
+     ["Comment un ordinateur garde une lettre en mémoire ?","Chaque caractère a un numéro (code ASCII : A = 65, B = 66…). Ce numéro s'écrit en binaire avec des 0 et des 1."]]},
+ {id:"start",title:"Le début",layout:"A",to:"lea",need:["bin","start"],noise:true,
+  mission:"Le fil n'est jamais silencieux : il y a des parasites. Envoie ton message à Bob.",
+  q:[["Bob, tu vois mon message ?","Bob : « Je vois des 0 et des 1 qui défilent tout le temps… lesquels sont à toi ? »"],
+     ["Pourquoi il y a des bits sur le fil alors que je n'envoie rien ?","Un fil n'est jamais parfaitement calme : parasites électriques, autres appareils… Bob reçoit des bits en permanence."],
+     ["Comment Bob peut repérer le moment où MON message commence ?","Il faudrait commencer par un motif spécial, toujours le même, facile à reconnaître."]]},
+ {id:"len",title:"La fin",layout:"A",to:"lea",need:["bin","start","len"],noise:true,two:true,
+  mission:"Envoie ton message à Bob, puis tout de suite un deuxième message : « CA VA ? ».",
+  q:[["Bob, qu'as-tu lu exactement ?","Bob : « J'ai tout lu d'un seul bloc, et à la fin il y a des caractères bizarres. »"],
+     ["D'où viennent les caractères bizarres à la fin ?","Après ton message, Bob a continué à lire les parasites du fil comme si c'était la suite."],
+     ["Comment Bob peut savoir quand arrêter de lire ?","Si tu lui annonces à l'avance combien de caractères (d'octets) il faut lire…"]]},
+ {id:"dst",title:"Le carrefour",layout:"B",to:"ines",need:["bin","start","len","dst"],
+  mission:"Maintenant tu es branché sur un routeur qui relie plusieurs ordinateurs. Envoie ton message à Inès.",
+  q:[["Que s'est-il passé au routeur ?","Le routeur a bien reçu ton paquet, mais il a trois sorties : vers qui le transmettre ? Dans le doute, il le jette."],
+     ["Comment on désigne un ordinateur sur un réseau ?","Chaque machine a une adresse IP, par exemple 192.168.1.57 : quatre nombres de 0 à 255."],
+     ["Pourquoi le routeur ne m'a pas prévenu ?","Il ne sait pas non plus qui tu es… Il ne peut donc pas te répondre !"]]},
+ {id:"src",title:"Le retour",layout:"B",to:"tom",need:["bin","start","len","dst","src"],reply:true,
+  mission:"Envoie ton message à Tom. Cette fois, Tom doit te répondre !",
+  q:[["Tom, tu as reçu mon message ?","Tom : « Oui ! J'ai essayé de répondre… mais à qui ? Il n'y avait pas ton adresse. »"],
+     ["Où est partie la réponse de Tom ?","Le routeur a reçu la réponse sans adresse de destination : il l'a jetée."],
+     ["Quelle est mon adresse ?","Elle est dans les paramètres réseau de ton PC : 192.168.1.10."]]},
+ {id:"port",title:"Les applications",layout:"B",to:"lea",apps:true,need:["bin","start","len","dst","src","port"],
+  mission:"Bob a plusieurs applications ouvertes : un navigateur, un jeu et sa messagerie. Envoie ton message dans sa messagerie 💬.",
+  q:[["Que dit l'ordinateur de Bob ?","« Paquet reçu, mais je ne sais pas à quelle application le donner ! »"],
+     ["Comment un ordinateur sait quelle application doit recevoir ?","Chaque application qui utilise le réseau a un numéro de « porte » : le port."],
+     ["Quel est le numéro de la messagerie ?","Dans ce jeu, la messagerie utilise le port 5222 (le web : 80 ou 443, le courriel : 25)."]]},
+ {id:"seq",title:"Le découpage",layout:"C",to:"lea",multi:true,need:["bin","start","len","dst","src","port","seq"],
+  mission:"Bob est maintenant loin, derrière plusieurs routeurs. Ton message « "+LONGMSG+" » est trop long : il est découpé en 4 paquets de 4 caractères.",
+  q:[["Bob, qu'as-tu reçu ?","Bob : « Des morceaux… mais dans n'importe quel ordre ! »"],
+     ["Pourquoi les paquets n'arrivent pas dans l'ordre ?","Ils ne prennent pas tous le même chemin : R2 est embouteillé, R3 est rapide."],
+     ["Comment Bob pourrait remettre les morceaux dans l'ordre ?","Si chaque paquet portait un numéro : 1, 2, 3, 4…"]]},
+ {id:"sum",title:"Les parasites",layout:"C",to:"lea",multi:true,storm:true,need:["bin","start","len","dst","src","port","seq","sum"],
+  mission:"Un orage ⚡ perturbe le câble entre R1 et R3. Envoie « "+LONGMSG+" » à Bob.",
+  q:[["Qu'a fait l'éclair ?","Il a changé un seul bit dans un paquet : 00110100 (le chiffre 4) est devenu 00110101 (le chiffre 5)."],
+     ["Pourquoi Bob ne s'est rendu compte de rien ?","Le paquet abîmé ressemble à un paquet normal : rien ne lui permet de vérifier qu'il est correct."],
+     ["Comment vérifier qu'un paquet n'a pas été modifié ?","On pourrait ajouter un nombre calculé à partir de tous les bits. Si un bit change, le calcul ne tombe plus juste."]]},
+ {id:"ack",title:"Le paquet perdu",layout:"C",to:"lea",multi:true,lossy:true,need:["bin","start","len","dst","src","port","seq","sum","ack"],
+  mission:"R3 est débordé : il lui arrive de jeter des paquets. Envoie « "+LONGMSG+" » à Bob et sois sûr que tout arrive.",
+  q:[["Bob, tu as tout reçu ?","Bob : « J'ai reçu RDV A 14H AU… et c'est tout. Il y avait une suite ? »"],
+     ["Comment je peux savoir qu'un paquet s'est perdu ?","Toi, tu ne sais rien : personne ne te confirme ce qui est bien arrivé."],
+     ["Que font les vrais réseaux ?","Le destinataire répond « bien reçu le n°… » pour chaque paquet. Sans réponse, on renvoie le paquet."]]},
+ {id:"ttl",title:"La boucle infinie",layout:"C",to:"lea",loop:true,need:["bin","start","len","dst","src","port","seq","sum","ack","ttl"],
+  mission:"Un routeur est mal réglé : R3 renvoie vers R1 les paquets pour Bob ! Envoie un paquet et observe.",
+  q:[["Où est mon paquet ?","Il tourne en rond R1 → R3 → R1 → R3… et il ne s'arrêtera jamais tout seul."],
+     ["C'est grave s'il tourne en rond ?","Oui : chaque paquet perdu dans la boucle occupe le réseau. Avec des milliers de paquets, tout est bloqué."],
+     ["Comment éviter qu'un paquet vive pour toujours ?","On pourrait lui donner un nombre maximum de routeurs à traverser, diminué de 1 à chaque routeur."]]}
+];
+
+/* ---------- sauvegarde ---------- */
+const KEY="snt-message-en-route";
+let save={un:1,st:{},msg:"",prof:false};
+try{Object.assign(save,JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){}
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+
+/* ---------- état de jeu ---------- */
+let G=null; // chapitre en cours
+let busy=false, noiseT=null, scrNoiseT=null, loopers=[];
+
+/* ---------- feuille (modale) ---------- */
+function sheet(html,buttons){
+  return new Promise(res=>{
+    const sh=$("#sheet"); sh.innerHTML=html+(buttons&&buttons.length?'<div class="btns"></div>':"");
+    const bx=sh.querySelector(".btns");
+    (buttons||[]).forEach(([lab,val,cls])=>{const b=document.createElement("button");b.innerHTML=lab;if(cls)b.className=cls;b.onclick=()=>{close();res(val)};bx.appendChild(b)});
+    sh._res=v=>{close();res(v)};
+    $("#veil").classList.remove("hidden"); sh.scrollTop=0;
+  });
+}
+function close(){$("#veil").classList.add("hidden")}
+
+/* ---------- menu ---------- */
+function totalStars(){return Object.values(save.st).reduce((a,b)=>a+b,0)}
+function renderMenu(){
+  stopFx();
+  $("#menu").classList.remove("hidden");$("#game").classList.add("hidden");$("#btnMenu").classList.add("hidden");
+  $("#totStars").textContent="⭐ "+totalStars()+" / "+CH.length*3;
+  const box=$("#chaps");box.innerHTML="";
+  CH.forEach((c,i)=>{
+    const b=document.createElement("button");b.className="chap"+(i<save.un||save.prof?"":" locked");
+    const s=save.st[c.id]||0; const f=F[c.id];
+    b.innerHTML=`<span class="n">Chapitre ${i+1}</span><b>${c.title}</b><span class="st">${"★".repeat(s)}${"☆".repeat(3-s)}</span>`+
+      (s?`<span class="f" style="background:${f.color}">${f.short||"01"} ${f.name}</span>`:`<span class="mut" style="font-size:12px;display:block;margin-top:6px">${i<save.un||save.prof?"Qu'est-ce qui va manquer ?":"🔒"}</span>`);
+    b.onclick=()=>startChapter(i);box.appendChild(b);
+  });
+}
+
+/* ---------- SVG ---------- */
+const svg=$("#net");
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);(parent||svg).appendChild(e);return e}
+function txt(x,y,s,attrs,parent){const t=el("text",Object.assign({x,y,"text-anchor":"middle","font-family":"system-ui,sans-serif"},attrs||{}),parent);t.textContent=s;return t}
+let L=null, layerFx=null;
+function drawNet(){
+  svg.innerHTML="";L=LAYOUTS[G.c.layout];
+  const N=L.nodes;
+  // chaque liaison = deux fils : un par sens (on « roule à droite »)
+  L.edges.forEach(([a,b])=>{
+    const dx=N[b][0]-N[a][0],dy=N[b][1]-N[a][1],d=Math.hypot(dx,dy),nx=-dy/d*WOFF,ny=dx/d*WOFF;
+    const col=G.c.storm&&a=="r1"&&b=="r3"?"#a16207":"#3b4458";
+    [1,-1].forEach(sg=>el("line",{x1:N[a][0]+sg*nx,y1:N[a][1]+sg*ny,x2:N[b][0]+sg*nx,y2:N[b][1]+sg*ny,stroke:col,"stroke-width":1.6,"stroke-linecap":"round"}));
+  });
+  if(G.c.layout=="A"){txt(200,92,"fil retour (Bob → Alice) ←",{fill:"#64748b","font-size":8});txt(200,136,"→ fil aller (Alice → Bob)",{fill:"#64748b","font-size":8});}
+  if(G.c.loop){el("path",{d:`M${N.r3[0]-14},${N.r3[1]-8} Q140,150 ${N.r1[0]+12},${N.r1[1]+12}`,fill:"none",stroke:"#ef4444","stroke-width":2,"stroke-dasharray":"5 4"});
+    txt(150,165,"mauvaise route !",{fill:"#f87171","font-size":9});}
+  if(G.c.storm){const N1=N.r1,N3=N.r3;txt((N1[0]+N3[0])/2+12,(N1[1]+N3[1])/2+4,"⚡",{"font-size":20});}
+  for(const id in N){
+    const [x,y,ic,lab]=N[id]; const g=el("g",{id:"n_"+id});
+    el("circle",{cx:x,cy:y,r:18,fill:id[0]=="r"?"#1e293b":"#172033",stroke:id==G.c.to?"#4ade80":"#475569","stroke-width":2},g);
+    txt(x,y+6,ic,{"font-size":17},g);
+    txt(x,y+32,lab,{fill:"#cbd5e1","font-size":10,"font-weight":700},g);
+    if(IP[id]&&G.c.layout!="A")txt(x,y+42,IP[id],{fill:"#64748b","font-size":7.5},g);
+  }
+  if(G.c.apps){const [x,y]=N.lea;["🌐","🎮","💬"].forEach((a,i)=>{const g=el("g",{id:"app"+i});el("rect",{x:x-62+i*20,y:y-10,width:18,height:18,rx:4,fill:"#1e293b",stroke:"#475569"},g);txt(x-53+i*20,y+4,a,{"font-size":11},g)})}
+  layerFx=el("g",{});
+}
+function P(...ids){return ids.map(i=>[L.nodes[i][0],L.nodes[i][1]])}
+function moveAlong(g,pts,speed){
+  speed=speed||170;
+  pts=pts.filter((p,i)=>i==0||p[0]!=pts[i-1][0]||p[1]!=pts[i-1][1]);
+  if(pts.length<2)return Promise.resolve();
+  return new Promise(res=>{
+    const seg=[];let tot=0;for(let i=1;i<pts.length;i++){const d=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);seg.push(d);tot+=d}
+    const t0=performance.now();
+    function f(now){
+      if(!g.isConnected){res();return}
+      let d=(now-t0)/1000*speed;
+      if(d>=tot){place(g,pts.length-2,1);res();return}
+      let i=0;while(d>seg[i]){d-=seg[i];i++}
+      place(g,i,d/seg[i]);requestAnimationFrame(f);
+    }
+    function place(g,i,k){
+      const ax=pts[i][0],ay=pts[i][1],dx=pts[i+1][0]-ax,dy=pts[i+1][1]-ay,len=Math.hypot(dx,dy),nx=-dy/len,ny=dx/len;
+      g.setAttribute("transform",`translate(${ax+dx*k+nx*WOFF},${ay+dy*k+ny*WOFF})`);
+      if(g._rot)g._rot.setAttribute("transform",`rotate(${Math.atan2(dy,dx)*180/Math.PI})`);
+      if(g._lab)g._lab.setAttribute("transform",`translate(${nx*15},${ny*15})`);
+    }
+    place(g,0,0);requestAnimationFrame(f);
+  });
+}
+function tween(ms,fn){return new Promise(res=>{const t0=performance.now();function f(n){const k=Math.min(1,(n-t0)/ms);fn(k);if(k<1)requestAnimationFrame(f);else res()}requestAnimationFrame(f)})}
+/* un train = le paquet en miniature, dessiné en créneaux sur le fil (1 = niveau haut) */
+const WOFF=5, BW=1.8, WH=9;
+const FBITS={start:"10101011",len:"010",ttl:"110",src:"011",dst:"101",port:"100",seq:"001",ack:"111",sum:"010"};
+function wave(g,chunks){ // chunks : [{bits,color,cls}]
+  const n=chunks.reduce((a,c)=>a+c.bits.length,0);let x=-n*BW/2,lv=0;
+  chunks.forEach(c=>{
+    let d=`M${x},${lv}`;
+    for(const b of c.bits){const y=b=="1"?WH:0;if(y!=lv)d+=`L${x},${y}`;lv=y;x+=BW;d+=`L${x},${y}`}
+    el("path",{d,fill:"none",stroke:c.color,"stroke-width":2,"stroke-linejoin":"miter",class:c.cls||""},g);
+  });
+}
+function train(opt){
+  opt=opt||{};
+  const g=el("g",{},layerFx);
+  if(!G.has("bin")){ // chapitre 1 : des lettres, pas des créneaux
+    const lab=opt.label||"Aa",w=lab.length*6+8;el("rect",{x:-w/2,y:-7,width:w,height:14,rx:2,fill:"#e2e8f0"},g);txt(0,3,lab,{"font-size":8,"font-weight":700,fill:"#0f172a"},g);return g;
+  }
+  const r=el("g",{},g);g._rot=r;
+  const fs=opt.fields||ORDER.filter(f=>G.has(f)||f=="data");
+  const dbits=toBin((G.c.multi?LONGMSG:G.msg).slice(0,2)).replace(/ /g,"");
+  wave(r,fs.map(f=>f=="data"?{bits:dbits,color:opt.dataColor||"#e2e8f0",cls:"dat"}:{bits:FBITS[f],color:F[f].color}));
+  if(opt.tag!=null&&opt.tag!==""){const l=el("g",{},g);g._lab=l;txt(0,3,opt.tag,{"font-size":9,"font-weight":800,fill:"#fff"},l)}
+  return g;
+}
+function msgTrain(label,color){
+  const g=el("g",{},layerFx);const r=el("g",{},g);g._rot=r;wave(r,[{bits:"1011001101",color}]);
+  const l=el("g",{},g);g._lab=l;const w=label.length*5+10;
+  el("rect",{x:-w/2,y:-6.5,width:w,height:13,rx:3,fill:color},l);txt(0,3,label,{"font-size":8,"font-weight":800,fill:"#0f172a"},l);return g;
+}
+async function drop(g){const tr=g.getAttribute("transform");await tween(700,k=>{g.setAttribute("transform",tr+` translate(0,${k*35}) rotate(${k*40})`);g.setAttribute("opacity",1-k)});g.remove()}
+async function boom(g){const tr=g.getAttribute("transform");const m=/translate\(([-\d.]+),([-\d.]+)\)/.exec(tr);g.remove();const b=txt(+m[1],+m[2]+6,"💥",{"font-size":18},layerFx);await tween(600,k=>b.setAttribute("opacity",1-k));b.remove()}
+function bubble(id,s,color,ms){
+  const [x,y]=L.nodes[id];const w=Math.min(230,s.length*5.6+14);
+  let bx=Math.max(4,Math.min(396-w,x-w/2)),by=y<60?y+46:y-50;
+  const g=el("g",{},layerFx);el("rect",{x:bx,y:by,width:w,height:18,rx:6,fill:color||"#fef3c7",stroke:"#0008"},g);
+  txt(bx+w/2,by+12.5,s,{"font-size":9.5,"font-weight":700,fill:"#111"},g);
+  if(ms!==0)setTimeout(()=>g.remove(),ms||2200);return g;
+}
+
+/* ---------- écran du destinataire ---------- */
+function scr(html,append){const s=$("#scr");if(append)s.innerHTML+=html;else s.innerHTML=html}
+const rbits=n=>{let s="";for(let i=0;i<n;i++)s+=Math.random()<.5?"0":"1";return s};
+function toBin(s){return [...s].map(c=>c.charCodeAt(0).toString(2).padStart(8,"0")).join(" ")}
+
+/* ---------- effets permanents ---------- */
+function stopFx(){clearInterval(noiseT);clearInterval(scrNoiseT);noiseT=scrNoiseT=null;loopers.forEach(g=>g.remove());loopers=[];$("#gauge").textContent=""}
+function startNoise(){
+  const N=L.nodes;
+  noiseT=setInterval(()=>{
+    const a=Math.random()<.5;const g=el("g",{},layerFx);const r=el("g",{},g);g._rot=r;wave(r,[{bits:rbits(5),color:"#4b6358"}]);
+    const y=N.me[1];moveAlong(g,a?[[70,y],[330,y]]:[[330,y],[70,y]],120+Math.random()*80).then(()=>g.remove());
+  },260);
+  scrNoiseT=setInterval(()=>{if(busy)return;const s=$("#scr");s.innerHTML=(s.innerHTML.length>900?"":s.innerHTML)+`<span class="nz">${rbits(6)}</span>`},350);
+}
+
+/* ---------- paquet ---------- */
+function renderPacket(){
+  const p=$("#packet");p.innerHTML="";
+  ORDER.forEach(f=>{
+    if(f=="data"){
+      const d=document.createElement("div");d.className="wag data";
+      const txtc=G.c.multi?LONGMSG:G.msg;
+      if(G.has("bin")){d.innerHTML=`Contenu (binaire)<small>${toBin(txtc)}</small>`;if(G.v.bin!==true){d.classList.add("need");d.onclick=()=>fillValue("bin")}}
+      else d.innerHTML=`Contenu<small>${esc(txtc)}</small>`;
+      p.appendChild(d);return;
+    }
+    if(!G.has(f))return;
+    const d=document.createElement("div");d.className="wag";d.style.background=F[f].color;
+    const v=G.v[f];d.innerHTML=`${F[f].short}<small>${v==null?"?":esc(valLabel(f,v))}</small>`;
+    if(v==null){d.classList.add("need");d.onclick=()=>fillValue(f)}
+    else if(["dst","len","src","port"].includes(f))d.onclick=()=>fillValue(f);
+    p.appendChild(d);
+  });
+}
+function valLabel(f,v){
+  if(f=="start")return "10101011";if(f=="len")return v+" octets";if(f=="sum")return "auto";if(f=="ack")return "oui";
+  if(f=="seq")return "1, 2, 3…";if(f=="ttl")return v;if(f=="port")return v;return v;
+}
+function autoValues(){
+  // valeurs automatiques ou déjà apprises
+  const c=G.c,i=G.i;
+  if(G.has("bin")&&i>0)G.v.bin=true;
+  if(G.has("start"))G.v.start=1;
+  if(G.has("len")&&(i>2||c.multi))G.v.len=c.multi?4:G.msg.length;
+  if(G.has("src")&&i>4)G.v.src=IP.me;
+  if(G.has("port")&&i>5)G.v.port=5222;
+  ["seq","sum","ack"].forEach(f=>{if(G.has(f))G.v[f]=1});
+  if(G.has("ttl"))G.v.ttl=6;
+}
+
+/* ---------- démarrer un chapitre ---------- */
+async function startChapter(i){
+  stopFx();
+  const c=CH[i];
+  G={i,c,fields:new Set(c.need.filter(f=>f!=c.id)),v:{},err:0,hint:0,asked:new Set(),fails:0,done:false,msg:save.msg||"SALUT BOB",
+     has(f){return this.fields.has(f)}};
+  autoValues();
+  $("#menu").classList.add("hidden");$("#game").classList.remove("hidden");$("#btnMenu").classList.remove("hidden");
+  $("#btnSol").classList.toggle("hidden",!save.prof);
+  $("#mTitle").textContent=`Chapitre ${i+1} · ${c.title}`;$("#mText").textContent=c.mission;
+  $("#scrLb").textContent="📺 Écran de "+WHO[c.to];scr("<span class='nz'>(en attente)</span>");
+  drawNet();renderPacket();
+  if(c.noise)startNoise();
+  if(i==0){
+    const m=await askMessage();G.msg=m;save.msg=m;store();renderPacket();
+  }
+}
+async function askMessage(){
+  const p=sheet(`<h2>✏️ Ton message</h2><p>Écris le message que tu veux envoyer à Bob (lettres sans accents, chiffres, espaces ; 14 caractères maximum).</p>
+   <input id="msgIn" maxlength="14" value="${esc(save.msg||"SALUT BOB")}" style="width:100%;font:700 20px ui-monospace,monospace;padding:8px;border-radius:8px;border:1px solid var(--line);background:#0b0e14;color:#fff;text-transform:uppercase">`,[]);
+  const sh=$("#sheet");const b=document.createElement("div");b.className="btns";b.innerHTML='<button class="pri">C\'est parti</button>';sh.appendChild(b);
+  b.firstChild.onclick=()=>{let v=$("#msgIn").value.normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/[^A-Z0-9 !?.,'-]/g,"").replace(/\s+/g," ").trim().slice(0,14);if(v.length<2)v="SALUT BOB";sh._res(v)};
+  return p;
+}
+
+/* ---------- remplir les valeurs (mini-défis) ---------- */
+async function fillValue(f){
+  if(busy)return;
+  const c=G.c;
+  if(f=="bin"){
+    const ch=G.msg[0],code=ch.charCodeAt(0);
+    const W=[128,64,32,16,8,4,2,1];let on=W.map(()=>0);
+    const render=()=>{
+      const sum=W.reduce((a,w,k)=>a+w*on[k],0);
+      $("#bits").innerHTML=W.map((w,k)=>`<div class="bit"><button class="${on[k]?"on":""}" data-k="${k}">${on[k]}</button><span>${w}</span></div>`).join("");
+      $("#bsum").innerHTML=`Total : <b>${sum}</b> ${sum==code?"✅":""}`;
+      $("#bits").querySelectorAll("button").forEach(b=>b.onclick=()=>{on[+b.dataset.k]^=1;render()});
+      $("#bok").disabled=sum!=code;
+    };
+    sheet(`<h2>🔢 Traduire en binaire</h2>
+      <p>Dans la table <b>ASCII</b>, chaque caractère a un numéro. La première lettre de ton message, <b style="font-size:20px">« ${esc(ch)} »</b>, a le numéro <b style="font-size:20px">${code}</b>.</p>
+      <p>Allume les bons bits (1 = courant, 0 = pas de courant) pour écrire <b>${code}</b> en binaire sur 8 bits :</p>
+      <div class="bits" id="bits"></div><p id="bsum" style="text-align:center"></p>
+      <p class="mut" style="font-size:13px">L'ordinateur fera ensuite pareil pour toutes les autres lettres.</p>
+      <div class="btns"><button class="pri" id="bok" disabled>Valider</button></div>`);
+    render();$("#bok").onclick=()=>{close();G.v.bin=true;renderPacket();scr(`Ton message en binaire : ${toBin(G.msg)}`)};
+    return;
+  }
+  if(f=="len"){
+    let n=G.v.len||0;const target=G.msg;
+    sheet(`<h2>📏 Longueur</h2><p>Combien d'octets Bob doit-elle lire pour ton message <b style="font-family:ui-monospace,monospace">« ${esc(target)} »</b> ? (1 caractère = 1 octet, les espaces comptent aussi !)</p>
+      <div class="stepper"><button id="m">−</button><b id="nv">${n}</b><button id="p">+</button></div><div class="btns"><button class="pri" id="ok">Valider</button></div>`);
+    $("#m").onclick=()=>{n=Math.max(0,n-1);$("#nv").textContent=n};$("#p").onclick=()=>{n=Math.min(30,n+1);$("#nv").textContent=n};
+    $("#ok").onclick=()=>{close();G.v.len=n;renderPacket()};return;
+  }
+  if(f=="dst"){
+    const ids=shuffle(["lea","tom","ines"]);
+    const v=await sheet(`<h2>📮 Adresse du destinataire</h2><p>Mission : envoyer à <b>${WHO[c.to]}</b>. Voici ton carnet d'adresses :</p>
+      <table class="t">${ids.map(k=>`<tr><td>${WHO[k]}</td><td style="font-family:ui-monospace,monospace">${IP[k]}</td></tr>`).join("")}</table>
+      <p>Quelle adresse écris-tu dans le paquet ?</p>`,shuffle(ids).map(k=>[`<span style="font-family:ui-monospace,monospace">${IP[k]}</span>`,IP[k]]));
+    G.v.dst=v;renderPacket();return;
+  }
+  if(f=="src"){
+    const opts=shuffle(Object.values(IP));
+    const v=await sheet(`<h2>↩️ Ton adresse (source)</h2><p>Paramètres réseau de ton PC :</p>
+      <div class="box" style="font-family:ui-monospace,monospace">Carte réseau : Ethernet<br>Adresse IPv4 . . . : ${IP.me}<br>Masque . . . . . . : 255.255.255.0</div><p>Quelle adresse écris-tu comme expéditeur ?</p>`,
+      opts.map(k=>[`<span style="font-family:ui-monospace,monospace">${k}</span>`,k]));
+    G.v.src=v;renderPacket();return;
+  }
+  if(f=="port"){
+    const v=await sheet(`<h2>🚪 Port de destination</h2><p>Quelle application de Bob doit recevoir ton message ? Voici la liste des ports :</p>
+      <table class="t">${PORTS.map(([n,l])=>`<tr><td style="font-family:ui-monospace,monospace">${n}</td><td>${l}</td></tr>`).join("")}</table>`,
+      shuffle(PORTS).map(([n])=>[`<span style="font-family:ui-monospace,monospace">${n}</span>`,n]));
+    G.v.port=v;renderPacket();return;
+  }
+}
+
+/* ---------- ajouter une information ---------- */
+function addInfoSheet(){
+  if(busy||G.done)return;
+  const real=["bin",...ORDER.filter(f=>f!="data")].filter(f=>!G.has(f));
+  const opts=shuffle([...real.map(f=>({f,opt:F[f].opt})),...shuffle(DISTRACT).slice(0,4)]);
+  sheet(`<h2>➕ Ajouter une information</h2><p class="mut">Quelle information manque pour régler <b>ce</b> problème ? Observe bien ce qui s'est passé sur le fil.</p><div class="grid2" id="addg"></div><div class="btns"><button id="addx">Annuler</button></div>`);
+  const gEl=$("#addg");
+  opts.forEach(o=>{const b=document.createElement("button");b.textContent=o.opt;b.onclick=()=>{close();chooseInfo(o)};gEl.appendChild(b)});
+  $("#addx").onclick=close;
+}
+async function chooseInfo(o){
+  const c=G.c;
+  if(o.f==c.id){
+    G.fields.add(o.f);autoValues();renderPacket();
+    await sheet(`<h2>✅ Bien vu !</h2><div class="wag" style="display:inline-block;background:${F[o.f].color}">${F[o.f].short||"01"} · ${F[o.f].name}</div>
+      <p>${F[o.f].expl}</p><p class="real">Dans la réalité : ${F[o.f].real}.</p>
+      ${needsValue(o.f)?"<p>➡️ Remplis maintenant la valeur de ce nouveau champ (wagon qui clignote), puis renvoie ton message.</p>":"<p>➡️ Renvoie ton message !</p>"}`,[["OK","ok","pri"]]);
+    if(needsValue(o.f))fillValue(o.f);
+    return;
+  }
+  G.err++;
+  if(o.f){
+    await sheet(`<h2>🤔 Bonne idée… mais pas maintenant</h2><p><b>${o.opt}</b> : c'est une vraie information des paquets réseau, et elle servira plus tard ! Mais elle ne règle pas <b>ce</b> problème-ci.</p><p class="mut">Relis ce que tu as observé, ou pose une question.</p>`,[["OK","ok"]]);
+  }else{
+    await sheet(`<h2>❌ Ça n'aide pas</h2><p><b>${o.opt}</b> : ${o.fb}</p>`,[["OK","ok"]]);
+  }
+}
+function needsValue(f){return (f=="bin"&&G.v.bin!==true)||(["len","dst","src","port"].includes(f)&&G.v[f]==null)}
+
+/* ---------- poser une question ---------- */
+function askSheet(){
+  if(busy)return;
+  const c=G.c;
+  sheet(`<h2>❓ Poser une question</h2><p class="mut">Tu peux demander au technicien du réseau ou croiser ${WHO[c.to]} dans le couloir. Chaque nouvelle question coûte un peu d'étoiles.</p><div id="qs"></div><div class="btns"><button id="qx">Fermer</button></div>`);
+  const box=$("#qs");
+  c.q.forEach(([q,a],k)=>{
+    const d=document.createElement("div");d.className="qa";
+    const b=document.createElement("button");b.style.width="100%";b.style.textAlign="left";b.textContent="💬 "+q;d.appendChild(b);
+    const show=()=>{if(!d.querySelector(".a")){const r=document.createElement("div");r.className="a";r.textContent=a;d.appendChild(r)}};
+    if(G.asked.has(k))show();
+    b.onclick=()=>{if(!G.asked.has(k)){G.asked.add(k);G.hint++}show()};
+    box.appendChild(d);
+  });
+  $("#qx").onclick=close;
+}
+
+/* ---------- envoi ---------- */
+function lock(v){busy=v;["#btnSend","#btnAdd","#btnAsk"].forEach(s=>$(s).disabled=v)}
+async function send(){
+  if(busy||G.done)return;
+  const pend=ORDER.concat(["bin"]).find(f=>G.has(f)&&needsValue(f));
+  if(pend){fillValue(pend);return}
+  lock(true);
+  let r;
+  try{
+    const c=G.c;
+    if(!G.has(c.id))r=await FAIL[c.id]();
+    else{r=await checkValues();if(!r)r=await WIN[c.id]()}
+  }finally{lock(false)}
+  if(r.win)return victory(r);
+  G.fails++;
+  const head=r.kind=="error"?`<h2>📩 Un message est revenu…</h2><div class="err">${r.err}</div>`:`<h2>🤫 Silence…</h2><p>Rien n'est revenu vers toi.</p>`;
+  const ch=await sheet(head+`<div class="box">👀 ${r.obs}</div>${r.val?"":"<p>Que fais-tu ?</p>"}`,
+    r.val?[["Corriger la valeur","fix","pri"]]:[["➕ Ajouter une information","add","pri"],["❓ Poser une question","ask"],["🔁 Fermer et réessayer","x"]]);
+  if(ch=="add")addInfoSheet();else if(ch=="ask")askSheet();else if(ch=="fix")fillValue(r.val);
+}
+
+/* mauvaises valeurs (champs déjà présents) */
+async function checkValues(){
+  const c=G.c,N=L.nodes;
+  if(G.has("len")&&!c.multi&&G.v.len!=G.msg.length){
+    G.err++;
+    const n=G.v.len,m=G.msg;const got=n<m.length?m.slice(0,n):m+"#%&!?@".slice(0,n-m.length);
+    const t=train();await moveAlong(t,P("me",c.layout=="A"?"lea":c.to));t.remove();
+    scr(`<span class="ok">▶</span> ${esc(got)}`);
+    if(c.layout=="A"){const e=msgTrain("ERREUR","#f87171");await moveAlong(e,P("lea","me"));e.remove();}
+    return {kind:"error",val:"len",err:`${WHO[c.to]} : « J'ai lu ${n} octets et j'ai reçu « ${esc(got)} ». Il y a un problème de longueur ! »`,obs:`Ton message fait ${m.length} caractères (espaces compris), mais le champ Longueur annonce ${n}.`};
+  }
+  if(G.has("dst")&&G.v.dst!=IP[c.to]){
+    G.err++;
+    const wrong=Object.keys(IP).find(k=>IP[k]==G.v.dst);
+    const t=train();
+    if(c.layout=="B"&&wrong!="me"){await moveAlong(t,P("me","r1",wrong));bubble(wrong,"Pas pour moi 🤷","#fde68a");await drop(t);}
+    else{await moveAlong(t,c.layout=="C"?P("me","r1","r2","r4"):P("me","r1"));bubble(c.layout=="C"?"r4":"r1","Adresse inconnue ici !","#fecaca");await drop(t);}
+    if(G.has("src")){const e=msgTrain("ERREUR","#f87171");await moveAlong(e,c.layout=="C"?P("r4","r2","r1","me"):P(wrong&&c.layout=="B"&&wrong!="me"?wrong:"r1","r1","me"));e.remove();
+      return {kind:"error",val:"dst",err:`Destination ${esc(G.v.dst)} : ce n'est pas l'ordinateur de ${WHO[c.to]} !`,obs:`Tu as écrit l'adresse ${esc(G.v.dst)}${wrong?" ("+WHO[wrong]+")":""} au lieu de celle de ${WHO[c.to]}.`};}
+    return {kind:"silence",val:"dst",obs:`Le paquet est parti vers ${esc(G.v.dst)}${wrong?" ("+WHO[wrong]+")":""}… ce n'est pas l'adresse de ${WHO[c.to]} ! Vérifie le carnet d'adresses.`};
+  }
+  if(G.has("src")&&G.v.src!=IP.me){
+    G.err++;
+    const wrong=Object.keys(IP).find(k=>IP[k]==G.v.src);
+    const t=train();await moveAlong(t,P("me","r1",c.to));t.remove();scr(`<span class="ok">✔</span> ${esc(G.msg)}`);
+    const e=msgTrain(c.reply?"Reçu 👍":"…",c.reply?"#86efac":"#cbd5e1");
+    if(wrong&&L.nodes[wrong]&&wrong!=c.to){await moveAlong(e,P(c.to,"r1",wrong));e.remove();bubble(wrong,"Hein ? Je n'ai rien demandé !","#fde68a")}else{await moveAlong(e,P(c.to,"r1"));await drop(e)}
+    await sleep(900);
+    return {kind:"silence",val:"src",obs:`La réponse est partie vers ${esc(G.v.src)}${wrong?" ("+WHO[wrong]+")":""} : ce n'est pas ton adresse ! Regarde les paramètres réseau de ton PC.`};
+  }
+  if(G.has("port")&&G.v.port!=5222){
+    G.err++;
+    const k=G.v.port==27015?1:(G.v.port==25?-1:0);
+    const t=train();await moveAlong(t,c.layout=="C"?P("me","r1","r2","r4","lea"):P("me","r1","lea"));t.remove();
+    if(c.apps&&k>=0){const a=$("#app"+k+" rect");a.setAttribute("stroke","#f87171");a.setAttribute("stroke-width",3);setTimeout(()=>{a.setAttribute("stroke","#475569");a.setAttribute("stroke-width",1)},2500)}
+    const app=PORTS.find(p=>p[0]==G.v.port)[1];
+    scr(`<span class="ko">${app}</span> a reçu des données incompréhensibles`);
+    const e=msgTrain("ERREUR","#f87171");await moveAlong(e,c.layout=="C"?P("lea","r4","r2","r1","me"):P("lea","r1","me"));e.remove();
+    return {kind:"error",val:"port",err:`Port ${G.v.port} (${app}) : « Ce message n'est pas pour moi, je ne le comprends pas. »`,obs:"Le message est arrivé chez Bob, mais dans la mauvaise application."};
+  }
+  return null;
+}
+
+/* ---------- scénarios d'échec (champ manquant) ---------- */
+const FAIL={
+ async bin(){
+  const t=train({label:G.msg.slice(0,4),dw:30});
+  await moveAlong(t,[[63,110],[110,110]],90);
+  t.remove();
+  const letters=[...G.msg];
+  await Promise.all(letters.map((ch,k)=>{const x=105+k*7;const g=txt(x,108,ch,{"font-size":13,"font-weight":800,fill:"#fde68a"},layerFx);const r=Math.random()*90-45;
+    return tween(1100+k*60,q=>{g.setAttribute("transform",`translate(${q*r*.4},${q*q*70}) rotate(${q*r} ${x} 108)`);g.setAttribute("opacity",1-q)}).then(()=>g.remove())}));
+  scr("<span class='nz'>(écran vide)</span>");await sleep(1200);
+  return {kind:"silence",obs:"Les lettres de ton message n'ont même pas pu entrer dans le fil : elles sont tombées par terre ! Rien n'est arrivé chez Bob."};
+ },
+ async start(){
+  const t=train({dataColor:"#4b6358",label:"01"});
+  scr("<span class='nz'>"+rbits(10)+"</span>",true);
+  await moveAlong(t,P("me","lea"),150);t.remove();
+  scr(`<span class="nz">${rbits(14)}</span>${toBin(G.msg).replace(/ /g,"")}<span class="nz">${rbits(14)}</span>`,true);
+  await sleep(1500);
+  return {kind:"silence",obs:"Tes bits sont bien arrivés au bout du fil… mais ils sont mélangés à tous les bits parasites. Sur l'écran de Bob, impossible de savoir lesquels sont les tiens."};
+ },
+ async len(){
+  const t1=train(),t2=train();
+  const p1=moveAlong(t1,P("me","lea"),150);await sleep(330);await Promise.all([p1,moveAlong(t2,P("me","lea"),150)]);t1.remove();t2.remove();
+  const got=esc(G.msg+"CA VA ?")+"<span class='ko'>#k%@ç&</span>";
+  scr(`<span class="ok">▶ début</span> ${got}`);
+  await sleep(500);
+  const e=msgTrain("ERREUR","#f87171");await moveAlong(e,P("lea","me"),150);e.remove();
+  return {kind:"error",err:`Bob : « J'ai lu « ${esc(G.msg)}CA VA ?#k%@ç& »… mais où s'arrête ton premier message ? Et c'est quoi la fin ? »`,
+    obs:"Bob a trouvé le début, mais il a tout lu d'un seul bloc : tes deux messages collés, puis les parasites du fil."};
+ },
+ async dst(){
+  const t=train();await moveAlong(t,P("me","r1"));
+  bubble("r1","Vers qui ?? ❓","#fde68a",2500);await sleep(900);await drop(t);await sleep(900);
+  return {kind:"silence",obs:"Le paquet est arrivé au routeur… qui l'a jeté. Personne ne l'a reçu, et le routeur ne t'a rien dit."};
+ },
+ async src(){
+  const t=train();await moveAlong(t,P("me","r1","tom"));t.remove();scr(`<span class="ok">✔</span> ${esc(G.msg)}`);
+  bubble("tom","Reçu ! Je réponds… à qui ?","#bbf7d0",2500);await sleep(800);
+  const e=msgTrain("Reçu 👍","#86efac");await moveAlong(e,P("tom","r1"));bubble("r1","Pour qui ? ❓","#fde68a",2000);await drop(e);await sleep(800);
+  return {kind:"silence",obs:"Tom a bien reçu ton message et t'a répondu. Mais sa réponse est restée bloquée au routeur, qui l'a jetée."};
+ },
+ async port(){
+  const t=train();await moveAlong(t,P("me","r1","lea"));t.remove();
+  bubble("lea","Pour quelle appli ?","#fde68a",2500);
+  [0,1,2].forEach(k=>{const a=$("#app"+k+" rect");a.setAttribute("stroke","#fbbf24");setTimeout(()=>a.setAttribute("stroke","#475569"),1800)});
+  scr("<span class='ko'>?</span> paquet reçu, aucune application désignée");await sleep(900);
+  const e=msgTrain("ERREUR","#f87171");await moveAlong(e,P("lea","r1","me"));e.remove();
+  return {kind:"error",err:"Ordinateur de Bob : « Paquet reçu, mais je ne sais pas à quelle application le donner : navigateur, jeu ou messagerie ? »",
+    obs:"Le message est bien arrivé sur l'ordinateur de Bob, qui t'a renvoyé une erreur (ça marche grâce à ton adresse source !)."};
+ },
+ async seq(){
+  const got=await multi({});
+  scr(`<span class="ko">?</span> ${esc(got)}`);
+  const e=msgTrain("ERREUR","#f87171");await moveAlong(e,P("lea","r4","r3","r1","me"));e.remove();
+  return {kind:"error",err:`Bob : « J'ai reçu « ${esc(got)} »… c'est dans le désordre, je n'y comprends rien ! »`,obs:"Les 4 paquets ont pris des chemins différents : ceux passés par R2 (embouteillé) sont arrivés après les autres."};
+ },
+ async sum(){
+  const got=await multi({storm:true});
+  scr(`<span class="ok">✔</span> ${esc(got)}`);
+  const e=msgTrain("OK, à 15H ! 👍","#86efac");await moveAlong(e,P("lea","r4","r3","r1","me"));e.remove();
+  return {kind:"error",err:"Bob : « OK, rendez-vous à 15H au CDI ! »",obs:"Bob a compris 15H au lieu de 14H ! Un éclair a changé un bit du paquet n°2, et personne ne s'en est rendu compte."};
+ },
+ async ack(){
+  const got=await multi({lose:true});
+  scr(`<span class="ok">✔</span> ${esc(got)}`);await sleep(1200);
+  return {kind:"silence",obs:"Le paquet n°4 a été jeté par R3. Bob a lu « RDV A 14H AU… » et ne sait pas qu'il manque la fin. Et toi, tu crois que tout est arrivé !"};
+ },
+ async ttl(){
+  const t=train();loopers.push(t);
+  await moveAlong(t,P("me","r1"));
+  const cyc=P("r1","r3");cyc.push(L.nodes.r1.slice(0,2));
+  (async()=>{while(t.isConnected)await moveAlong(t,cyc,190)})();
+  $("#gauge").textContent="🚧 Encombrement : "+"▮".repeat(loopers.length)+(loopers.length>=4?" RÉSEAU SATURÉ !":"");
+  await sleep(3200);
+  return {kind:"silence",obs:`Ton paquet tourne en rond R1 → R3 → R1… pour toujours ! Paquets coincés dans la boucle : ${loopers.length}. Plus tu en envoies, plus le réseau se bouche.`};
+ }
+};
+
+/* plusieurs paquets sur le réseau C */
+async function multi(o){
+  const N=L.nodes;const pathA=P("me","r1","r2","r4","lea"),pathB=P("me","r1","r3","r4","lea");
+  bubble("r2","Embouteillage ⏳","#fde68a",4000);
+  const arrived=[];
+  const runs=PARTS.map(async(p,k)=>{
+    await sleep(k*380);
+    const viaB=k%2==1; // 2 et 4 par R3 (rapide), 1 et 3 par R2 (lent)
+    const t=train({tag:G.has("seq")?k+1:"",label:"01"});
+    let txtp=p;
+    if(viaB){
+      await moveAlong(t,P("me","r1"),170);
+      if(o.storm&&k==1){
+        const m=[(N.r1[0]+N.r3[0])/2,(N.r1[1]+N.r3[1])/2];
+        await moveAlong(t,[P("r1")[0],m],170);
+        const z=txt(m[0],m[1]-10,"⚡ 0011010 0 → 1",{"font-size":9,fill:"#fde047","font-weight":800},layerFx);setTimeout(()=>z.remove(),1800);
+        t.querySelectorAll("path.dat").forEach(r=>r.setAttribute("stroke","#f87171"));
+        txtp="A 15";
+        await moveAlong(t,[m,P("r3")[0]],170);
+      }else await moveAlong(t,P("r1","r3"),170);
+      if(o.lose&&k==3){bubble("r3","Débordé ! 🗑","#fecaca",2500);await drop(t);return}
+      await moveAlong(t,P("r3","r4","lea"),170);
+    }else await moveAlong(t,pathA,95);
+    t.remove();arrived.push({k,t:txtp});
+    scr(`[${G.has("seq")?"n°"+(k+1):"?"}] ${esc(txtp)} `,arrived.length>1);
+  });
+  await Promise.all(runs);
+  if(o.keep)return arrived;
+  return (G.has("seq")?arrived.slice().sort((a,b)=>a.k-b.k):arrived).map(a=>a.t).join("");
+}
+
+/* ---------- scénarios de réussite ---------- */
+const WIN={
+ async bin(){
+  const t=train({label:"01"});await moveAlong(t,P("me","lea"),150);t.remove();
+  scr(toBin(G.msg));await sleep(600);
+  return {win:true,txt:"Tes 0 et tes 1 voyagent sur le fil sous forme de courant électrique et arrivent chez Bob. Mais… Bob voit-elle vraiment ton message ? (chapitre suivant)"};
+ },
+ async start(){
+  const t=train();await moveAlong(t,P("me","lea"),150);t.remove();
+  scr(`<span class="nz">${rbits(12)}</span><span class="ok">▶ DÉBUT</span> ${esc(G.msg)}<span class="ko">#k%@</span>`);await sleep(900);
+  return {win:true,txt:"Bob a repéré le motif de début et a décodé ton message ! Mais as-tu remarqué les caractères bizarres à la fin ? (chapitre suivant)"};
+ },
+ async len(){
+  const t1=train(),t2=train();const p1=moveAlong(t1,P("me","lea"),150);await sleep(330);await Promise.all([p1,moveAlong(t2,P("me","lea"),150)]);t1.remove();t2.remove();
+  scr(`<span class="ok">▶ ${G.msg.length} octets</span> ${esc(G.msg)}<br><span class="ok">▶ 7 octets</span> CA VA ?`);
+  const e=msgTrain("OUI ET TOI ?","#86efac");await sleep(400);await moveAlong(e,P("lea","me"),150);e.remove();
+  return {win:true,txt:"Bob a lu exactement le bon nombre d'octets : tes deux messages sont bien séparés, et les parasites ne sont plus lus."};
+ },
+ async dst(){
+  const t=train();await moveAlong(t,P("me","r1"));bubble("r1","→ "+IP.ines,"#bfdbfe",1500);await moveAlong(t,P("r1","ines"));t.remove();
+  scr(`<span class="ok">✔</span> ${esc(G.msg)}`);await sleep(700);
+  return {win:true,txt:"Le routeur a lu l'adresse de destination et a envoyé le paquet vers la bonne sortie : Inès l'a reçu !"};
+ },
+ async src(){
+  const t=train();await moveAlong(t,P("me","r1","tom"));t.remove();scr(`<span class="ok">✔</span> ${esc(G.msg)}`);
+  const e=msgTrain("Reçu 👍","#86efac");await moveAlong(e,P("tom","r1","me"));e.remove();
+  return {win:true,txt:"Tom a inversé les adresses (sa destination = ta source) et sa réponse est revenue jusqu'à toi."};
+ },
+ async port(){
+  const t=train();await moveAlong(t,P("me","r1","lea"));
+  const a=$("#app2 rect");a.setAttribute("stroke","#4ade80");a.setAttribute("stroke-width",3);
+  t.remove();scr(`<span class="ok">💬 Messagerie</span> ${esc(G.msg)}`);await sleep(900);
+  return {win:true,txt:"Le port 5222 a dirigé ton message vers la messagerie de Bob, et pas vers son jeu ni son navigateur."};
+ },
+ async seq(){
+  const arr=await multi({keep:true});
+  scr(arr.map(a=>`[n°${a.k+1}] ${esc(a.t)}`).join(" ")+"<br>↓ remis dans l'ordre :<br><span class='ok'>"+esc(arr.slice().sort((a,b)=>a.k-b.k).map(a=>a.t).join(""))+"</span>");
+  await sleep(1200);
+  return {win:true,txt:"Les paquets sont toujours arrivés dans le désordre… mais grâce aux numéros, Bob les a remis dans le bon ordre."};
+ },
+ async sum(){
+  const arr=await multi({keep:true,storm:true});
+  scr(arr.map(a=>a.k==1?`<span class="ko">[n°2] ✖ contrôle faux</span>`:`[n°${a.k+1}] ✔`).join(" "));
+  const e=msgTrain("Renvoie le n°2","#fde68a");await moveAlong(e,P("lea","r4","r2","r1","me"),190);e.remove();
+  const t=train({tag:2});await moveAlong(t,P("me","r1","r2","r4","lea"),190);t.remove();
+  scr(`<br>[n°2] ✔ → <span class="ok">${LONGMSG}</span>`,true);await sleep(800);
+  return {win:true,txt:"Bob a refait le calcul de contrôle : le paquet n°2 ne correspondait pas. Il l'a jeté et en a demandé un nouveau, qui est arrivé intact."};
+ },
+ async ack(){
+  const N=L.nodes;
+  const arr=await multi({keep:true,lose:true});
+  scr(arr.sort((a,b)=>a.k-b.k).map(a=>`[n°${a.k+1}] ✔`).join(" "));
+  await Promise.all(arr.map(async(a,j)=>{await sleep(j*250);const e=msgTrain("ACK "+(a.k+1),"#6ee7b7");await moveAlong(e,P("lea","r4","r2","r1","me"),210);e.remove()}));
+  const tm=bubble("me","⏱ Pas d'ACK pour le n°4…","#fde68a",0);await sleep(1600);tm.remove();
+  bubble("me","Je renvoie le n°4 !","#bfdbfe",1500);
+  const t=train({tag:4});await moveAlong(t,P("me","r1","r2","r4","lea"),200);t.remove();
+  scr(` [n°4] ✔ → <span class="ok">${LONGMSG}</span>`,true);
+  const e=msgTrain("ACK 4","#6ee7b7");await moveAlong(e,P("lea","r4","r2","r1","me"),210);e.remove();
+  return {win:true,txt:"Pour chaque paquet reçu, Bob a renvoyé un accusé de réception. Comme l'ACK n°4 n'arrivait pas, ton ordinateur a renvoyé le paquet n°4 tout seul."};
+ },
+ async ttl(){
+  let ttl=6;const t=train({tag:"TTL "+ttl});
+  const lab=t._lab.querySelector("text");lab.setAttribute("fill","#fca5a5");
+  await moveAlong(t,P("me","r1"));
+  const hops=["r3","r1","r3","r1","r3","r1"];let cur="r1";
+  for(const h of hops){ttl--;lab.textContent="TTL "+ttl;if(ttl<=0)break;await moveAlong(t,P(cur,h),200);cur=h}
+  bubble(cur,"TTL = 0 : détruit !","#fecaca",2200);await boom(t);
+  const e=msgTrain("TTL expiré","#f87171");await moveAlong(e,P(cur,"r1","me").filter((p,i,a)=>i==0||p[0]!=a[i-1][0]||p[1]!=a[i-1][1]));e.remove();
+  loopers.forEach(g=>g.remove());loopers=[];$("#gauge").textContent="";
+  bubble("r3","🔧 Route réparée !","#bbf7d0",2000);await sleep(1300);
+  const t2=train();await moveAlong(t2,P("me","r1","r3","r4","lea"));t2.remove();
+  scr(`<span class="ok">✔</span> ${LONGMSG}`);await sleep(600);
+  return {win:true,txt:"Ton paquet a été détruit au bout de 6 routeurs et une erreur « TTL expiré » t'a été renvoyée. Le technicien a ainsi repéré la boucle et l'a réparée : le paquet suivant est arrivé."};
+ }
+};
+
+/* ---------- victoire ---------- */
+async function victory(r){
+  G.done=true;
+  const pen=G.err+G.hint, s=pen==0?3:pen<=2?2:1, c=G.c;
+  save.st[c.id]=Math.max(save.st[c.id]||0,s);save.un=Math.max(save.un,G.i+2);store();
+  const f=F[c.id];const last=G.i==CH.length-1;
+  const ch=await sheet(`<h2>🎉 Message reçu !</h2><div class="stars">${"★".repeat(s)}${"☆".repeat(3-s)}</div>
+    <p>${r.txt}</p><div class="box">Nouveau champ : <b style="color:${f.color}">${f.name}</b><br><span class="real">${f.real}</span></div>
+    <p class="mut" style="font-size:13px">Erreurs : ${G.err} · Questions posées : ${G.hint}</p>`,
+    [["↺ Rejouer","again"],[last?"🧩 Voir le paquet complet":"Chapitre suivant ➜","next","pri"]]);
+  if(ch=="again")startChapter(G.i);else if(last)anatomy();else startChapter(G.i+1);
+}
+
+/* ---------- le paquet complet ---------- */
+function anatomy(){
+  const ok=f=>save.prof||save.st[f];
+  const cell=f=>ok(f)?`<div style="background:${F[f].color}">${F[f].short||"DONNÉES"}</div>`:`<div style="background:#334155;color:#94a3b8">???</div>`;
+  const wire=ORDER.map(f=>f=="data"?cell("bin"):cell(f)).join("");
+  const row=(t,fs)=>`<div class="layer"><b>${t}</b> : ${fs.map(f=>ok(f)?F[f].name:"???").join(", ")}</div>`;
+  sheet(`<h2>🧩 Le paquet complet</h2><p>Voici, dans l'ordre, tout ce qui part sur le fil pour un simple message :</p><div id="anat">${wire}</div>
+    ${row("Couche accès réseau (Ethernet)",["start"])}${row("Couche Internet (IP)",["len","ttl","src","dst"])}${row("Couche transport (TCP)",["port","seq","ack","sum"])}${row("Couche application",["bin"])}
+    <p class="mut" style="font-size:13px">Chaque couche ajoute son <b>en-tête</b> devant les données : c'est l'<b>encapsulation</b>. Dans un vrai paquet, il y a encore d'autres champs (adresses MAC, version, drapeaux…), mais tu as découvert les principaux.</p>
+    ${CH.every(c=>ok(c.id))?"":"<p>Termine tous les chapitres pour tout dévoiler !</p>"}`,[["Fermer","x"]]);
+}
+
+/* ---------- mode prof ---------- */
+async function prof(){
+  sheet(`<h2>🔑 Mode enseignant</h2><p>Code :</p><input id="pc" style="width:100%;font-size:18px;padding:8px;border-radius:8px;border:1px solid var(--line);background:#0b0e14;color:#fff"><div class="btns"><button id="pok" class="pri">Valider</button><button id="px">Annuler</button></div><p id="pm" class="mut"></p>`);
+  $("#px").onclick=close;
+  $("#pok").onclick=()=>{if($("#pc").value.trim().toUpperCase()=="SNT-PROF"){save.prof=true;store();close();renderMenu()}else $("#pm").textContent="Code incorrect."};
+}
+
+/* ---------- boutons ---------- */
+$("#btnSend").onclick=send;
+$("#btnAdd").onclick=addInfoSheet;
+$("#btnAsk").onclick=askSheet;
+$("#btnSol").onclick=()=>sheet(`<h2>💡 Solution</h2><p>Champ à ajouter : <b>${F[G.c.id].opt}</b></p><p>${F[G.c.id].expl}</p>`,[["OK","x"]]);
+$("#btnMenu").onclick=()=>{if(!busy)renderMenu()};
+$("#btnAnat").onclick=anatomy;
+$("#btnProf").onclick=prof;
+$("#btnReset").onclick=async()=>{if(await sheet("<h2>Effacer ?</h2><p>Toutes tes étoiles seront perdues.</p>",[["Oui, effacer","y","warn"],["Non","n"]])=="y"){save={un:1,st:{},msg:"",prof:false};store();renderMenu()}};
+$("#veil").onclick=e=>{if(e.target.id=="veil"&&$("#sheet").querySelector(".btns button")){/* clic à côté : rien */}};
+renderMenu();
+</script>
+
+</body></html>
