@@ -4,7 +4,7 @@ Série ludique sur la cognition, sur le modèle de Techno Survivor. On y aborde 
 
 Le but est la métacognition : nous avons des biais, comme l'IA, et beaucoup sont aussi des superpouvoirs. Aucun jugement : tout le monde tombe dans les pièges, et c'est la diversité des points de vue qui compense.
 
-Il y a 12 jeux, en 6 paires. Une paire s'ouvre quand les deux jeux de la paire précédente ont leur découverte notée. Le code enseignant `SNT-PROF` ouvre tout. L'enquête finale (8 situations de la vie réelle : quel mécanisme ?) s'ouvre après les 12 jeux.
+Il y a 13 jeux : 6 paires, puis un 7e jeu seul. Une paire s'ouvre quand les deux jeux de la paire précédente ont leur découverte notée. Le code enseignant `SNT-PROF` ouvre tout. L'enquête finale (9 situations de la vie réelle : quel mécanisme ?) s'ouvre après les 13 jeux.
 
 | Paire | Jeux | État |
 | --- | --- | --- |
@@ -14,6 +14,7 @@ Il y a 12 jeux, en 6 paires. Une paire s'ouvre quand les deux jeux de la paire p
 | 4 · Le jeu du statut | 👑 Détecteur de statut · 🪙 Toujours plus | 🧪 à tester |
 | 5 · La tribu | 👥 Pression du groupe · 🟦 Ma tribu | 🧪 à tester |
 | 6 · Les marchands d'attention | 📺 Attention Tycoon · 🏭 Fabrique à besoins | 🧪 à tester |
+| 7 · Les chiffres et moi | 📊 Moyenne ou destin ? (erreur écologique, déterminisme social) | 🧪 à tester |
 
 ## Les deux jeux jouables
 
@@ -30,6 +31,14 @@ Il y a 12 jeux, en 6 paires. Une paire s'ouvre quand les deux jeux de la paire p
 3. La tache aveugle, que le cerveau remplit avec les rayures du fond.
 4. Le mot suivant, avec le lien vers les IA de langage.
 
+## 📊 Moyenne ou destin ?
+
+Reprise de l'activité « biais d'écologie ». 120 survivants fictifs, deux camps.
+
+1. On parie sur la réussite de 8 survivants en ne connaissant que leur camp. Les nuages de points se recouvrent : la moyenne décrit le camp, pas la personne.
+2. On ouvre les sacs à dos (livres, mentor, temps). À ressources égales, les deux camps font pareil : l'écart vient de contraintes inégalement réparties. Dans un même groupe, les scores vont du simple au triple.
+3. Noa, du Marais, avec 1 ressource sur 3 : 200 vies simulées, puis des leviers (mentor, ressources gratuites, ne pas croire que c'est joué). Une contrainte est un sac plus lourd, pas un mur.
+
 ## La découverte, en 5 étapes, sans pénalité
 
 1. Ce qui s'est passé : un QCM, suivi d'un message rassurant (« la plupart des gens font pareil, ton prof aussi »).
@@ -42,7 +51,7 @@ Il y a 12 jeux, en 6 paires. Une paire s'ouvre quand les deux jeux de la paire p
 
 `brain-exploration-scorm.zip` est un paquet SCORM 1.2.
 
-- La note sur 100 correspond à la part des 12 jeux dont la découverte est notée.
+- La note sur 100 correspond à la part des 13 jeux dont la découverte est notée.
 - Chaque réponse est envoyée comme interaction, avec les identifiants suivants :
   - `<jeu>_revelation`, `_superpouvoir`, `_enqueteN` et `_ia`, accompagnés de correct / wrong ;
   - `<jeu>_phrase`, `_aide` et `_piege` pour les textes de l'élève.

@@ -1,7 +1,7 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Brain Exploration</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v6 · 15/11/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v7 · 21/11/2026</div>
 <!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
 <button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 58px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
 <script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
@@ -1401,7 +1401,138 @@ function discBesoins(){
 /* =========================================================
    ENQUÊTE FINALE : quel mécanisme est à l'œuvre ?
    ========================================================= */
-const EF_M=['Pilote automatique','Prédiction','Détecteur de changement','Habituation','Conteur','Miroir flatteur','Radar à statut','Toujours plus','Instinct de meute','Esprit d\'équipe','Marchands d\'attention','Besoin fabriqué'];
+
+/* =========================================================
+   13 · MOYENNE OU DESTIN ? (erreur écologique)
+   A. paris sur l'étiquette du camp · B. on ouvre le sac à dos
+   C. ton chemin : une contrainte pénalise, elle ne décide pas
+   ========================================================= */
+const ECO=(()=>{
+  let seed=34; const rnd=()=>{ seed=seed*16807%2147483647; return (seed-1)/2147483646; };
+  const gauss=()=>{ const u=rnd()||1e-9, v=rnd(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+  const SYL=['Ma','Lou','Ty','Né','Sa','Ka','Li','No','Ya','Zo','Ri','Ilo','Ba','Té'];
+  const P=[];
+  [['C',60,.75],['M',60,.3]].forEach(([camp,n,p])=>{ for(let k=0;k<n;k++){
+    const r=[rnd()<p,rnd()<p,rnd()<p]; const nr=r.filter(Boolean).length;
+    P.push({camp,r,nr,name:SYL[Math.floor(rnd()*14)]+SYL[Math.floor(rnd()*14)].toLowerCase(),score:Math.max(5,Math.min(98,Math.round(38+11*nr+13*gauss())))});
+  }});
+  return {P,gauss,SEUIL:55};
+})();
+const ECO_RES=[['📚','des livres et un coin calme pour réviser'],['🧭','quelqu\'un qui a déjà réussi l\'épreuve et qui conseille'],['⏱️','du temps pour s\'entraîner, sans corvées']];
+const ECO_CAMP={C:['Camp de la Colline','#5ce1e6'],M:['Camp du Marais','#b18cff']};
+const ecoPass=p=>p.score>=ECO.SEUIL;
+const ecoMean=a=>avg(a.map(p=>p.score));
+function ecoDraw(){ // 8 survivants dont au moins 2 qui contredisent l'étiquette
+  const contra=shuffle(ECO.P.filter(p=>(p.camp==='C')!==ecoPass(p))).slice(0,2);
+  return shuffle([...contra,...shuffle(ECO.P.filter(p=>!contra.includes(p))).slice(0,6)]);
+}
+function ecoStrip(groups){
+  return `<div style="position:relative;margin:8px 0 30px;border-left:1px solid var(--line);border-bottom:1px solid var(--line);height:${groups.length*46+10}px">
+    <div style="position:absolute;top:0;bottom:0;left:${ECO.SEUIL}%;border-left:2px dashed var(--amber)"></div>
+    ${groups.map((g,k)=>`<div style="position:absolute;left:0;right:0;top:${20+k*46}px;height:26px"><span style="position:absolute;left:6px;top:-19px;font-size:12px;color:var(--muted)">${g.lab} · moyenne ${Math.round(ecoMean(g.list))}</span>${g.list.map((p,j)=>`<span style="position:absolute;left:${p.score}%;top:${(j%3)*6}px;width:9px;height:9px;margin-left:-4px;border-radius:50%;background:${g.col||ECO_CAMP[p.camp][1]};opacity:.85"></span>`).join('')}<span style="position:absolute;left:${ecoMean(g.list)}%;top:-3px;width:4px;height:22px;margin-left:-2px;border-radius:2px;background:#fff"></span></div>`).join('')}
+    <div style="position:absolute;left:0;right:0;bottom:-20px;font-size:12px;color:var(--muted)">${[0,25,55,75,100].map(v=>`<span style="position:absolute;left:${v}%;transform:translateX(-50%)">${v===55?'réussite 55':v}</span>`).join('')}</div></div>`;
+}
+function gDestin(){ partHead('📊','Moyenne ou destin ?',1,3,'Deux camps de survivants passent l\'épreuve de survie en solo. On réussit avec 55 sur 100. Pour chaque survivant, parie : réussite ou échec ?'); ecoBets(false); }
+function ecoBets(open){
+  const L=ecoDraw(); let i=0, ok=0;
+  const C=ECO.P.filter(p=>p.camp==='C'), M=ECO.P.filter(p=>p.camp==='M');
+  const box=mk('div',null,null,main);
+  const stats=open
+    ? [0,1,2,3].map(n=>[`${n} ressource${n>1?'s':''} sur 3`,ecoMean(ECO.P.filter(p=>p.nr===n))])
+    : [[ECO_CAMP.C[0],ecoMean(C)],[ECO_CAMP.M[0],ecoMean(M)]];
+  function trial(){
+    if(i>=L.length) return open?ecoReveal2(ok):ecoReveal1(ok);
+    const p=L[i], cc=ECO_CAMP[p.camp];
+    box.innerHTML=`<div class="card"><p class="lead" style="margin:0">Survivant ${i+1}/${L.length}</p>
+      <div style="display:flex;gap:12px;align-items:center;margin:8px 0"><div style="width:64px;height:64px;border-radius:50%;background:${cc[1]};display:grid;place-items:center;font-size:30px;flex:none">🎒</div><div><b style="font-size:20px">${p.name}</b><br><span style="color:${cc[1]};font-weight:700">${cc[0]}</span></div></div>
+      ${open?`<p style="margin:6px 0"><b>Dans son sac :</b> ${ECO_RES.map((r,k)=>`<span style="display:inline-block;margin:2px 4px;opacity:${p.r[k]?1:.25}">${r[0]}</span>`).join('')} <span class="lead">(${p.nr}/3)</span></p>`:''}
+      <p class="lead" style="font-size:13px;margin:8px 0 4px">Score moyen à l'épreuve :</p>
+      ${stats.map(([l,v])=>`<div style="display:grid;grid-template-columns:9.5em 1fr 2.5em;gap:8px;align-items:center;font-size:13px;margin:3px 0"><span>${l}</span><div style="height:10px;background:var(--deep);border-radius:6px;overflow:hidden"><div style="width:${v}%;height:100%;background:var(--cyan)"></div></div><span>${Math.round(v)}</span></div>`).join('')}
+      <div id="eb"></div></div>`;
+    const eb=$('#eb');
+    eb.innerHTML=`<div class="row c" style="margin-top:10px"><button class="btn ok" data-g="1">✅ Réussite</button><button class="btn" data-g="0">❌ Échec</button></div>`;
+    eb.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{
+      const g=b.dataset.g==='1', good=g===ecoPass(p); if(good){ ok++; addPts(1); }
+      eb.innerHTML=`<p class="fb ${good?'good':'info'}">${good?'Bien vu':'Raté'} : ${p.score}/100, ${ecoPass(p)?'réussite':'échec'}.</p><div style="position:relative;height:16px;background:var(--deep);border-radius:8px"><div style="width:${p.score}%;height:100%;border-radius:8px;background:${cc[1]}"></div><div style="position:absolute;top:-4px;bottom:-4px;left:${ECO.SEUIL}%;width:3px;background:var(--amber)"></div></div>`;
+      nextBtn(i<L.length-1?'Survivant suivant →':'Voir les 120 survivants',()=>{ i++; trial(); },eb);
+    });
+  }
+  trial();
+}
+function ecoReveal1(ok){
+  const C=ECO.P.filter(p=>p.camp==='C'), M=ECO.P.filter(p=>p.camp==='M');
+  const mb=M.filter(p=>p.score>ecoMean(C)).length, cf=C.filter(p=>!ecoPass(p)).length;
+  const acc=ECO.P.filter(p=>(p.camp==='C')===ecoPass(p)).length;
+  sendInt('destin_paris1',ok+'/8');
+  main.innerHTML=''; partHead('📊','Moyenne ou destin ?',1,3,'Voici les 120 survivants. Chaque point est une personne, le trait blanc est la moyenne du camp.');
+  mk('div','card',`<p>Tes paris : <b>${ok} justes sur 8</b>.</p>${ecoStrip([{lab:ECO_CAMP.C[0],list:C},{lab:ECO_CAMP.M[0],list:M}])}
+    <p>👉 <b>${mb}</b> survivants du Marais font <b>mieux que la moyenne</b> de la Colline.<br>👉 <b>${cf}</b> survivants de la Colline <b>échouent</b> quand même.<br>👉 Parier « Colline réussit, Marais échoue » sur les 120 : juste <b>${acc} fois sur 120</b>.</p>
+    <p>La moyenne décrit <b>le camp</b>. Elle dit très peu de chose d'<b>une personne</b> : les deux nuages se recouvrent largement. Appliquer la moyenne d'un groupe à un individu, c'est l'<b>erreur écologique</b>.</p>
+    <p class="lead">Mais alors, d'où vient l'écart entre les deux camps ?</p>`,main);
+  nextBtn('Ouvrir les sacs à dos →',()=>{ main.innerHTML=''; partHead('📊','Moyenne ou destin ?',2,3,`Cette fois, tu vois ce que chaque survivant a dans son sac : ${ECO_RES.map(r=>r[0]+' '+r[1]).join(', ')}. Parie à nouveau.`); ecoBets(true); });
+}
+function ecoReveal2(ok){
+  const C=ECO.P.filter(p=>p.camp==='C'), M=ECO.P.filter(p=>p.camp==='M');
+  const share=a=>Math.round(100*avg(a.map(p=>p.nr))/3);
+  const same=ECO.P.filter(p=>p.nr===1), sMin=Math.min(...same.map(p=>p.score)), sMax=Math.max(...same.map(p=>p.score));
+  sendInt('destin_paris2',ok+'/8');
+  main.innerHTML=''; partHead('📊','Moyenne ou destin ?',2,3,'Les mêmes 120 survivants, rangés cette fois selon ce qu\'ils avaient dans leur sac.');
+  mk('div','card',`<p>Tes paris : <b>${ok} justes sur 8</b>.</p>${ecoStrip([0,1,2,3].map(n=>({lab:`${n} ressource${n>1?'s':''} sur 3`,list:ECO.P.filter(p=>p.nr===n)})))}
+    <p>Les couleurs sont mélangées : <b>à ressources égales, les deux camps font pareil</b>. À la Colline, les sacs étaient remplis à ${share(C)} %, au Marais à ${share(M)} %. L'écart venait de là : des <b>contraintes</b> réparties inégalement, pas de ce que <i>sont</i> les gens du Marais.</p>
+    <p>Et regarde une même ligne : avec exactement 1 ressource sur 3, les scores vont de <b>${sMin}</b> à <b>${sMax}</b>. Entraînement, rencontres, choix, chance : <b>à l'intérieur d'un groupe, les trajectoires sont très différentes</b>.</p>`,main);
+  nextBtn('Et toi ? →',ecoPath);
+}
+function ecoPath(){
+  main.innerHTML=''; partHead('📊','Moyenne ou destin ?',3,3,'Tu es Noa. Tu viens du Marais, et ton sac ne contient qu\'une ressource sur trois : ⏱️ du temps. Les statistiques ne sont pas en ta faveur. Qu\'est-ce que tu peux faire ?');
+  const LEV=[
+    {k:'m',e:'🧭',t:'Trouver un mentor',d:'un prof, un ancien élève, une association de parrainage',gain:11},
+    {k:'b',e:'📚',t:'Aller chercher les ressources gratuites',d:'CDI, médiathèque, cours en ligne, salle d\'étude',gain:11},
+    {k:'c',e:'🗣️',t:'Ne pas croire que c\'est joué d\'avance',d:'quand on pense « de toute façon, c\'est foutu », on s\'entraîne moins',gain:4}
+  ];
+  const on={}; const box=mk('div',null,null,main);
+  const lives=base=>Array.from({length:200},()=>Math.max(5,Math.min(98,Math.round(base+13*ECO.gauss()))));
+  const histo=(s,col)=>{ const b=Array(20).fill(0); s.forEach(v=>b[Math.min(19,Math.floor(v/5))]++); const mx=Math.max(...b,1);
+    return `<div style="display:flex;align-items:flex-end;gap:2px;height:90px;position:relative;border-bottom:1px solid var(--line)">${b.map((n,k)=>`<div style="flex:1;height:${n/mx*100}%;background:${k*5>=ECO.SEUIL?col:'#5b6390'};border-radius:3px 3px 0 0"></div>`).join('')}<div style="position:absolute;top:0;bottom:0;left:${ECO.SEUIL}%;border-left:2px dashed var(--amber)"></div></div>`; };
+  const C=ECO.P.filter(p=>p.camp==='C'), cRate=Math.round(100*C.filter(ecoPass).length/C.length);
+  function draw(){
+    const base=38+11+LEV.filter(l=>on[l.k]).reduce((s,l)=>s+l.gain,0);
+    const s=lives(base), r=Math.round(100*s.filter(v=>v>=ECO.SEUIL).length/s.length);
+    box.innerHTML=`<div class="card"><p class="lead" style="margin:0 0 6px">200 vies possibles de Noa (même départ, chance et rencontres différentes) :</p>${histo(s,'#b18cff')}
+      <p style="margin:8px 0">Noa réussit l'épreuve dans <b>${r} %</b> de ses vies. <span class="lead">(Survivants de la Colline : ${cRate} %.)</span></p>
+      <p class="lead" style="margin:10px 0 6px"><b>Ce que Noa peut faire</b> (touche pour essayer) :</p>
+      <div class="opts">${LEV.map(l=>`<button class="opt${on[l.k]?' right':''}" data-k="${l.k}">${on[l.k]?'✓ ':''}${l.e} ${l.t}<br><span style="font-weight:400;font-size:13px;color:var(--muted)">${l.d}</span></button>`).join('')}</div></div>`;
+    box.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ on[b.dataset.k]=!on[b.dataset.k]; draw(); });
+    if(Object.values(on).filter(Boolean).length>=2 && !$('#eco-end')) showEnd();
+  }
+  function showEnd(){
+    const e=mk('div','card',`<p>Remarque deux choses :</p><p>1. <b>Même sans rien changer</b>, Noa réussit dans une partie de ses vies : la statistique ne l'interdisait pas.</p><p>2. Les contraintes restent réelles et <b>ce n'est pas la faute de Noa</b> : son sac était plus léger au départ. Mais une contrainte, c'est un <b>sac plus lourd, pas un mur</b>. Savoir où elle se trouve permet de chercher comment la contourner.</p><p>Et une société peut aussi décider de mieux remplir les sacs (bourses, internats, mentorat, transports…) : c'est un choix collectif, pas une fatalité.</p><p class="reassure" style="margin:0">Les statistiques te disent où sont les obstacles, pas jusqu'où tu iras.</p>`,main); e.id='eco-end';
+    addPts(3); toDisc(discDestin);
+  }
+  draw();
+}
+function discDestin(){
+  discovery('destin',{
+    reveal:{ q:'Pourquoi les paris faits sur le seul nom du camp se trompaient-ils si souvent ?', opts:['Parce que les gens du Marais sont moins doués','Parce qu\'une moyenne décrit un groupe, pas une personne : les deux nuages se recouvraient largement','Parce que je n\'ai pas eu de chance'], good:1,
+      explain:'L\'écart entre camps était réel, mais petit à côté des différences entre personnes d\'un même camp. Et il venait des sacs à dos, pas des gens. Appliquer la moyenne d\'un groupe à un individu, c\'est l\'erreur écologique.' },
+    power:{ name:'la généralisation éclair', emoji:'🏕️🐺🫐', scene:'Pour un chasseur-cueilleur, retenir que « dans cette vallée, il y a souvent des loups » ou que « ces baies-là rendent souvent malade » permettait de décider vite, sans tout tester soi-même. Penser par groupes, c\'est économiser des expériences dangereuses.',
+      q:'Pourquoi raisonner sur des groupes était-il utile ?', opts:['Pour décider vite sans goûter chaque baie ni visiter chaque vallée','Pour connaître chaque personne en détail','Ça ne servait à rien'], good:0,
+      explain:'Une moyenne est un excellent résumé pour décider vite face à des choses ou des lieux. Elle devient un piège quand on l\'applique à une personne, et encore plus à soi-même.',
+      help:'tu repères où sont les obstacles (pas de transport, pas de stage par relation, pas d\'option dans ton lycée) et tu cherches comment les contourner.',
+      trap:'tu appliques la moyenne de ton groupe à toi-même : « dans mon quartier, personne ne fait d\'études longues, donc pas moi ».' },
+    cases:[
+      { s:'Un article dit que les élèves de ton secteur réussissent moins bien au bac. Tu te dis : « Inutile d\'essayer. »', a:'piege', why:'La moyenne du secteur ne décide pas de ta note. Croire que c\'est joué fait baisser l\'effort, et la prédiction se réalise toute seule.' },
+      { s:'Tu sais que peu d\'élèves de ton lycée trouvent un stage grâce à leurs parents. Tu demandes une liste d\'entreprises à ton prof principal et au CDI.', a:'aide', why:'Connaître la contrainte du groupe permet de la contourner à titre individuel.' },
+      { s:'Un recruteur écarte un CV à cause de l\'adresse, parce que « statistiquement, ce quartier… ».', a:'piege', why:'Décider à l\'étiquette fabrique l\'écart qu\'on croit seulement constater : sans emploi, les habitants du quartier réussissent moins, et la statistique semble confirmée.' },
+      { s:'Le ministère voit que les élèves ruraux ont moins d\'options près de chez eux et ouvre des cours à distance.', a:'aide', why:'Une statistique de groupe sert ici à repérer une contrainte et à la retirer, pas à juger les personnes.' }
+    ],
+    ai:{ html:'<p>Une IA apprend sur des millions d\'exemples passés. Si on lui demande de trier des CV ou de prédire la réussite d\'un élève, elle s\'appuie sur des moyennes de groupes : quartier, prénom, lycée…</p>',
+      q:'Quel est le risque ?', opts:['Elle juge chaque personne sur la moyenne de son groupe et reproduit les inégalités du passé','Aucun : les chiffres sont neutres','Elle se trompe à chaque fois'], good:0,
+      explain:'C\'est déjà arrivé : en 2018, Amazon a abandonné un outil de tri de CV qui défavorisait les candidatures de femmes, parce qu\'il avait appris sur les embauches passées. Une moyenne n\'est pas un destin, ni pour toi, ni dans une IA qui te note.' },
+    ask:'Avec tes mots, en une phrase : qu\'est-ce qu\'une statistique sur ton groupe dit de toi, et qu\'est-ce qu\'elle ne dit pas ?'
+  });
+}
+
+const EF_M=['Pilote automatique','Prédiction','Détecteur de changement','Habituation','Conteur','Miroir flatteur','Radar à statut','Toujours plus','Instinct de meute','Esprit d\'équipe','Marchands d\'attention','Besoin fabriqué','Erreur écologique'];
 const EF_C=[
   ['Après un mois en 3e, Lina ne remarque plus l\'odeur de la cantine.',3],
   ['Un influenceur montre sa nouvelle voiture : ses abonnés regardent soudain la leur avec moins de plaisir.',7],
@@ -1410,10 +1541,11 @@ const EF_C=[
   ['Dans un groupe de discussion, tout le monde valide une rumeur ; personne n\'ose demander la source.',8],
   ['Une appli invente une « série de jours » à ne surtout pas perdre.',10],
   ['Dans le match de quartier, chacun trouve que l\'arbitre favorise l\'autre équipe.',9],
-  ['En entrant dans la salle, tu sais tout de suite qui est le principal, sans l\'avoir jamais vu.',6]
+  ['En entrant dans la salle, tu sais tout de suite qui est le principal, sans l\'avoir jamais vu.',6],
+  ['« Dans ma famille, personne n\'a fait d\'études, donc ce n\'est pas pour moi », se dit Inès.',12]
 ];
 function gFinal(){
-  partHead('🕵️','L\'enquête finale',0,0,'Huit situations de la vraie vie. Pour chacune, quel mécanisme du cerveau est à l\'œuvre ? Plusieurs réponses peuvent se défendre : choisis la plus évidente.');
+  partHead('🕵️','L\'enquête finale',0,0,'Neuf situations de la vraie vie. Pour chacune, quel mécanisme du cerveau est à l\'œuvre ? Plusieurs réponses peuvent se défendre : choisis la plus évidente.');
   let i=0, ok=0; const box=mk('div',null,null,main);
   function q(){
     if(i>=EF_C.length) return end();
@@ -1439,7 +1571,7 @@ function gWip(g){
 /* =========================================================
    MENU · 6 paires de 2 jeux, ouvertes deux par deux
    ========================================================= */
-const PAIRS=['1 · Pilote automatique','2 · Seul le changement compte','3 · Le cerveau conteur','4 · Le jeu du statut','5 · La tribu','6 · Les marchands d\'attention'];
+const PAIRS=['1 · Pilote automatique','2 · Seul le changement compte','3 · Le cerveau conteur','4 · Le jeu du statut','5 · La tribu','6 · Les marchands d\'attention','7 · Les chiffres et moi'];
 const GAMES=[
   {id:'homeo',e:'🌡️',t:'Survie homéostatique',d:'Garde ton survivant en vie : température, eau, sucre, stress. Puis laisse faire le pilote automatique… et les notifications.',fn:gHomeo},
   {id:'hallu',e:'👁️',t:'Hallucination contrôlée',d:'Zombie ou souche ? Silhouettes, lettres mélangées, tache aveugle, mot suivant : vois-tu vraiment le monde ?',fn:gHallu},
@@ -1452,7 +1584,8 @@ const GAMES=[
   {id:'groupe',e:'👥',t:'Pression du groupe',d:'Sept avatars répondent avant toi. Ils se trompent. Et toi ?',fn:gGroupe},
   {id:'tribu',e:'🟦',t:'Ma tribu',d:'Une couleur tirée au hasard. Nous… et eux.',fn:gTribu},
   {id:'tycoon',e:'📺',t:'Attention Tycoon',d:'Dirige un média gratuit de 1833 à aujourd\'hui. Ce que tu vends, c\'est l\'attention.',fn:gTycoon},
-  {id:'besoins',e:'🏭',t:'Fabrique à besoins',d:'Crée un problème, vends la solution. Puis repère les ficelles dans de vraies pubs.',fn:gBesoins}
+  {id:'besoins',e:'🏭',t:'Fabrique à besoins',d:'Crée un problème, vends la solution. Puis repère les ficelles dans de vraies pubs.',fn:gBesoins},
+  {id:'destin',e:'📊',t:'Moyenne ou destin ?',d:'Parie sur la réussite de survivants de deux camps. Puis ouvre leurs sacs à dos… et trace ton propre chemin.',fn:gDestin}
 ];
 // une paire s'ouvre quand les deux jeux d'avant ont leur découverte notée. Code prof : tout ouvert.
 const prevPair=i=>{ const p=Math.floor(i/2); return p?[GAMES[2*p-2],GAMES[2*p-1]]:[]; };
@@ -1462,9 +1595,9 @@ function menu(){
   stopGame();
   const card=(g,i)=>!isOpen(i)?`<button class="gcard locked" data-i="${i}" aria-disabled="true"><span class="e">${g.e}</span><span class="t">${i+1} · ${g.t}</span><span class="d">${g.d}</span><span class="s lk">🔒 Termine d'abord ${prevPair(i).filter(x=>!D.disc[x.id]).map(x=>x.e+' '+x.t).join(' et ')}</span></button>`
     :`<button class="gcard${D.disc[g.id]?' done':''}" data-i="${i}"><span class="e">${g.e}</span><span class="t">${i+1} · ${g.t}</span><span class="d">${g.d}</span><span class="s${g.fn?'':' wip'}">${g.fn?(D.disc[g.id]?'✓ découverte notée':''):'🚧 en construction'}${D.best[g.id]&&g.id==='homeo'?` · record ${D.best[g.id]}`:''}</span></button>`;
-  main.innerHTML=`<h2>🧠 Brain Exploration</h2>${D.prof?'<p class="fb good" style="margin:0 0 8px">🔑 Mode enseignant : tous les jeux sont ouverts.</p>':''}<p class="lead">Douze jeux pour explorer ton cerveau : ses superpouvoirs, ses pièges, et pourquoi il marche comme ça. Tout le monde tombe dans les pièges, c'est normal, et c'est justement intéressant. À la fin de chaque jeu, note ta découverte : on la reprendra en cours.</p>
+  main.innerHTML=`<h2>🧠 Brain Exploration</h2>${D.prof?'<p class="fb good" style="margin:0 0 8px">🔑 Mode enseignant : tous les jeux sont ouverts.</p>':''}<p class="lead">Treize jeux pour explorer ton cerveau : ses superpouvoirs, ses pièges, et pourquoi il marche comme ça. Tout le monde tombe dans les pièges, c'est normal, et c'est justement intéressant. À la fin de chaque jeu, note ta découverte : on la reprendra en cours.</p>
     <div class="games">${GAMES.map((g,i)=>(i%2===0?`<div class="pairh">${PAIRS[i/2]}</div>`:'')+card(g,i)).join('')}
-    <div class="pairh">Final</div><button class="gcard final${allDone()||D.prof?'':' locked'}" id="final"><span class="e">🕵️</span><span class="t">L'enquête finale</span><span class="d">Des situations de la vraie vie : quel mécanisme est à l'œuvre ? Et pourquoi un groupe où l'on pense différemment se trompe moins.</span><span class="s ${allDone()||D.prof?'':'lk'}">${allDone()||D.prof?'':'🔒 Termine les 12 jeux'}</span></button></div>
+    <div class="pairh">Final</div><button class="gcard final${allDone()||D.prof?'':' locked'}" id="final"><span class="e">🕵️</span><span class="t">L'enquête finale</span><span class="d">Des situations de la vraie vie : quel mécanisme est à l'œuvre ? Et pourquoi un groupe où l'on pense différemment se trompe moins.</span><span class="s ${allDone()||D.prof?'':'lk'}">${allDone()||D.prof?'':'🔒 Termine les 13 jeux'}</span></button></div>
     <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button><button class="btn" id="profb">${D.prof?'🔓 Quitter le mode enseignant':'🔑 Mode enseignant'}</button></div>${SCORM?'<p class="lead" style="font-size:13px">✅ Ta progression et tes découvertes sont enregistrées sur ÉLÉA.</p>':''}`;
   main.querySelectorAll('.gcard[data-i]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, g=GAMES[i]; if(isOpen(i)) (g.fn||(()=>gWip(g)))(); else shake(b); });
   $('#final').onclick=()=>{ if(allDone()||D.prof) gFinal(); else shake($('#final')); };
