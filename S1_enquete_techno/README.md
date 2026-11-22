@@ -35,3 +35,10 @@ Ordre : inventions, CyberSpeedScribe, fil d'actu, dopamine, usine (à filtres, p
 ## Photos des inventions
 
 Les photos de l'épreuve « Les inventions » viennent de Wikipédia et Wikimedia Commons (licences libres) ; auteurs et licences dans `photos/credits.json` et dans le jeu (lien « 📷 Crédits photos »). Elles sont intégrées dans la page (aucun chargement externe). Pour les régénérer : modifier `tools/photos.py`, pousser ; l'action GitHub « photos des inventions » dépose le résultat sur la branche `photos`.
+
+## Épreuves à la carte (v21)
+
+- Lien direct vers une seule épreuve : `index.html?jeu=9` (numéro) ou `?jeu=bubble` (`inv`, `scribe`, `feed`, `dopa`, `usine`, `box`, `zombie`, `octo`, `bubble`, `likes`, `reseau`, `sel`). En mode enseignant, bouton « 🎯 Épreuves à la carte ».
+- `scorm-par-jeu/` : un paquet ÉLÉA par épreuve (100 quand la découverte est notée).
+- `fiches/` : une fiche élève Word par épreuve, `toutes-les-fiches.docx` et `corrige-enseignant.docx`. Générées par `tools/fiches-snt/gen2.js techno.js`.
+- Page commune : [jeux à la carte](../jeux-a-la-carte.html#techno).

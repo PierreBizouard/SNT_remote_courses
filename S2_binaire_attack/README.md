@@ -19,3 +19,10 @@ Une seule page HTML autonome, jouable sur ordinateur, tablette et téléphone.
 
 Paliers : un objectif de points débloque le niveau suivant, un second donne une étoile.
 Code enseignant (débloque tout) : voir `TEACHER_CODE` dans le source.
+
+## Niveaux à la carte (v44)
+
+- Lien direct vers un seul niveau : `index.html?jeu=3` (0 = tutoriel, 1 à 5 = niveaux, 6 = Binabina) ou `?jeu=hexa` (`tuto`, `billes`, `attaque`, `colonnes`, `hexa`, `pixels`, `binabina`). Le niveau s'ouvre sans palier à atteindre ; « Voir tous les niveaux » ramène au menu complet.
+- `scorm-par-jeu/` : un paquet ÉLÉA par niveau (note = palier 1 du niveau atteint ; tutoriel et Binabina : 100 une fois faits).
+- `fiches/` : une fiche élève Word par niveau (activité, observations, ce que j'ai compris, exercices, ma phrase), `toutes-les-fiches.docx` et `corrige-enseignant.docx`. Générées par `tools/fiches-snt/gen2.js binaire.js`.
+- Page commune : [jeux à la carte](../jeux-a-la-carte.html#binaire).
