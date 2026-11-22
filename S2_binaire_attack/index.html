@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Binaire Attack</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v43 · 15/10/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v44 · 22/11/2026</div>
 <!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
 <button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 62px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
 <script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
@@ -526,6 +526,14 @@ const UNLOCK=[250,300,200,250,300];   // palier 1 : débloque le niveau suivant 
 const STAR=[500,600,450,500,600]; // palier 2 : une étoile ; les 5 étoiles ouvrent le jeu secret
 const NL=5, SECRET=5;
 const TEACHER_CODE='SNT-PROF';
+// accès direct à un seul niveau, pour la classe : index.html?jeu=3 (0 = tutoriel, 1 à 5 = niveaux, 6 = Binabina)
+// ou avec un nom : tuto, billes, attaque, colonnes, hexa, pixels, binabina. Paquet ÉLÉA d'un seul niveau : window.BA_JEU
+const SOLO_NAMES={tuto:-1,tutoriel:-1,billes:0,attaque:1,colonnes:2,hexa:3,pixels:4,binabina:5,secret:5};
+const SOLO_I=(()=>{ let v=window.BA_JEU||''; try{ if(!v) v=new URLSearchParams(location.search).get('jeu')||''; if(!v){ const m=location.hash.match(/jeu=([\w-]+)/); if(m) v=m[1]; } }catch(e){}
+  v=String(v).trim().toLowerCase(); if(v==='') return null; if(v in SOLO_NAMES) return SOLO_NAMES[v];
+  const n=parseInt(v,10); return String(n)===v && n>=0 && n<=6 ? n-1 : null; })();
+const PACK=window.BA_JEU!=null && window.BA_JEU!=='';
+let soloAll=false;
 const SCORM=(()=>{
   let api=null;
   try{ let w=window; for(let i=0;i<12 && w;i++){ if(w.API){ api=w.API; break; } if(w===w.parent) break; w=w.parent; } }catch(e){}
@@ -561,7 +569,9 @@ const Store={
     try{
       if(SCORM){
         SCORM.LMSSetValue('cmi.suspend_data',raw);
-        const pct=Math.round(UNLOCK.reduce((a,u,i)=>a+Math.min(1,(this.data.best[i]||0)/u),0)*100/NL);
+        // paquet d'un seul niveau : note de ce niveau (palier 1 = 100) ; tutoriel et Binabina : 100 une fois faits
+        const pct = SOLO_I===-1 ? (this.data.tuto.learn?100:0) : SOLO_I===SECRET ? ((this.data.best[SECRET]||0)>0?100:0) : SOLO_I!=null ? Math.round(Math.min(1,(this.data.best[SOLO_I]||0)/UNLOCK[SOLO_I])*100)
+          : Math.round(UNLOCK.reduce((a,u,i)=>a+Math.min(1,(this.data.best[i]||0)/u),0)*100/NL);
         SCORM.LMSSetValue('cmi.core.score.min','0'); SCORM.LMSSetValue('cmi.core.score.max','100');
         SCORM.LMSSetValue('cmi.core.score.raw',String(pct));
         SCORM.LMSSetValue('cmi.core.lesson_status', pct>=100 ? 'passed' : 'incomplete');
@@ -603,7 +613,7 @@ function saveBest(id,v){ if(v>best(id)){ Store.data.best[id]=v; }
 function modeBests(id){ const M=MODES[id]; if(!M) return ''; const bm=Store.data.bm||{}; return '<br>Par mode : '+M.list.map(([k])=>`<span style="white-space:nowrap">${M.short[k]} : ${Math.min(bm[id+k]||0,best(id))}</span>`).join(' · '); }
 function hasStar(i){ return best(i)>=STAR[i]; }
 function nStars(){ return STAR.filter((x,i)=>hasStar(i)).length; }
-function unlocked(i){ return i===0 || Store.data.prof || (i===SECRET ? nStars()===NL : best(i-1)>=UNLOCK[i-1]); }
+function unlocked(i){ return i===0 || i===SOLO_I || Store.data.prof || (i===SECRET ? nStars()===NL : best(i-1)>=UNLOCK[i-1]); }
 
 /* ---------- game state & shared helpers ---------- */
 const G = { lv:null, id:0, score:0, lives:3, run:false, pause:false };
@@ -2365,6 +2375,13 @@ function renderMenu(){
   $('#lw-open').onclick=()=>Learn.open();
   $('#where').textContent = (Store.tampered ? 'Les records enregistrés avaient été modifiés à la main : ils ont été remis à zéro. ' : '') + (SCORM ? 'Ta progression est enregistrée sur ÉLÉA.' : 'Les records restent sur cet appareil.');
   $('#profbtn').textContent = Store.data.prof ? 'Accès enseignant activé (tout est débloqué) · désactiver' : 'Accès enseignant';
+  // accès direct : on ne montre que le niveau du jour
+  const solo=SOLO_I!=null && (PACK || !soloAll);
+  $('#stars').hidden=solo; if($('#allg')) $('#allg').remove();
+  if(solo){
+    $('#levels').querySelectorAll('.lvcard').forEach(c=>{ c.hidden = SOLO_I===-1 ? c.id!=='lw-open' : c.dataset.i!==String(SOLO_I); });
+    if(!PACK){ const b=document.createElement('button'); b.className='btn'; b.id='allg'; b.type='button'; b.textContent='Voir tous les niveaux'; b.style.margin='10px 0'; b.onclick=()=>{ soloAll=true; renderMenu(); }; $('#levels').after(b); }
+  }
 }
 function teacherDialog(){
   if(Store.data.prof){ Store.data.prof=false; Store.save(); renderMenu(); return; }
@@ -2718,6 +2735,7 @@ const Learn=(()=>{
 addEventListener('resize',()=>{ if(G.lv && G.lv.layout) G.lv.layout(); });
 $('#profbtn').addEventListener('click',teacherDialog);
 renderMenu();
+if(SOLO_I===-1){ if(!Store.data.tuto.learn) Learn.open(); } else if(SOLO_I!=null) startLevel(SOLO_I);
 </script>
 
 </body></html>

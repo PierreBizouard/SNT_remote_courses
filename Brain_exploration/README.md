@@ -65,7 +65,7 @@ Reprise de l'activité « biais d'écologie ». 120 survivants fictifs, deux cam
 
 Pour utiliser un jeu seul en classe, sans passer par les paires :
 
-- [jeux.html](jeux.html) : la page sommaire, avec pour chaque jeu le lien direct, la fiche élève Word et le paquet ÉLÉA.
+- [Jeux à la carte](../jeux-a-la-carte.html#brain) : la page sommaire commune (avec Binaire Attack et Techno Survivor), avec pour chaque jeu le lien direct, la fiche élève Word et le paquet ÉLÉA.
 - Lien direct : `index.html?jeu=3` (numéro 1 à 13, ou nom : `radar`, `destin`…, ou `final` pour l'enquête). Le jeu s'ouvre tout de suite ; le bouton « Voir tous les jeux » ramène au menu complet.
 - En mode enseignant (`SNT-PROF`), le bouton « 🎯 Jeux à la carte » liste les 14 activités avec leur lien.
 - `scorm-par-jeu/` : un paquet SCORM par jeu pour ÉLÉA (note 100 quand la découverte est notée ; pour l'enquête finale, la note est le score sur 9).

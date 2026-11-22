@@ -3,7 +3,9 @@ const {Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,WidthType,Bord
 const DATA=require('./data.js'), OUT=process.argv[2];
 const C={accent:'5B3FA0',soft:'EEE9F8',muted:'666666'};
 const W=11906-2*1080; // largeur utile A4
-const line=()=>new Paragraph({spacing:{before:220,after:0},border:{bottom:{style:BorderStyle.DOTTED,size:6,color:'999999',space:1}},children:[new TextRun(' ')]});
+const NB={style:BorderStyle.NONE,size:0,color:'FFFFFF'};
+const lines=(n)=>new Table({width:{size:W,type:WidthType.DXA},columnWidths:[W],borders:{top:NB,bottom:NB,left:NB,right:NB,insideHorizontal:NB,insideVertical:NB},rows:Array.from({length:n},()=>new TableRow({height:{value:400,rule:'atLeast'},children:[new TableCell({width:{size:W,type:WidthType.DXA},borders:{top:NB,left:NB,right:NB,bottom:{style:BorderStyle.DOTTED,size:6,color:'999999'}},children:[new Paragraph({children:[]})]})]}))});
+const line=()=>lines(1);
 const lbl=(t,rest)=>new Paragraph({spacing:{before:80,after:20},children:[new TextRun({text:t,bold:true}),...(rest?[new TextRun({text:rest})]:[])]});
 const fill=(t)=>new Paragraph({spacing:{before:200,after:0},border:{bottom:{style:BorderStyle.DOTTED,size:6,color:'999999',space:1}},children:[new TextRun({text:t,bold:true})]});
 const b1={style:BorderStyle.SINGLE,size:6,color:'BBBBBB'};
@@ -18,7 +20,7 @@ function fiche(g){
     new Paragraph({spacing:{after:40},children:[new TextRun(g.intro)]}),
     ...g.steps.map(s=>new Paragraph({numbering:{reference:'steps-'+g.id,level:0},spacing:{after:20},children:[new TextRun(s)]})),
     new Paragraph({heading:HeadingLevel.HEADING_2,children:[new TextRun("Ce que j'ai observé")]}),
-    ...g.obs.flatMap(q=>[lbl(q),line(),line(),line()]),
+    ...g.obs.flatMap(q=>[lbl(q),lines(3)]),
     new Paragraph({heading:HeadingLevel.HEADING_2,children:[new TextRun("Ce que j'ai compris")]}),
     fill(g.n<14?'Ce que fait mon cerveau : ':'Le mécanisme que je reconnais le mieux : '),
     fill(g.n<14?'Son superpouvoir (pourquoi il a aidé nos ancêtres) : ':'Pourquoi il a aidé nos ancêtres : '),
@@ -27,7 +29,7 @@ function fiche(g){
     new Table({width:{size:W,type:WidthType.DXA},columnWidths:[h,h],rows:[
       new TableRow({children:[cell([new Paragraph({children:[new TextRun({text:"✅ Quand ça m'aide (un exemple de ma vie)",bold:true})]})],h,'E8F5E9'),cell([new Paragraph({children:[new TextRun({text:'⚠️ Quand ça me piège (un exemple de ma vie)',bold:true})]})],h,'FDECEA')]}),
       new TableRow({children:[cell([blank(),blank(),blank(),blank(),blank()],h),cell([blank(),blank(),blank(),blank(),blank()],h)]})]}),
-    lbl('🤖 Et l\'IA ? ',g.aiq),line(),line(),
+    lbl('🤖 Et l\'IA ? ',g.aiq),lines(2),
     new Paragraph({heading:HeadingLevel.HEADING_2,children:[new TextRun('Ma découverte en une phrase')]}),
     new Table({width:{size:W,type:WidthType.DXA},columnWidths:[W],rows:[new TableRow({children:[cell([new Paragraph({children:[new TextRun({text:g.ask,italics:true,color:C.muted})]}),blank(),blank(),blank()],W,C.soft)]})]}),
   ];
