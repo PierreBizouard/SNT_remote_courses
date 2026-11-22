@@ -1,7 +1,7 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Brain Exploration</title>
 <!-- version affichée : à augmenter à chaque mise à jour -->
-<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v7 · 21/11/2026</div>
+<div id="version" style="position:fixed;top:1px;left:50%;transform:translateX(-50%);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;padding:0 7px;border-radius:0 0 6px 6px;pointer-events:none">v8 · 22/11/2026</div>
 <!-- plein écran (si le navigateur ou ÉLÉA l'autorise) -->
 <button id="fsbtn" type="button" title="Plein écran" aria-label="Plein écran" style="position:fixed;top:1px;left:calc(50% + 58px);z-index:99999;font:600 10px/1.4 system-ui,sans-serif;color:#fffc;background:#000a;border:0;padding:0 7px;border-radius:0 0 6px 6px;cursor:pointer" hidden>⛶ plein écran</button>
 <script>(function(){ var b=document.getElementById('fsbtn'), d=document, e=d.documentElement;
@@ -179,10 +179,13 @@ function save(){
       const slim={ pts:D.pts, best:D.best, prof:D.prof, disc:{} };
       for(const k in D.disc){ const d=D.disc[k]; slim.disc[k]={ ok:d.ok, got:d.got, txt:String(d.txt||'').slice(0,200), help:String(d.help||'').slice(0,80), trap:String(d.trap||'').slice(0,80) }; }
       SCORM.LMSSetValue('cmi.suspend_data',JSON.stringify(slim));
-      const n=GAMES.filter(g=>D.disc[g.id]).length, pct=Math.round(n*100/GAMES.length);
+      let pct, done;
+      if(SOLO==='final'){ done=D.best.final!=null; pct=done?Math.round(D.best.final*100/EF_C.length):0; }
+      else if(SOLO){ done=!!D.disc[SOLO]; pct=done?100:0; }
+      else { const n=GAMES.filter(g=>D.disc[g.id]).length; pct=Math.round(n*100/GAMES.length); done=n>=GAMES.length; }
       SCORM.LMSSetValue('cmi.core.score.min','0'); SCORM.LMSSetValue('cmi.core.score.max','100');
       SCORM.LMSSetValue('cmi.core.score.raw',String(pct));
-      SCORM.LMSSetValue('cmi.core.lesson_status', n>=GAMES.length ? 'completed' : 'incomplete');
+      SCORM.LMSSetValue('cmi.core.lesson_status', done ? 'completed' : 'incomplete');
       SCORM.LMSCommit('');
     } else localStorage.setItem(KEY,JSON.stringify(D));
   }catch(e){}
@@ -1553,6 +1556,7 @@ function gFinal(){
     box.innerHTML=''; choice(`${i+1}/${EF_C.length} · ${s}`,opts.map(k=>EF_M[k]),(k,fb)=>{ const g=opts[k]===a; if(g){ ok++; addPts(2); } fb.className='fb '+(g?'good':'info'); fb.innerHTML=g?'Bien vu !':`<span>Plutôt : <b>${EF_M[a]}</b>.</span>`; sendInt('final_'+(i+1),EF_M[opts[k]],g?'correct':'wrong'); nextBtn('Suivante →',()=>{ i++; q(); },box); },box);
   }
   function end(){
+    D.best.final=Math.max(D.best.final||0,ok); save();
     box.innerHTML=''; mk('div','card',`<p><b>${ok}/${EF_C.length}</b> mécanismes identifiés.</p><p>Tous ces mécanismes sont des <b>superpouvoirs</b> qui ont aidé nos ancêtres à survivre, et qui nous piègent parfois aujourd'hui. Personne n'y échappe : ni toi, ni ton prof, ni les IA, qui ont leurs propres biais.</p><p>La meilleure protection n'est pas d'être parfait : c'est d'écouter <b>ceux qui pensent autrement</b>. Un groupe varié repère les erreurs que chacun ne voit pas chez lui, comme la personne qui donnait la bonne réponse dans Pression du groupe.</p>`,box);
     nextBtn('Retour au menu',menu);
   }
@@ -1589,19 +1593,52 @@ const GAMES=[
 ];
 // une paire s'ouvre quand les deux jeux d'avant ont leur découverte notée. Code prof : tout ouvert.
 const prevPair=i=>{ const p=Math.floor(i/2); return p?[GAMES[2*p-2],GAMES[2*p-1]]:[]; };
-const isOpen=i=>D.prof||prevPair(i).every(g=>D.disc[g.id]);
+// accès direct à un seul jeu, pour la classe : index.html?jeu=radar (ou ?jeu=3, ?jeu=final, ou #jeu=3)
+// ou paquet ÉLÉA d'un seul jeu (window.BE_JEU écrit dans le paquet) : le jeu s'ouvre sans passer par les paires
+const SOLO=(()=>{ let v=window.BE_JEU||''; try{ if(!v) v=new URLSearchParams(location.search).get('jeu')||''; if(!v){ const m=location.hash.match(/jeu=([\w-]+)/); if(m) v=m[1]; } }catch(e){}
+  v=String(v).trim().toLowerCase(); if(!v) return null; if(v==='final'||v==='enquete'||v==='14') return 'final';
+  const n=parseInt(v,10); if(String(n)===v && n>=1 && n<=GAMES.length) return GAMES[n-1].id;
+  return GAMES.some(g=>g.id===v)?v:null; })();
+const PACK=!!window.BE_JEU; // paquet d'un seul jeu : pas d'accès aux autres jeux
+let soloAll=false;
+const isOpen=i=>D.prof||GAMES[i].id===SOLO||prevPair(i).every(g=>D.disc[g.id]);
 const allDone=()=>GAMES.every(g=>D.disc[g.id]);
+const finalOpen=()=>allDone()||D.prof||SOLO==='final';
+const gameOf=id=>id==='final'?{id:'final',e:'🕵️',t:'L\'enquête finale',d:'Neuf situations de la vraie vie : quel mécanisme du cerveau est à l\'œuvre ?',fn:gFinal}:GAMES.find(g=>g.id===id);
+const numOf=id=>id==='final'?'Final':(GAMES.findIndex(g=>g.id===id)+1)+' ·';
+function soloMenu(){
+  stopGame(); const g=gameOf(SOLO), done=SOLO==='final'?D.best.final!=null:!!D.disc[SOLO];
+  main.innerHTML=`<h2>🧠 Brain Exploration</h2><p class="lead">Aujourd'hui en classe : un seul jeu. Joue, puis note ta découverte : on la reprendra ensemble.</p>
+    <div class="games"><button class="gcard${done?' done':''}" id="solog"><span class="e">${g.e}</span><span class="t">${numOf(g.id)} ${g.t}</span><span class="d">${g.d}</span><span class="s">${done?(SOLO==='final'?`✓ terminé · ${D.best.final}/${EF_C.length}`:'✓ découverte notée'):'▶ Jouer'}</span></button></div>
+    <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button>${PACK?'':'<button class="btn" id="allg">Voir tous les jeux</button>'}</div>${SCORM?'<p class="lead" style="font-size:13px">✅ Ta progression et ta découverte sont enregistrées sur ÉLÉA.</p>':''}`;
+  $('#solog').onclick=g.fn; $('#notes').onclick=notes;
+  if(!PACK) $('#allg').onclick=()=>{ soloAll=true; menu(); };
+  scrollTo(0,0);
+}
+// mode enseignant : chaque jeu avec son lien direct, à donner aux élèves pour une séance
+function carte(){
+  stopGame();
+  const base=location.href.split(/[?#]/)[0], http=/^https?:/.test(base) && !/claude\.ai|claudeusercontent/.test(base);
+  const L=[...GAMES.map(g=>g.id),'final'].map(gameOf);
+  main.innerHTML=`<h2>🎯 Jeux à la carte</h2><p class="lead">Chaque jeu s'ouvre seul, sans passer par les paires. ${http?'Donne aux élèves le lien du jeu du jour :':'Sur la version GitHub, ajoute <code>?jeu=3</code> (numéro ou nom du jeu) à l\'adresse de la page. Sur ÉLÉA, utilise le paquet SCORM du jeu.'}</p>
+    <ol class="notes" style="list-style:none;padding:0">${L.map(g=>`<li><b>${g.e} ${numOf(g.id)} ${g.t}</b><br><span class="q">${g.d}</span><br>${http?`<code style="font-size:12px;word-break:break-all">${esc(base)}?jeu=${g.id}</code><br>`:''}<span class="row" style="margin-top:4px"><button class="btn ok" data-play="${g.id}">▶ Jouer</button>${http?`<button class="btn" data-cp="${g.id}">Copier le lien</button>`:''}</span></li>`).join('')}</ol>
+    <p class="fb" id="cf"></p><div class="row"><button class="btn" id="back">Menu</button></div>`;
+  main.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>gameOf(b.dataset.play).fn());
+  main.querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{ const u=base+'?jeu='+b.dataset.cp; try{ await navigator.clipboard.writeText(u); $('#cf').className='fb good'; $('#cf').textContent='Lien copié : '+u; }catch(e){ $('#cf').className='fb info'; $('#cf').textContent=u; } });
+  $('#back').onclick=menu; scrollTo(0,0);
+}
 function menu(){
   stopGame();
+  if(SOLO && (PACK || !soloAll)) return soloMenu();
   const card=(g,i)=>!isOpen(i)?`<button class="gcard locked" data-i="${i}" aria-disabled="true"><span class="e">${g.e}</span><span class="t">${i+1} · ${g.t}</span><span class="d">${g.d}</span><span class="s lk">🔒 Termine d'abord ${prevPair(i).filter(x=>!D.disc[x.id]).map(x=>x.e+' '+x.t).join(' et ')}</span></button>`
     :`<button class="gcard${D.disc[g.id]?' done':''}" data-i="${i}"><span class="e">${g.e}</span><span class="t">${i+1} · ${g.t}</span><span class="d">${g.d}</span><span class="s${g.fn?'':' wip'}">${g.fn?(D.disc[g.id]?'✓ découverte notée':''):'🚧 en construction'}${D.best[g.id]&&g.id==='homeo'?` · record ${D.best[g.id]}`:''}</span></button>`;
   main.innerHTML=`<h2>🧠 Brain Exploration</h2>${D.prof?'<p class="fb good" style="margin:0 0 8px">🔑 Mode enseignant : tous les jeux sont ouverts.</p>':''}<p class="lead">Treize jeux pour explorer ton cerveau : ses superpouvoirs, ses pièges, et pourquoi il marche comme ça. Tout le monde tombe dans les pièges, c'est normal, et c'est justement intéressant. À la fin de chaque jeu, note ta découverte : on la reprendra en cours.</p>
     <div class="games">${GAMES.map((g,i)=>(i%2===0?`<div class="pairh">${PAIRS[i/2]}</div>`:'')+card(g,i)).join('')}
-    <div class="pairh">Final</div><button class="gcard final${allDone()||D.prof?'':' locked'}" id="final"><span class="e">🕵️</span><span class="t">L'enquête finale</span><span class="d">Des situations de la vraie vie : quel mécanisme est à l'œuvre ? Et pourquoi un groupe où l'on pense différemment se trompe moins.</span><span class="s ${allDone()||D.prof?'':'lk'}">${allDone()||D.prof?'':'🔒 Termine les 13 jeux'}</span></button></div>
-    <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button><button class="btn" id="profb">${D.prof?'🔓 Quitter le mode enseignant':'🔑 Mode enseignant'}</button></div>${SCORM?'<p class="lead" style="font-size:13px">✅ Ta progression et tes découvertes sont enregistrées sur ÉLÉA.</p>':''}`;
+    <div class="pairh">Final</div><button class="gcard final${finalOpen()?'':' locked'}" id="final"><span class="e">🕵️</span><span class="t">L'enquête finale</span><span class="d">Des situations de la vraie vie : quel mécanisme est à l'œuvre ? Et pourquoi un groupe où l'on pense différemment se trompe moins.</span><span class="s ${finalOpen()?'':'lk'}">${finalOpen()?'':'🔒 Termine les 13 jeux'}</span></button></div>
+    <div class="row"><button class="btn" id="notes">📒 Mes découvertes</button>${D.prof?'<button class="btn" id="carteb">🎯 Jeux à la carte</button>':''}<button class="btn" id="profb">${D.prof?'🔓 Quitter le mode enseignant':'🔑 Mode enseignant'}</button></div>${SCORM?'<p class="lead" style="font-size:13px">✅ Ta progression et tes découvertes sont enregistrées sur ÉLÉA.</p>':''}`;
   main.querySelectorAll('.gcard[data-i]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i, g=GAMES[i]; if(isOpen(i)) (g.fn||(()=>gWip(g)))(); else shake(b); });
-  $('#final').onclick=()=>{ if(allDone()||D.prof) gFinal(); else shake($('#final')); };
-  $('#notes').onclick=notes; $('#profb').onclick=profMode; scrollTo(0,0);
+  $('#final').onclick=()=>{ if(finalOpen()) gFinal(); else shake($('#final')); };
+  $('#notes').onclick=notes; $('#profb').onclick=profMode; if(D.prof) $('#carteb').onclick=carte; scrollTo(0,0);
 }
 function profMode(){
   if(D.prof){ D.prof=false; save(); return menu(); }
@@ -1623,7 +1660,7 @@ function notes(){
   $('#rs').onclick=()=>{ if(confirm('Effacer tes découvertes, records et points ?')){ D={pts:0,best:{},disc:{}}; save(); menu(); } };
 }
 $('#home').onclick=menu;
-save(); menu();
+save(); if(SOLO && !(SOLO==='final'?D.best.final!=null:D.disc[SOLO])) gameOf(SOLO).fn(); else menu();
 </script>
 
 </body></html>
